@@ -1,765 +1,135 @@
 <!DOCTYPE html>
-
 <html lang="nl">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>CuliLab – Sauce Lab</title>
-
 <style>
-
-* { box-sizing: border-box; }
-
-body {
-
-  margin: 0;
-
-  padding: 22px;
-
-  font-family: Arial, sans-serif;
-
-  background: #f4efe5;
-
-  color: #252525;
-
-  text-align: center;
-
-}
-
-header {
-
-  margin-bottom: 22px;
-
-}
-
-h1 {
-
-  margin: 4px;
-
-  font-size: 38px;
-
-}
-
-.subtitle {
-
-  color: #666;
-
-  font-size: 17px;
-
-}
-
-.game {
-
-  max-width: 780px;
-
-  margin: auto;
-
-  background: white;
-
-  border-radius: 26px;
-
-  padding: 26px;
-
-  box-shadow: 0 12px 35px rgba(0,0,0,.12);
-
-}
-
-.topbar {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  font-weight: bold;
-
-}
-
-.challenge {
-
-  margin: 20px 0;
-
-  padding: 15px;
-
-  border-radius: 16px;
-
-  background: #fff4cf;
-
-}
-
-.progress {
-
-  font-size: 14px;
-
-  color: #777;
-
-  margin-top: 6px;
-
-}
-
-.kitchen {
-
-  position: relative;
-
-  max-width: 520px;
-
-  margin: 18px auto 8px;
-
-}
-
-.pan-image {
-
-  width: 100%;
-
-  max-height: 330px;
-
-  object-fit: contain;
-
-  display: block;
-
-  margin: auto;
-
-  border-radius: 18px;
-
-}
-
-.flame {
-
-  font-size: 42px;
-
-  height: 48px;
-
-  margin-top: -25px;
-
-  opacity: 0;
-
-  transform: scale(.5);
-
-  transition: .3s;
-
-}
-
-.flame.on {
-
-  opacity: 1;
-
-  transform: scale(1);
-
-}
-
-.pan-status {
-
-  font-size: 20px;
-
-  font-weight: bold;
-
-  min-height: 30px;
-
-  margin: 8px 0 18px;
-
-}
-
-.section-title {
-
-  margin: 16px 0 10px;
-
-  font-weight: bold;
-
-}
-
-.buttons {
-
-  display: flex;
-
-  flex-wrap: wrap;
-
-  justify-content: center;
-
-  gap: 10px;
-
-}
-
-button {
-
-  border: 2px solid #ddd;
-
-  background: white;
-
-  border-radius: 14px;
-
-  padding: 13px 18px;
-
-  font-size: 17px;
-
-  color: #1769e0;
-
-  cursor: pointer;
-
-}
-
-button.selected {
-
-  background: #ffeba9;
-
-  border-color: #333;
-
-}
-
-button.locked {
-
-  opacity: .4;
-
-}
-
-.techniques {
-
-  margin-top: 14px;
-
-}
-
-.prepare {
-
-  margin: 18px 0;
-
-  background: #242424;
-
-  color: white;
-
-  border: none;
-
-  padding: 15px 38px;
-
-  font-size: 18px;
-
-}
-
-.feedback {
-
-  min-height: 78px;
-
-  padding: 14px;
-
-  background: #f6f6f6;
-
-  border-radius: 14px;
-
-  line-height: 1.4;
-
-}
-
-.feedback strong {
-
-  font-size: 19px;
-
-}
-
-.book {
-
-  border-top: 1px solid #ddd;
-
-  margin-top: 22px;
-
-  padding-top: 18px;
-
-  text-align: left;
-
-}
-
-.book-entry {
-
-  padding: 9px;
-
-  margin: 6px 0;
-
-  background: #f5f1e7;
-
-  border-radius: 8px;
-
-}
-
-.complete {
-
-  background: #e9f7e9;
-
-}
-
-@media(max-width:600px) {
-
-  body { padding: 10px; }
-
-  .game { padding: 18px 12px; }
-
-  h1 { font-size: 31px; }
-
-  button { padding: 11px 13px; font-size: 15px; }
-
-}
-
+*{box-sizing:border-box}
+body{margin:0;padding:22px;font-family:Arial,sans-serif;background:#f4efe5;color:#252525;text-align:center}
+.wrap{max-width:780px;margin:auto}
+.topline{color:#666;margin:6px 0 20px}
+.game{background:#fff;border-radius:28px;padding:26px;box-shadow:0 12px 32px rgba(0,0,0,.10)}
+.header{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:20px;margin-bottom:20px}
+.challenge{background:#fff2c9;border-radius:20px;padding:18px;margin-bottom:20px}
+.challenge h2{font-size:18px;margin:0 0 5px}.challenge p{margin:0}.dots{color:#888;margin-top:8px;font-size:14px}
+.pan-area{max-width:540px;margin:0 auto 14px}
+.pan-area img{display:block;width:100%;height:auto;border-radius:18px}
+.status{font-size:22px;font-weight:700;margin:16px 0 20px}
+h3{font-size:17px;margin:16px 0 10px}
+.buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+button{font:inherit;font-size:17px;border:2px solid #ddd;background:#fff;color:#1670e8;border-radius:14px;padding:13px 19px;cursor:pointer}
+button.selected{border-color:#222;background:#f0f0f0;color:#222}
+#prepare{margin-top:20px;background:#242424;color:white;border:0;min-width:135px}
+.tip{margin-top:18px;background:#f7f7f7;border-radius:14px;padding:14px;line-height:1.4}
+.book{border-top:1px solid #ddd;margin-top:20px;padding-top:16px;text-align:left}
+.book h3{margin-top:0}.entry{background:#e8f7e8;padding:10px;border-radius:8px;margin:7px 0}
+.result{margin-top:15px;font-weight:700;min-height:24px}
+@media(max-width:600px){body{padding:10px}.game{padding:16px}.header{font-size:17px}.challenge{padding:14px}.status{font-size:19px}button{font-size:15px;padding:11px 14px}}
 </style>
-
 </head>
-
 <body>
-
-<header>
-
-  <h1>👨‍🍳 CuliLab</h1>
-
-  <div class="subtitle">Sauce Lab • Ontdek • Combineer • Begrijp</div>
-
-</header>
-
+<div class="wrap">
+<div class="topline">Sauce Lab • Ontdek • Combineer • Begrijp</div>
 <main class="game">
+<div class="header"><span>🧪 Sauce Lab</span><span>⭐ <span id="xp">0</span> XP</span></div>
 
-  <div class="topbar">
+<section class="challenge">
+<h2 id="challengeTitle">Chef Challenge 01 — Roux</h2>
+<p id="challengeText">Combineer de juiste ingrediënten en technieken om een roux te maken.</p>
+<div class="dots" id="progress">Challenge 1 van 3 ● ○ ○</div>
+</section>
 
-    <span>🧪 Sauce Lab</span>
+<div class="pan-area">
+<img src="./culilab-pan.png" alt="Professionele sauspan">
+</div>
+<div class="status" id="status">De pan is leeg.</div>
 
-    <span>⭐ <span id="xp">0</span> XP</span>
+<h3>Ingrediënten</h3>
+<div class="buttons" id="ingredients">
+<button data-value="boter">🧈 Boter</button>
+<button data-value="bloem">🌾 Bloem</button>
+<button data-value="melk">🥛 Melk</button>
+<button data-value="bouillon">🥣 Bouillon</button>
+</div>
 
-  </div>
+<h3>Technieken</h3>
+<div class="buttons" id="techniques">
+<button data-value="verwarmen">🔥 Verwarmen</button>
+<button data-value="mengen">🥄 Mengen</button>
+</div>
 
-  <div class="challenge">
+<button id="prepare">Bereid</button>
+<div class="result" id="result"></div>
+<div class="tip"><b>💡 Chef-tip:</b><br><span id="tip">Begin met de basis: vetstof en bloem vormen samen een roux.</span></div>
 
-    <strong id="challengeTitle">Chef Challenge 01 – Roux</strong>
-
-    <div id="challengeText">
-
-      Ontdek hoe je de basis voor klassieke gebonden sauzen maakt.
-
-    </div>
-
-    <div class="progress" id="progress">Challenge 1 van 3 ● ○ ○</div>
-
-  </div>
-
-  <div class="kitchen">
-
-    <img src="culilab-pan.png" class="pan-image" alt="Professionele sauspan">
-
-    <div id="flame" class="flame">🔥</div>
-
-  </div>
-
-  <div class="pan-status" id="panStatus">De pan is leeg.</div>
-
-  <div class="section-title">Ingrediënten</div>
-
-  <div class="buttons">
-
-    <button class="ingredient" data-item="boter">🧈 Boter</button>
-
-    <button class="ingredient" data-item="bloem">🌾 Bloem</button>
-
-    <button class="ingredient locked" data-item="roux" id="rouxBtn">🥣 Roux 🔒</button>
-
-    <button class="ingredient" data-item="melk">🥛 Melk</button>
-
-    <button class="ingredient" data-item="bouillon">🥣 Bouillon</button>
-
-  </div>
-
-  <div class="section-title">Technieken</div>
-
-  <div class="buttons techniques">
-
-    <button id="heatBtn">🔥 Verwarmen</button>
-
-    <button id="mixBtn">🥄 Mengen</button>
-
-  </div>
-
-  <button class="prepare" id="prepareBtn">Bereid</button>
-
-  <div class="feedback" id="feedback">
-
-    Kies ingrediënten en technieken. Experimenteer en ontdek wat er gebeurt.
-
-  </div>
-
-  <section class="book">
-
-    <strong>📖 Mijn Sauce Book</strong>
-
-    <div id="bookEntries">
-
-      <div class="book-entry">Nog geen bereidingen ontdekt.</div>
-
-    </div>
-
-  </section>
-
+<section class="book">
+<h3>📖 Mijn Sauce Book</h3>
+<div id="book"><div style="color:#777">Nog niets ontdekt.</div></div>
+</section>
 </main>
+</div>
 
 <script>
-
-let xp = 0;
-
-let challenge = 1;
-
-let selected = [];
-
-let heated = false;
-
-let mixed = false;
-
-let rouxUnlocked = false;
-
-const xpEl = document.getElementById("xp");
-
-const feedback = document.getElementById("feedback");
-
-const panStatus = document.getElementById("panStatus");
-
-const flame = document.getElementById("flame");
-
-const heatBtn = document.getElementById("heatBtn");
-
-const mixBtn = document.getElementById("mixBtn");
-
-const rouxBtn = document.getElementById("rouxBtn");
-
-const challengeTitle = document.getElementById("challengeTitle");
-
-const challengeText = document.getElementById("challengeText");
-
-const progress = document.getElementById("progress");
-
-const bookEntries = document.getElementById("bookEntries");
-
-document.querySelectorAll(".ingredient").forEach(btn => {
-
-  btn.addEventListener("click", () => {
-
-    if (btn.dataset.item === "roux" && !rouxUnlocked) {
-
-      feedback.innerHTML =
-
-        "🔒 <strong>Roux is nog niet ontdekt.</strong><br>Maak hem eerst zelf.";
-
-      return;
-
-    }
-
-    const item = btn.dataset.item;
-
-    if (selected.includes(item)) {
-
-      selected = selected.filter(x => x !== item);
-
-      btn.classList.remove("selected");
-
-    } else {
-
-      selected.push(item);
-
-      btn.classList.add("selected");
-
-    }
-
-    updatePanStatus();
-
-  });
-
+let xp=0, level=1, selected=new Set(), discoveries=[];
+const qs=s=>document.querySelector(s);
+document.querySelectorAll('button[data-value]').forEach(b=>{
+ b.addEventListener('click',()=>{
+   const v=b.dataset.value;
+   selected.has(v)?selected.delete(v):selected.add(v);
+   b.classList.toggle('selected');
+   qs('#status').textContent=selected.size ? 'In de pan: '+[...selected].join(' + ') : 'De pan is leeg.';
+ });
 });
-
-heatBtn.addEventListener("click", () => {
-
-  heated = !heated;
-
-  heatBtn.classList.toggle("selected", heated);
-
-  flame.classList.toggle("on", heated);
-
-  updatePanStatus();
-
+function reset(){
+ selected.clear();
+ document.querySelectorAll('button[data-value]').forEach(b=>b.classList.remove('selected'));
+ qs('#status').textContent='De pan is leeg.';
+}
+function discover(name,text,points){
+ if(!discoveries.includes(name)){discoveries.push(name);xp+=points;qs('#xp').textContent=xp}
+ qs('#result').textContent='✓ '+text;
+ qs('#book').innerHTML=discoveries.map(x=>'<div class="entry">✓ '+x+'</div>').join('');
+}
+function setLevel(n){
+ level=n; reset();
+ if(n===2){
+  qs('#challengeTitle').textContent='Chef Challenge 02 — Béchamel';
+  qs('#challengeText').textContent='Je hebt de basis geleerd. Maak nu een klassieke béchamel.';
+  qs('#progress').textContent='Challenge 2 van 3 ● ● ○';
+  qs('#tip').textContent='Een klassieke béchamel bouw je op vanuit roux, melk, warmte en goed mengen.';
+ } else if(n===3){
+  qs('#challengeTitle').textContent='Chef Challenge 03 — Velouté';
+  qs('#challengeText').textContent='Gebruik je kennis van roux om een velouté te maken.';
+  qs('#progress').textContent='Challenge 3 van 3 ● ● ●';
+  qs('#tip').textContent='Welke vloeistof onderscheidt velouté van béchamel?';
+ }
+}
+qs('#prepare').addEventListener('click',()=>{
+ const has=(...a)=>a.every(x=>selected.has(x));
+ if(level===1 && has('boter','bloem','verwarmen','mengen')){
+   discover('Roux — boter + bloem','Roux ontdekt! +25 XP',25);
+   qs('#tip').textContent='Goed. Roux is een basisbinding voor meerdere klassieke sauzen.';
+   setTimeout(()=>setLevel(2),900); return;
+ }
+ if(level===2 && has('boter','bloem','melk','verwarmen','mengen') && !selected.has('bouillon')){
+   discover('Béchamel — roux + melk','Béchamel ontdekt! +100 XP',100);
+   setTimeout(()=>setLevel(3),900); return;
+ }
+ if(level===3 && has('boter','bloem','bouillon','verwarmen','mengen') && !selected.has('melk')){
+   discover('Velouté — roux + bouillon','Velouté ontdekt! +100 XP',100);
+   qs('#challengeText').textContent='Uitstekend. Je hebt de drie basischallenges voltooid.';
+   qs('#tip').textContent='Volgende stap: afleidingen, reducties, emulsies en fouten leren herstellen.';
+   reset(); return;
+ }
+ if((selected.has('bloem')||selected.has('melk')) && !selected.has('mengen')){
+   qs('#result').textContent='⚠️ Klontjes. Wat ontbreekt er in je techniek?';
+   qs('#tip').textContent='Goed mengen is essentieel voor een gladde saus.'; return;
+ }
+ if(selected.size===0){qs('#result').textContent='Kies eerst ingrediënten en/of technieken.';return}
+ qs('#result').textContent='Nog niet juist. Bekijk de combinatie en probeer opnieuw.';
+ qs('#tip').textContent='Denk aan de functie van ieder ingrediënt én aan de bereidingstechniek.';
 });
-
-mixBtn.addEventListener("click", () => {
-
-  mixed = !mixed;
-
-  mixBtn.classList.toggle("selected", mixed);
-
-  updatePanStatus();
-
-});
-
-document.getElementById("prepareBtn").addEventListener("click", prepare);
-
-function updatePanStatus() {
-
-  if (selected.length === 0) {
-
-    panStatus.textContent = heated
-
-      ? "De lege pan wordt verwarmd."
-
-      : "De pan is leeg.";
-
-    return;
-
-  }
-
-  const names = {
-
-    boter:"boter",
-
-    bloem:"bloem",
-
-    roux:"roux",
-
-    melk:"melk",
-
-    bouillon:"bouillon"
-
-  };
-
-  let text = selected.map(x => names[x]).join(" + ");
-
-  if (heated) text += " • verwarmd";
-
-  if (mixed) text += " • gemengd";
-
-  panStatus.textContent = text;
-
-}
-
-function prepare() {
-
-  const has = item => selected.includes(item);
-
-  if (
-
-    challenge === 1 &&
-
-    has("boter") &&
-
-    has("bloem") &&
-
-    heated &&
-
-    mixed &&
-
-    selected.length === 2
-
-  ) {
-
-    successRoux();
-
-    return;
-
-  }
-
-  if (
-
-    challenge === 2 &&
-
-    has("roux") &&
-
-    has("melk") &&
-
-    heated &&
-
-    mixed &&
-
-    selected.length === 2
-
-  ) {
-
-    successBechamel();
-
-    return;
-
-  }
-
-  if (
-
-    challenge === 3 &&
-
-    has("roux") &&
-
-    has("bouillon") &&
-
-    heated &&
-
-    mixed &&
-
-    selected.length === 2
-
-  ) {
-
-    successVeloute();
-
-    return;
-
-  }
-
-  giveHint();
-
-}
-
-function successRoux() {
-
-  xp += 25;
-
-  xpEl.textContent = xp;
-
-  rouxUnlocked = true;
-
-  rouxBtn.classList.remove("locked");
-
-  rouxBtn.innerHTML = "🥣 Roux";
-
-  feedback.innerHTML =
-
-    "🎉 <strong>Roux ontdekt!</strong><br>" +
-
-    "Door boter en bloem samen te garen ontstaat een roux. " +
-
-    "Deze vormt de basis voor verschillende gebonden sauzen.";
-
-  bookEntries.innerHTML =
-
-    '<div class="book-entry complete">✓ Roux — boter + bloem</div>';
-
-  challenge = 2;
-
-  challengeTitle.textContent = "Chef Challenge 02 – Béchamel";
-
-  challengeText.textContent =
-
-    "Je hebt een roux. Welke vloeistof gebruik je voor een klassieke béchamel?";
-
-  progress.textContent = "Challenge 2 van 3 ● ● ○";
-
-  resetPan();
-
-}
-
-function successBechamel() {
-
-  xp += 50;
-
-  xpEl.textContent = xp;
-
-  feedback.innerHTML =
-
-    "🎉 <strong>Béchamel ontdekt!</strong><br>" +
-
-    "Roux met melk vormt de klassieke basissaus béchamel.";
-
-  bookEntries.innerHTML +=
-
-    '<div class="book-entry complete">✓ Béchamel — roux + melk</div>';
-
-  challenge = 3;
-
-  challengeTitle.textContent = "Chef Challenge 03 – Velouté";
-
-  challengeText.textContent =
-
-    "Gebruik opnieuw roux. Welke vloeistof heb je nodig voor een velouté?";
-
-  progress.textContent = "Challenge 3 van 3 ● ● ●";
-
-  resetPan();
-
-}
-
-function successVeloute() {
-
-  xp += 50;
-
-  xpEl.textContent = xp;
-
-  feedback.innerHTML =
-
-    "🏆 <strong>Sauce Lab – Basis voltooid!</strong><br>" +
-
-    "Je hebt roux, béchamel en velouté ontdekt.";
-
-  bookEntries.innerHTML +=
-
-    '<div class="book-entry complete">✓ Velouté — roux + bouillon</div>';
-
-  challengeTitle.textContent = "🏆 Chef Challenge voltooid";
-
-  challengeText.textContent =
-
-    "Je beheerst nu de basis van klassieke rouxgebonden sauzen.";
-
-  progress.textContent = "3 van 3 voltooid ✓";
-
-  resetPan();
-
-}
-
-function giveHint() {
-
-  if (!heated) {
-
-    feedback.innerHTML =
-
-      "💡 <strong>Chef-tip:</strong><br>Temperatuur speelt een belangrijke rol. Probeer de pan te verwarmen.";
-
-  } else if (!mixed) {
-
-    feedback.innerHTML =
-
-      "💡 <strong>Chef-tip:</strong><br>De ingrediënten moeten goed worden samengebracht. Probeer te mengen.";
-
-  } else if (challenge === 1) {
-
-    feedback.innerHTML =
-
-      "🤔 <strong>Nog niet.</strong><br>Welke twee ingrediënten vormen samen een roux?";
-
-  } else if (challenge === 2) {
-
-    feedback.innerHTML =
-
-      "🤔 <strong>Nog niet.</strong><br>Denk aan de witte vloeistof die bij béchamel hoort.";
-
-  } else {
-
-    feedback.innerHTML =
-
-      "🤔 <strong>Nog niet.</strong><br>Velouté wordt gemaakt met roux en een smaakvolle heldere vloeistof.";
-
-  }
-
-}
-
-function resetPan() {
-
-  selected = [];
-
-  heated = false;
-
-  mixed = false;
-
-  document.querySelectorAll(".ingredient")
-
-    .forEach(btn => btn.classList.remove("selected"));
-
-  heatBtn.classList.remove("selected");
-
-  mixBtn.classList.remove("selected");
-
-  flame.classList.remove("on");
-
-  panStatus.textContent = "De pan is leeg.";
-
-}
-
 </script>
-
 </body>
-
 </html>
