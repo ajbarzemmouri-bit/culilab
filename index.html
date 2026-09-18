@@ -1,0 +1,12 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>CuliLab – Sauce Lab</title><link rel="stylesheet" href="style.css"></head><body>
+<header><div><h1>👨‍🍳 CuliLab <span>Sauce Lab</span></h1><p>Ontdek • Combineer • Begrijp</p></div><div class="xp">⭐ <b id="xp">0</b> XP</div></header>
+<main>
+<section class="challenge"><b>Chef Challenge 01</b><span>Ontdek een roux en maak daarna béchamel of velouté.</span></section>
+<section class="workspace">
+<div class="pan-area"><div class="heat" id="heatGlow"></div><div class="pan"><div id="panContents" class="pan-contents">Tik op ingrediënten</div></div><div class="controls"><button data-tech="mengen">🥄 Mengen</button><button data-tech="verwarmen">🔥 Verwarmen</button><button id="cook">Bereid</button><button id="clear" class="ghost">Leeg pan</button></div><div class="status" id="status">Kies maximaal twee ingrediënten.</div></div>
+<aside><h2>Ingrediënten</h2><div class="cards" id="cards">
+<button class="card" data-item="boter"><span>🧈</span>Boter</button><button class="card" data-item="bloem"><span>🌾</span>Bloem</button><button class="card" data-item="melk"><span>🥛</span>Melk</button><button class="card" data-item="bouillon"><span>🥣</span>Bouillon</button>
+</div><h2>Ontdekt</h2><div id="discoveries" class="discoveries"><span>🔒 Roux</span><span>🔒 Béchamel</span><span>🔒 Velouté</span></div></aside>
+</section>
+<section class="book"><h2>📖 Mijn Sauce Book</h2><p id="bookText">Nog geen bereidingen ontdekt. Experimenteer in de pan.</p></section>
+</main><div id="toast" class="toast" role="status"></div><script src="app.js"></script></body></html>
