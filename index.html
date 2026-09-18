@@ -1,135 +1,88 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>CuliLab – Sauce Lab</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;padding:22px;font-family:Arial,sans-serif;background:#f4efe5;color:#252525;text-align:center}
-.wrap{max-width:780px;margin:auto}
-.topline{color:#666;margin:6px 0 20px}
-.game{background:#fff;border-radius:28px;padding:26px;box-shadow:0 12px 32px rgba(0,0,0,.10)}
-.header{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:20px;margin-bottom:20px}
-.challenge{background:#fff2c9;border-radius:20px;padding:18px;margin-bottom:20px}
-.challenge h2{font-size:18px;margin:0 0 5px}.challenge p{margin:0}.dots{color:#888;margin-top:8px;font-size:14px}
-.pan-area{max-width:540px;margin:0 auto 14px}
-.pan-area img{display:block;width:100%;height:auto;border-radius:18px}
-.status{font-size:22px;font-weight:700;margin:16px 0 20px}
-h3{font-size:17px;margin:16px 0 10px}
-.buttons{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
-button{font:inherit;font-size:17px;border:2px solid #ddd;background:#fff;color:#1670e8;border-radius:14px;padding:13px 19px;cursor:pointer}
-button.selected{border-color:#222;background:#f0f0f0;color:#222}
-#prepare{margin-top:20px;background:#242424;color:white;border:0;min-width:135px}
-.tip{margin-top:18px;background:#f7f7f7;border-radius:14px;padding:14px;line-height:1.4}
-.book{border-top:1px solid #ddd;margin-top:20px;padding-top:16px;text-align:left}
-.book h3{margin-top:0}.entry{background:#e8f7e8;padding:10px;border-radius:8px;margin:7px 0}
-.result{margin-top:15px;font-weight:700;min-height:24px}
-@media(max-width:600px){body{padding:10px}.game{padding:16px}.header{font-size:17px}.challenge{padding:14px}.status{font-size:19px}button{font-size:15px;padding:11px 14px}}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="topline">Sauce Lab • Ontdek • Combineer • Begrijp</div>
-<main class="game">
-<div class="header"><span>🧪 Sauce Lab</span><span>⭐ <span id="xp">0</span> XP</span></div>
+*{box-sizing:border-box}body{margin:0;padding:18px;background:#f3eee4;font-family:Arial,sans-serif;color:#252525;text-align:center}
+.app{max-width:800px;margin:auto;background:#fff;border-radius:28px;padding:24px;box-shadow:0 12px 32px #0002}
+.top{display:flex;justify-content:space-between;font-size:19px;font-weight:700}.challenge{background:#fff1c4;border-radius:18px;padding:17px;margin:20px 0}
+.challenge h2{margin:0 0 6px;font-size:20px}.challenge p{margin:5px}.progress{font-size:14px;color:#777}
+.stage{position:relative;max-width:560px;margin:auto}.stage img{width:100%;display:block;border-radius:16px}
+.sauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;opacity:0;transition:.5s;box-shadow:inset 0 5px 12px #fff7,0 2px 5px #0002}
+.sauce.roux{opacity:.88;background:#d9ad58}.sauce.bechemel{opacity:.92;background:#fff6d9}.sauce.veloute{opacity:.92;background:#ead8a0}
+.flame{position:absolute;left:43%;bottom:3%;font-size:40px;opacity:0;transition:.25s}.flame.on{opacity:1}
+.state{font-size:21px;font-weight:700;margin:13px 0 20px}h3{font-size:17px;margin:14px 0 9px}
+.buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:9px}button{font-size:16px;padding:12px 16px;border:2px solid #ddd;border-radius:13px;background:#fff;color:#176bdc}
+button.selected{background:#ffedaf;border-color:#333;color:#222}.prepare{margin:19px 0 10px;background:#222;color:#fff;border:0;padding:14px 38px}
+.feedback{min-height:66px;background:#f6f6f6;border-radius:14px;padding:14px;line-height:1.4}.book{text-align:left;border-top:1px solid #ddd;margin-top:18px;padding-top:15px}
+.entry{background:#eaf7e9;border-radius:8px;padding:9px;margin:6px 0}.hidden{display:none}
+@media(max-width:600px){body{padding:8px}.app{padding:14px}.sauce{top:47%;height:17%}button{font-size:15px}}
+</style></head>
+<body><main class="app">
+<div class="top"><span>🧪 Sauce Lab</span><span>⭐ <span id="xp">0</span> XP</span></div>
+<section class="challenge"><h2 id="title"></h2><p id="instruction"></p><div class="progress" id="progress"></div></section>
 
-<section class="challenge">
-<h2 id="challengeTitle">Chef Challenge 01 — Roux</h2>
-<p id="challengeText">Combineer de juiste ingrediënten en technieken om een roux te maken.</p>
-<div class="dots" id="progress">Challenge 1 van 3 ● ○ ○</div>
-</section>
-
-<div class="pan-area">
-<img src="./culilab-pan.png" alt="Professionele sauspan">
+<div class="stage">
+<img src="culilab-pan.png" alt="Professionele sauspan">
+<div id="sauce" class="sauce"></div><div id="flame" class="flame">🔥</div>
 </div>
-<div class="status" id="status">De pan is leeg.</div>
+<div class="state" id="state">De pan is leeg.</div>
 
-<h3>Ingrediënten</h3>
-<div class="buttons" id="ingredients">
-<button data-value="boter">🧈 Boter</button>
-<button data-value="bloem">🌾 Bloem</button>
-<button data-value="melk">🥛 Melk</button>
-<button data-value="bouillon">🥣 Bouillon</button>
+<div id="controls">
+<h3>Ingrediënten</h3><div class="buttons" id="ingredients"></div>
+<h3>Technieken</h3><div class="buttons">
+<button data-tech="heat">🔥 Verwarmen</button><button data-tech="mix">🥄 Mengen</button>
+</div>
+<button id="prepare" class="prepare">Bereid</button>
 </div>
 
-<h3>Technieken</h3>
-<div class="buttons" id="techniques">
-<button data-value="verwarmen">🔥 Verwarmen</button>
-<button data-value="mengen">🥄 Mengen</button>
-</div>
-
-<button id="prepare">Bereid</button>
-<div class="result" id="result"></div>
-<div class="tip"><b>💡 Chef-tip:</b><br><span id="tip">Begin met de basis: vetstof en bloem vormen samen een roux.</span></div>
-
-<section class="book">
-<h3>📖 Mijn Sauce Book</h3>
-<div id="book"><div style="color:#777">Nog niets ontdekt.</div></div>
-</section>
+<div id="feedback" class="feedback">Kies je ingrediënten en technieken.</div>
+<section class="book"><b>📖 Mijn Sauce Book</b><div id="book">Nog niets ontdekt.</div></section>
 </main>
-</div>
 
 <script>
-let xp=0, level=1, selected=new Set(), discoveries=[];
-const qs=s=>document.querySelector(s);
-document.querySelectorAll('button[data-value]').forEach(b=>{
- b.addEventListener('click',()=>{
-   const v=b.dataset.value;
-   selected.has(v)?selected.delete(v):selected.add(v);
-   b.classList.toggle('selected');
-   qs('#status').textContent=selected.size ? 'In de pan: '+[...selected].join(' + ') : 'De pan is leeg.';
+let level=1,xp=0,selected=new Set(),heat=false,mix=false;
+const $=x=>document.getElementById(x);
+const data={
+1:{title:"Chef Challenge 01 — Roux",text:"Maak vanuit een lege pan een klassieke roux.",ings:[["boter","🧈 Boter"],["bloem","🌾 Bloem"]],need:["boter","bloem"],sauce:"roux",name:"Roux",points:25,book:"Roux — boter + bloem"},
+2:{title:"Chef Challenge 02 — Béchamel",text:"De roux is je basis. Maak nu een klassieke béchamel.",ings:[["melk","🥛 Melk"]],need:["melk"],sauce:"bechemel",name:"Béchamel",points:100,book:"Béchamel — roux + melk"},
+3:{title:"Chef Challenge 03 — Velouté",text:"Je krijgt opnieuw een roux als basis. Maak een velouté.",ings:[["bouillon","🥣 Bouillon"]],need:["bouillon"],sauce:"veloute",name:"Velouté",points:100,book:"Velouté — roux + bouillon"}
+};
+function drawLevel(){
+ const d=data[level]; $("title").textContent=d.title;$("instruction").textContent=d.text;
+ $("progress").textContent=`Challenge ${level} van 3 ${["● ○ ○","● ● ○","● ● ●"][level-1]}`;
+ $("ingredients").innerHTML=d.ings.map(([v,n])=>`<button data-ing="${v}">${n}</button>`).join("");
+ selected.clear();heat=false;mix=false;$("flame").className="flame";
+ document.querySelectorAll("[data-tech]").forEach(b=>b.classList.remove("selected"));
+ $("sauce").className=level===1?"sauce":"sauce roux";
+ $("state").textContent=level===1?"De pan is leeg.":"Basis in de pan: roux";
+ $("feedback").textContent="Kies je ingrediënten en technieken.";
+ bindIngredients();
+}
+function bindIngredients(){
+ document.querySelectorAll("[data-ing]").forEach(b=>b.onclick=()=>{
+  let v=b.dataset.ing;selected.has(v)?selected.delete(v):selected.add(v);b.classList.toggle("selected");
+  let base=level===1?[]:["roux"]; $("state").textContent="In de pan: "+base.concat([...selected]).join(" + ");
  });
+}
+document.querySelectorAll("[data-tech]").forEach(b=>b.onclick=()=>{
+ if(b.dataset.tech==="heat"){heat=!heat;$("flame").classList.toggle("on",heat);b.classList.toggle("selected",heat)}
+ else{mix=!mix;b.classList.toggle("selected",mix)}
 });
-function reset(){
- selected.clear();
- document.querySelectorAll('button[data-value]').forEach(b=>b.classList.remove('selected'));
- qs('#status').textContent='De pan is leeg.';
-}
-function discover(name,text,points){
- if(!discoveries.includes(name)){discoveries.push(name);xp+=points;qs('#xp').textContent=xp}
- qs('#result').textContent='✓ '+text;
- qs('#book').innerHTML=discoveries.map(x=>'<div class="entry">✓ '+x+'</div>').join('');
-}
-function setLevel(n){
- level=n; reset();
- if(n===2){
-  qs('#challengeTitle').textContent='Chef Challenge 02 — Béchamel';
-  qs('#challengeText').textContent='Je hebt de basis geleerd. Maak nu een klassieke béchamel.';
-  qs('#progress').textContent='Challenge 2 van 3 ● ● ○';
-  qs('#tip').textContent='Een klassieke béchamel bouw je op vanuit roux, melk, warmte en goed mengen.';
- } else if(n===3){
-  qs('#challengeTitle').textContent='Chef Challenge 03 — Velouté';
-  qs('#challengeText').textContent='Gebruik je kennis van roux om een velouté te maken.';
-  qs('#progress').textContent='Challenge 3 van 3 ● ● ●';
-  qs('#tip').textContent='Welke vloeistof onderscheidt velouté van béchamel?';
- }
-}
-qs('#prepare').addEventListener('click',()=>{
- const has=(...a)=>a.every(x=>selected.has(x));
- if(level===1 && has('boter','bloem','verwarmen','mengen')){
-   discover('Roux — boter + bloem','Roux ontdekt! +25 XP',25);
-   qs('#tip').textContent='Goed. Roux is een basisbinding voor meerdere klassieke sauzen.';
-   setTimeout(()=>setLevel(2),900); return;
- }
- if(level===2 && has('boter','bloem','melk','verwarmen','mengen') && !selected.has('bouillon')){
-   discover('Béchamel — roux + melk','Béchamel ontdekt! +100 XP',100);
-   setTimeout(()=>setLevel(3),900); return;
- }
- if(level===3 && has('boter','bloem','bouillon','verwarmen','mengen') && !selected.has('melk')){
-   discover('Velouté — roux + bouillon','Velouté ontdekt! +100 XP',100);
-   qs('#challengeText').textContent='Uitstekend. Je hebt de drie basischallenges voltooid.';
-   qs('#tip').textContent='Volgende stap: afleidingen, reducties, emulsies en fouten leren herstellen.';
-   reset(); return;
- }
- if((selected.has('bloem')||selected.has('melk')) && !selected.has('mengen')){
-   qs('#result').textContent='⚠️ Klontjes. Wat ontbreekt er in je techniek?';
-   qs('#tip').textContent='Goed mengen is essentieel voor een gladde saus.'; return;
- }
- if(selected.size===0){qs('#result').textContent='Kies eerst ingrediënten en/of technieken.';return}
- qs('#result').textContent='Nog niet juist. Bekijk de combinatie en probeer opnieuw.';
- qs('#tip').textContent='Denk aan de functie van ieder ingrediënt én aan de bereidingstechniek.';
-});
-</script>
-</body>
-</html>
+$("prepare").onclick=()=>{
+ const d=data[level],ok=d.need.every(x=>selected.has(x))&&selected.size===d.need.length&&heat&&mix;
+ if(!ok){$("feedback").innerHTML="<b>Nog niet juist.</b><br>Controleer ingrediënten, verwarmen én mengen.";return}
+ $("sauce").className="sauce "+d.sauce;$("state").textContent=d.name+" in de pan";
+ xp+=d.points;$("xp").textContent=xp;$("feedback").innerHTML=`🎉 <b>${d.name} ontdekt! +${d.points} XP</b>`;
+ if($("book").textContent==="Nog niets ontdekt.")$("book").innerHTML="";
+ $("book").innerHTML+=`<div class="entry">✓ ${d.book}</div>`;
+ if(level<3){setTimeout(()=>{level++;drawLevel()},1200)}
+ else setTimeout(()=>{
+   $("title").textContent="🏆 Sauce Lab – Basis voltooid";$("instruction").textContent="Je hebt Roux, Béchamel en Velouté ontdekt.";
+   $("progress").textContent="3 van 3 voltooid ✓";$("controls").classList.add("hidden");
+   $("feedback").innerHTML="<b>Chef Challenge voltooid!</b><br>Volgende stap: afleidingen, emulsies en fouten leren herstellen.";
+ },1200);
+};
+drawLevel();
+</script></body></html>
