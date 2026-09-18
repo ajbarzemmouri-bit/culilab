@@ -1,12 +1,273 @@
-<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>CuliLab – Sauce Lab</title><link rel="stylesheet" href="style.css"></head><body>
-<header><div><h1>👨‍🍳 CuliLab <span>Sauce Lab</span></h1><p>Ontdek • Combineer • Begrijp</p></div><div class="xp">⭐ <b id="xp">0</b> XP</div></header>
-<main>
-<section class="challenge"><b>Chef Challenge 01</b><span>Ontdek een roux en maak daarna béchamel of velouté.</span></section>
-<section class="workspace">
-<div class="pan-area"><div class="heat" id="heatGlow"></div><div class="pan"><div id="panContents" class="pan-contents">Tik op ingrediënten</div></div><div class="controls"><button data-tech="mengen">🥄 Mengen</button><button data-tech="verwarmen">🔥 Verwarmen</button><button id="cook">Bereid</button><button id="clear" class="ghost">Leeg pan</button></div><div class="status" id="status">Kies maximaal twee ingrediënten.</div></div>
-<aside><h2>Ingrediënten</h2><div class="cards" id="cards">
-<button class="card" data-item="boter"><span>🧈</span>Boter</button><button class="card" data-item="bloem"><span>🌾</span>Bloem</button><button class="card" data-item="melk"><span>🥛</span>Melk</button><button class="card" data-item="bouillon"><span>🥣</span>Bouillon</button>
-</div><h2>Ontdekt</h2><div id="discoveries" class="discoveries"><span>🔒 Roux</span><span>🔒 Béchamel</span><span>🔒 Velouté</span></div></aside>
-</section>
-<section class="book"><h2>📖 Mijn Sauce Book</h2><p id="bookText">Nog geen bereidingen ontdekt. Experimenteer in de pan.</p></section>
-</main><div id="toast" class="toast" role="status"></div><script src="app.js"></script></body></html>
+<!DOCTYPE html>
+
+<html lang="nl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>CuliLab – Sauce Lab</title>
+
+<style>
+
+body {
+
+  font-family: Arial, sans-serif;
+
+  background: #f7f2e8;
+
+  margin: 0;
+
+  padding: 25px;
+
+  text-align: center;
+
+}
+
+h1 {
+
+  font-size: 38px;
+
+  margin-bottom: 5px;
+
+}
+
+.subtitle {
+
+  color: #666;
+
+  margin-bottom: 30px;
+
+}
+
+.game {
+
+  max-width: 700px;
+
+  margin: auto;
+
+  background: white;
+
+  padding: 25px;
+
+  border-radius: 24px;
+
+  box-shadow: 0 5px 20px rgba(0,0,0,.12);
+
+}
+
+.pan {
+
+  font-size: 90px;
+
+  margin: 20px;
+
+}
+
+#status {
+
+  min-height: 45px;
+
+  font-weight: bold;
+
+  font-size: 20px;
+
+}
+
+.ingredients {
+
+  display: flex;
+
+  justify-content: center;
+
+  gap: 12px;
+
+  flex-wrap: wrap;
+
+  margin: 25px 0;
+
+}
+
+.ingredient {
+
+  border: 2px solid #ddd;
+
+  background: white;
+
+  padding: 15px 22px;
+
+  border-radius: 15px;
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+}
+
+.ingredient.selected {
+
+  border-color: #222;
+
+  background: #ffe9a8;
+
+  transform: scale(1.05);
+
+}
+
+#prepare {
+
+  border: 0;
+
+  border-radius: 15px;
+
+  background: #222;
+
+  color: white;
+
+  padding: 16px 35px;
+
+  font-size: 18px;
+
+  cursor: pointer;
+
+}
+
+#result {
+
+  margin-top: 25px;
+
+  font-size: 22px;
+
+  min-height: 50px;
+
+}
+
+.xp {
+
+  margin-top: 20px;
+
+  font-weight: bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>👨‍🍳 CuliLab</h1>
+
+<div class="subtitle">Sauce Lab • Ontdek • Combineer • Begrijp</div>
+
+<div class="game">
+
+<h2>Chef Challenge 01</h2>
+
+<p>Ontdek hoe je een roux maakt.</p>
+
+<div class="pan">🍳</div>
+
+<div id="status">Kies maximaal twee ingrediënten.</div>
+
+<div class="ingredients">
+
+<button class="ingredient" data-item="boter">🧈 Boter</button>
+
+<button class="ingredient" data-item="bloem">🌾 Bloem</button>
+
+<button class="ingredient" data-item="melk">🥛 Melk</button>
+
+<button class="ingredient" data-item="bouillon">🥣 Bouillon</button>
+
+</div>
+
+<button id="prepare">🔥 Bereid</button>
+
+<div id="result"></div>
+
+<div class="xp">⭐ <span id="xp">0</span> XP</div>
+
+</div>
+
+<script>
+
+let selected = [];
+
+let xp = 0;
+
+const buttons = document.querySelectorAll(".ingredient");
+
+const status = document.getElementById("status");
+
+const result = document.getElementById("result");
+
+buttons.forEach(button => {
+
+  button.addEventListener("click", function() {
+
+    const item = this.dataset.item;
+
+    if (selected.includes(item)) {
+
+      selected = selected.filter(x => x !== item);
+
+      this.classList.remove("selected");
+
+    } else {
+
+      if (selected.length >= 2) {
+
+        status.textContent = "Je kunt maximaal twee ingrediënten kiezen.";
+
+        return;
+
+      }
+
+      selected.push(item);
+
+      this.classList.add("selected");
+
+    }
+
+    status.textContent =
+
+      selected.length === 0
+
+      ? "Kies maximaal twee ingrediënten."
+
+      : "Gekozen: " + selected.join(" + ");
+
+  });
+
+});
+
+document.getElementById("prepare").addEventListener("click", function() {
+
+  if (selected.includes("boter") && selected.includes("bloem")) {
+
+    result.innerHTML = "🎉 <strong>Roux ontdekt!</strong><br>Door boter en bloem te garen ontstaat de basis voor verschillende gebonden sauzen.";
+
+    if (xp === 0) {
+
+      xp = 25;
+
+      document.getElementById("xp").textContent = xp;
+
+    }
+
+  } else {
+
+    result.textContent = "👨‍🍳 Deze combinatie levert nog geen roux op. Probeer opnieuw.";
+
+  }
+
+});
+
+</script>
+
+</body>
+
+</html>
