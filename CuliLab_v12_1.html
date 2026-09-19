@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CuliLab • Chef Academy v12 Clean Build</title>
+<style>
+*{box-sizing:border-box}
+:root{--cream:#f7f0e3;--dark:#20150e;--gold:#f5a019;--orange:#ed7410;--green:#e7f6e6;--red:#fde5df;--ink:#29231e}
+body{margin:0;background:#17110d;font-family:Arial,sans-serif;color:var(--ink)}
+.app{max-width:430px;margin:auto;min-height:100vh;background:var(--cream);overflow:hidden}
+header{padding:17px 17px 13px;color:#fff;background:linear-gradient(135deg,#21160f,#54351f)}
+.brand{font-size:27px;font-weight:900}.tag{font-size:11px;letter-spacing:1.2px;opacity:.75;margin-top:2px}
+.stats{display:flex;gap:7px;margin-top:12px}.pill{font-size:13px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;padding:7px 9px;border-radius:16px}
+.progress{height:7px;background:#ffffff20;border-radius:8px;margin-top:11px;overflow:hidden}.progress i{display:block;height:100%;width:12%;background:#ffc94f;transition:.3s}
+.mode{margin:13px 14px 9px;padding:13px;border-radius:18px;background:#fff0b8;text-align:center}
+.mode b{display:block;font-size:12px;letter-spacing:1px;color:#90651e}.mode h2{margin:5px 0 3px;font-size:21px}.mode p{margin:0;font-size:13px;line-height:1.35}
+.stage{position:relative}.stage img{width:100%;display:block}
+.sauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;background:#d7ab58;opacity:.93;transition:.35s;box-shadow:inset 0 5px 12px #fff7}
+.sauce.milk{background:#fff0c9}.sauce.good{background:#fff5d9}.sauce.burnt{background:#59301e}.sauce.lumpy{background:radial-gradient(circle,#fff8dc 0 8%,#d3bd82 9% 17%,#f3e3b9 18% 100%)}.sauce.thin{background:#f8f0d7;opacity:.7}
+.flame{position:absolute;left:46%;bottom:4%;font-size:34px;opacity:0}.flame.on{opacity:1}
+.tip{position:absolute;left:12px;right:12px;bottom:10px;background:#21170fe8;color:#fff;padding:10px 12px;border-radius:14px;font-size:13px;line-height:1.3;box-shadow:0 5px 15px #0005}
+.tip:after{content:"";position:absolute;bottom:-8px;left:24%;border:8px solid transparent;border-top-color:#21170fe8;border-bottom:0}
+.panel{padding:12px 15px 24px}.goal{text-align:center;font-size:19px;font-weight:900;margin:5px 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.group{background:#fff;border-radius:16px;padding:11px;margin-bottom:9px;box-shadow:0 3px 10px #0001}
+.group h3{font-size:12px;text-transform:uppercase;letter-spacing:.8px;margin:0 0 8px;color:#8b765e}
+button{width:100%;border:2px solid #e0d3c1;background:#fff;border-radius:13px;padding:11px 7px;font-size:14px;font-weight:800;color:#60411d;margin:3px 0;box-shadow:0 2px 0 #d4c2ac}
+button.selected{background:#ffe49a;border-color:#3a2b20}button.primary{background:linear-gradient(135deg,#f5a019,#ed7410);border:0;color:#fff;font-size:16px;box-shadow:0 4px 0 #a64d08;padding:13px}
+.feedback{padding:12px;border-radius:14px;text-align:center;background:#efebe5;line-height:1.35;margin-top:9px}.success{background:var(--green)}.error{background:var(--red)}
+.hidden{display:none!important}.stars{font-size:29px;letter-spacing:4px}.result{text-align:center;background:#fff0b8;border-radius:18px;padding:15px;margin-top:10px}
+.small{font-size:12px;color:#786b5d}.attempt{font-size:12px;font-weight:900;text-align:center;color:#9b650f;margin:7px}
+.choiceHint{animation:pulse 1s infinite}@keyframes pulse{50%{transform:scale(1.03);box-shadow:0 0 0 4px #ffc94f55}}
+
+.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 12px;background:#2a1b12;position:sticky;top:0;z-index:20}
+.nav button{margin:0;padding:9px 3px;background:#ffffff12;border:1px solid #ffffff25;box-shadow:none;color:#fff;font-size:12px}
+.nav button.active{background:#f5a019;border-color:#f5a019}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+
+.homecards{display:grid;gap:10px;margin-top:12px;text-align:left}
+.homecard{border:1px solid #ead8bd;background:#fff;border-radius:17px;padding:14px;box-shadow:0 3px 10px #0001}
+.homecard b{display:block;font-size:17px;margin-bottom:4px;color:#382719}
+.homecard span{font-size:13px;line-height:1.35;color:#756454}
+.homecard button{margin-top:10px}
+.badge{display:inline-block;background:#fff0b8;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;margin-top:5px}
+
+.toolgame{background:#fff;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 3px 10px #0001}
+.toolrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.toolchoice{min-height:105px;font-size:42px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.toolchoice span{font-size:13px;margin-top:6px}
+.lesson{font-size:13px;line-height:1.4;background:#fff7dd;border-radius:13px;padding:10px;margin:9px 0}
+
+/* v12 clean-build additions */
+#v12app{max-width:520px;margin:0 auto;background:#fbf4e7;min-height:100vh}
+.v12head{background:linear-gradient(135deg,#3a2116,#6b3b1f);color:#fff;padding:20px 18px 14px}
+.v12brand{font-size:29px;font-weight:800}.v12sub{font-size:11px;letter-spacing:1.4px;opacity:.8}
+.stats{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.pill{background:#ffffff18;border:1px solid #ffffff20;border-radius:13px;padding:9px 12px;font-weight:700}
+.bar{height:7px;background:#ffffff25;border-radius:8px;margin-top:14px;overflow:hidden}.bar i{display:block;height:100%;background:#ffc43d;width:25%}
+.nav{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;background:#2a1b14;padding:10px 12px;position:sticky;top:0;z-index:10}
+.nav button,.choice,.primary,.card button{border:0;border-radius:13px;padding:13px;font-weight:800;cursor:pointer}
+.nav button{background:#3a2921;color:#fff;border:1px solid #ffffff20}.nav button.active{background:#ff9d12}
+main{padding:14px}.hero{background:#ffefad;border-radius:17px;padding:16px;text-align:center;margin-bottom:12px}.hero small{font-weight:800;letter-spacing:1px;color:#8c5b16}.hero h2{margin:6px 0}
+.pan{width:100%;display:block;border-radius:15px;margin:10px 0 16px}
+.card{background:#fff;border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 2px 8px #00000010}
+.card h3{margin:0 0 8px}.card p{margin:6px 0 12px;color:#6b584b}
+.card button{width:100%;background:#fff;border:2px solid #dfcfbb;color:#5a381d}
+.group{background:#fff;border-radius:17px;padding:13px;margin:10px 0}.label{font-size:12px;font-weight:800;letter-spacing:1px;color:#8b735f;margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice{background:#fff;border:2px solid #dfcfbb;color:#53391f;min-height:50px}.choice.selected{background:#ffe39a;border-color:#3e2b20}
+.toolChoice{min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}.toolChoice img{width:115px;height:115px;object-fit:contain}
+.primary{width:100%;background:#ff8e0a;color:#fff;font-size:17px;margin-top:12px;box-shadow:0 4px 0 #b85c00}
+.feedback{padding:13px;border-radius:14px;margin-top:12px;text-align:center;background:#f0ede7}.good{background:#e2f5e5}.bad{background:#ffe5df}
+.result{background:#ffefad;border-radius:17px;padding:18px;text-align:center;margin-top:12px}.stars{font-size:30px}
+.hidden{display:none!important}.muted{color:#765f4e;font-size:13px}.center{text-align:center}
+</style>
+</head>
+<body>
+<div id="v12app">
+  <header class="v12head">
+    <div class="v12brand">🧪 CuliLab</div>
+    <div class="v12sub">CHEF ACADEMY • LEER → ONTDEK → BEHEERS</div>
+    <div class="stats">
+      <span class="pill">👨‍🍳 Lv. <b id="level">2</b></span>
+      <span class="pill">⭐ <b id="xp">0</b> XP</span>
+      <span class="pill">🪙 <b id="coins">0</b></span>
+      <span class="pill">🏅 <b id="medals">0</b></span>
+    </div>
+    <div class="bar"><i id="progress"></i></div>
+  </header>
+
+  <nav class="nav">
+    <button id="navHome" type="button">🏠 Start</button>
+    <button id="navTraining" type="button">🎓 Training</button>
+    <button id="navChallenge" type="button">🔥 Challenges</button>
+  </nav>
+  <main id="screen"></main>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const state = {
+  xp:0, coins:0, medals:0,
+  tutorialDone:false, toolsDone:false, freeDone:false, rescueDone:false,
+  tutorialStep:0, toolQ:0, toolMistakes:0, rescueQ:0, rescueMistakes:0,
+  picks:{ingredient:null,temp:null,tech:null}
+};
+const pan = "culilab-pan.png";
+const garde = "culilab-garde.png?v=1200";
+const spatel = "culilab-spatel.png?v=1200";
+
+function stats(){
+  $("xp").textContent=state.xp; $("coins").textContent=state.coins; $("medals").textContent=state.medals;
+  const done=[state.tutorialDone,state.toolsDone,state.freeDone,state.rescueDone].filter(Boolean).length;
+  $("progress").style.width=(10+done*22.5)+"%";
+}
+function active(id){
+  ["navHome","navTraining","navChallenge"].forEach(x=>$(x).classList.toggle("active",x===id));
+}
+function reward(key,xp,coins,medal=0){
+  const k="_reward_"+key;
+  if(state[k]) return false;
+  state[k]=true; state.xp+=xp; state.coins+=coins; state.medals+=medal; stats(); return true;
+}
+function img(){return `<img class="pan" src="${pan}" alt="Pan met saus">`;}
+function setScreen(html){$("screen").innerHTML=html; window.scrollTo({top:0,behavior:"auto"});}
+function home(){
+  active("navHome"); stats();
+  setScreen(`${img()}
+  <div class="center"><h2>👨‍🍳 Chef Dashboard</h2><p class="muted">Train, herken je gereedschap, kook zelfstandig en red de service.</p></div>
+  <div class="card"><h3>🎓 1. Béchamel training</h3><p>De chef helpt je één keer stap voor stap.</p><button id="goTrain" type="button">${state.tutorialDone?"Opnieuw trainen":"Start training"}</button></div>
+  <div class="card"><h3>🥄 2. Keukentools</h3><p>Herken garde en spatel en kies wat je in de situatie nodig hebt.</p><button id="goTools" type="button">Garde of spatel?</button></div>
+  <div class="card"><h3>👨‍🍳 3. Zelfstandig koken</h3><p>Geen aanwijzingen. Pas toe wat je hebt geleerd.</p><button id="goFree" type="button">Speel zelfstandig</button></div>
+  <div class="card"><h3>🔥 4. Rescue Challenge</h3><p>Herken fouten en red drie sauzen tijdens de service.</p><button id="goRescue" type="button">Start Rescue</button></div>`);
+  $("goTrain").addEventListener("click", startTutorial);
+  $("goTools").addEventListener("click", startTools);
+  $("goFree").addEventListener("click", startFree);
+  $("goRescue").addEventListener("click", startRescue);
+}
+function startTutorial(){
+  active("navTraining"); state.tutorialStep=0; state.picks={ingredient:null,temp:null,tech:null}; renderTutorial();
+}
+function renderTutorial(){
+  const steps=[
+    {title:"Stap 1 van 3 • VLOEISTOF",msg:"🥛 <b>Melk = vloeistof.</b><br>De melk maakt van de roux een saus. Voeg de vloeistof toe en meng goed.",group:"ingredient"},
+    {title:"Stap 2 van 3 • WARMTE",msg:"🔥 <b>Middel = gecontroleerde warmte.</b><br>De saus heeft warmte nodig om te binden. Te hoog vuur vergroot de kans op aanzetten.",group:"temp"},
+    {title:"Stap 3 van 3 • BEWEGING",msg:"🥄 <b>Garde = beweging.</b><br>Door te kloppen meng je melk en roux gelijkmatig en help je klontjes voorkomen.",group:"tech"}
+  ];
+  const d=steps[Math.min(state.tutorialStep,2)];
+  setScreen(`<div class="hero"><small>RONDE 1 • CHEF-TUTORIAL</small><h2>Béchamel leren</h2><div>De chef helpt je één keer. Daarna sta je er zelf voor.</div></div>
+  ${img()}<div class="feedback">${d.msg}</div><h2 class="center">Maak een gladde béchamel</h2><p class="center muted">Tutorial • ${d.title}</p>
+  ${cookGroups(true)}<button id="prepare" class="primary" type="button">🔍 Bereid saus</button><div id="out"></div>`);
+  wireCook(true);
+}
+function cookGroups(tutorial){
+ return `<div class="group"><div class="label">INGREDIËNT</div><div class="grid2">
+ <button class="choice" data-kind="ingredient" data-val="milk" type="button">🥛 Melk</button><button class="choice" data-kind="ingredient" data-val="stock" type="button">🍲 Bouillon</button></div></div>
+ <div class="group"><div class="label">TEMPERATUUR</div><div class="grid2">
+ <button class="choice" data-kind="temp" data-val="low" type="button">🔥 Laag</button><button class="choice" data-kind="temp" data-val="mid" type="button">🔥🔥 Middel</button><button class="choice" data-kind="temp" data-val="high" type="button">🔥🔥🔥 Hoog</button></div></div>
+ <div class="group"><div class="label">TECHNIEK</div><div class="grid2">
+ <button class="choice" data-kind="tech" data-val="whisk" type="button">🥄 Kloppen</button><button class="choice" data-kind="tech" data-val="none" type="button">✋ Niet mengen</button></div></div>`;
+}
+function wireCook(tutorial){
+  document.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>{
+    const kind=b.dataset.kind,val=b.dataset.val;
+    if(tutorial){
+      const expected=[["ingredient","milk"],["temp","mid"],["tech","whisk"]][state.tutorialStep];
+      if(kind!==expected[0] || val!==expected[1]) return;
+      state.picks[kind]=val; document.querySelectorAll(`[data-kind="${kind}"]`).forEach(x=>x.classList.remove("selected")); b.classList.add("selected");
+      if(state.tutorialStep<2){state.tutorialStep++; setTimeout(renderTutorial,180);}
+    } else {
+      state.picks[kind]=val; document.querySelectorAll(`[data-kind="${kind}"]`).forEach(x=>x.classList.remove("selected")); b.classList.add("selected");
+    }
+  }));
+  $("prepare").addEventListener("click",()=> tutorial ? finishTutorial() : checkFree());
+}
+function finishTutorial(){
+  if(!(state.picks.ingredient==="milk"&&state.picks.temp==="mid"&&state.picks.tech==="whisk")){
+    $("out").innerHTML=`<div class="feedback">Volg eerst de drie aanwijzingen van de chef.</div>`; return;
+  }
+  state.tutorialDone=true; const got=reward("tutorial",50,10); stats();
+  $("out").innerHTML=`<div class="feedback good"><b>✓ Het kookprincipe:</b><br>🥛 vloeistof + 🔥 gecontroleerde warmte + 🥄 beweging = een gladde béchamel.</div>
+  <div class="result"><div class="stars">⭐⭐⭐</div><h2>Tutorial voltooid</h2><p>${got?"+50 XP • +10 coins":"Oefenronde • beloning al ontvangen"}<br><b>Nu verdwijnen de aanwijzingen.</b></p>
+  <button id="nextTools" class="primary" type="button">🥄 Naar Garde of spatel</button></div>`;
+  $("nextTools").addEventListener("click",startTools);
+}
+const toolQs=[
+ {q:"Je béchamelsaus heeft kleine klontjes. Wat pak je?",a:"whisk",ok:"Juist. Met een garde klop je kleine klontjes uit de saus."},
+ {q:"Een dikke saus moet je goed over de bodem en langs de randen bewegen. Wat pak je?",a:"spatula",ok:"Juist. Een spatel helpt je langs bodem en randen te schrapen."},
+ {q:"Je voegt melk aan de roux toe en wilt glad mengen terwijl de saus bindt. Wat pak je?",a:"whisk",ok:"Juist. De garde helpt de vloeistof gelijkmatig door de roux te mengen."}
+];
+function startTools(){active("navTraining");state.toolQ=0;state.toolMistakes=0;renderTool();}
+function renderTool(){
+ const d=toolQs[state.toolQ];
+ setScreen(`<div class="hero"><small>MINI-GAME • KEUKENTOOL</small><h2>Garde of spatel?</h2><div>Eerst herkennen. Daarna kiezen zonder hulp.</div></div>${img()}
+ <h2 class="center">🥄 Kies het juiste gereedschap</h2><p class="center muted">Vraag ${state.toolQ+1} van ${toolQs.length}</p>
+ <div class="feedback"><b>${d.q}</b></div><div class="group"><div class="grid2">
+ <button id="pickWhisk" class="choice toolChoice" type="button"><img src="${garde}" alt="Garde"><b>Garde</b></button>
+ <button id="pickSpatula" class="choice toolChoice" type="button"><img src="${spatel}" alt="Spatel"><b>Spatel</b></button>
+ </div></div><div id="toolOut" class="muted center">Kijk naar de situatie, niet alleen naar de naam.</div>`);
+ $("pickWhisk").addEventListener("click",()=>answerTool("whisk"));
+ $("pickSpatula").addEventListener("click",()=>answerTool("spatula"));
+}
+function answerTool(v){
+ const d=toolQs[state.toolQ];
+ if(v!==d.a){state.toolMistakes++;$("toolOut").className="feedback bad";$("toolOut").textContent="Nog niet. Kijk naar wat je met de saus moet doen.";return;}
+ $("toolOut").className="feedback good";$("toolOut").textContent=d.ok;
+ setTimeout(()=>{state.toolQ++; if(state.toolQ<toolQs.length) renderTool(); else finishTools();},500);
+}
+function finishTools(){
+ state.toolsDone=true; const stars=Math.max(1,3-state.toolMistakes); const got=reward("tools",50,10);
+ setScreen(`<div class="hero"><small>MINI-GAME VOLTOOID</small><h2>Toolkennis</h2></div>${img()}
+ <div class="result"><div class="stars">${"⭐".repeat(stars)}</div><h2>Garde en spatel herkend</h2><p>${got?"+50 XP • +10 coins":"Oefenronde • beloning al ontvangen"}</p>
+ <button id="nextFree" class="primary" type="button">👨‍🍳 Zelfstandig béchamel maken</button></div>`);
+ $("nextFree").addEventListener("click",startFree);
+}
+function startFree(){active("navTraining");state.picks={ingredient:null,temp:null,tech:null};
+ setScreen(`<div class="hero"><small>RONDE 2 • JIJ BENT DE CHEF</small><h2>Béchamel Challenge</h2><div>Geen aanwijzingen. Gebruik wat je hebt geleerd.</div></div>${img()}
+ <h2 class="center">Maak een gladde béchamel</h2><p class="center muted">Zelfstandig • poging</p>${cookGroups(false)}
+ <button id="prepare" class="primary" type="button">🔍 Bereid saus</button><div id="out"><div class="feedback">Feedback krijg je pas na je bereiding.</div></div>`);
+ wireCook(false);
+}
+function checkFree(){
+ const p=state.picks;
+ if(!p.ingredient||!p.temp||!p.tech){$("out").innerHTML='<div class="feedback bad">Maak eerst alle drie de keuzes.</div>';return;}
+ if(p.ingredient==="milk"&&p.temp==="mid"&&p.tech==="whisk"){
+   state.freeDone=true;const got=reward("free",105,45,1);
+   $("out").innerHTML=`<div class="feedback good">🏆 Gelukt zonder aanwijzingen!</div><div class="result"><div class="stars">⭐⭐⭐</div><h2>Béchamel beheerst</h2><p>${got?"+105 XP • +45 coins":"Oefenronde • beloning al ontvangen"}</p><button id="nextRescue" class="primary" type="button">🔥 Start Rescue Challenge</button></div>`;
+   $("nextRescue").addEventListener("click",startRescue);
+ } else $("out").innerHTML='<div class="feedback bad">De saus is nog niet goed. Kijk opnieuw naar ingrediënt, warmte en techniek en probeer opnieuw.</div>';
+}
+const rescue=[
+ {q:"De saus is hobbelig en niet glad.",opts:[["Krachtig kloppen","whisk"],["Vuur hoger","high"]],a:"whisk",ok:"Goed gezien: kloppen helpt kleine klontjes glad te maken."},
+ {q:"De saus is veel te dik geworden.",opts:[["Beetje melk toevoegen","milk"],["Niet meer roeren","stop"]],a:"milk",ok:"Juist: een beetje melk maakt de saus weer soepeler."},
+ {q:"De saus dreigt aan te branden.",opts:[["Vuur lager","low"],["Vuur hoger","high"]],a:"low",ok:"Juist: verlaag de hitte en blijf controleren."}
+];
+function startRescue(){active("navChallenge");state.rescueQ=0;state.rescueMistakes=0;renderRescue();}
+function renderRescue(){
+ const d=rescue[state.rescueQ];
+ setScreen(`<div class="hero"><small>RESCUE CHALLENGE • SERVICE!</small><h2>Red de saus</h2><div>Kijk goed naar de situatie. Jij bepaalt wat er moet gebeuren.</div></div>${img()}
+ <h2 class="center">Situatie ${state.rescueQ+1} van 3</h2><div class="feedback"><b>${d.q}</b></div><div class="group"><div class="grid2">
+ ${d.opts.map((o,i)=>`<button class="choice rescuePick" data-v="${o[1]}" type="button">${o[0]}</button>`).join("")}</div></div><div id="rescueOut"></div>`);
+ document.querySelectorAll(".rescuePick").forEach(b=>b.addEventListener("click",()=>answerRescue(b.dataset.v)));
+}
+function answerRescue(v){
+ const d=rescue[state.rescueQ];
+ if(v!==d.a){state.rescueMistakes++;$("rescueOut").innerHTML='<div class="feedback bad">Niet de beste ingreep. Probeer opnieuw.</div>';return;}
+ $("rescueOut").innerHTML=`<div class="feedback good">✓ ${d.ok}</div>`;
+ setTimeout(()=>{state.rescueQ++; if(state.rescueQ<rescue.length) renderRescue(); else finishRescue();},500);
+}
+function finishRescue(){
+ state.rescueDone=true;const stars=Math.max(1,3-state.rescueMistakes);const got=reward("rescue",195,75,2);
+ setScreen(`<div class="hero"><small>RESCUE CHALLENGE • VOLTOOID</small><h2>Service gered!</h2></div>${img()}
+ <div class="feedback good">🏆 Je redde 3/3 sauzen.</div><div class="result"><div class="stars">${"⭐".repeat(stars)}</div><h2>Rescue Chef</h2><p>${got?"+195 XP • +75 coins":"Oefenronde • geen extra XP/coins"}</p>
+ <button id="again" class="primary" type="button">🔁 Speel Rescue opnieuw</button><button id="backHome" class="choice" style="width:100%;margin-top:12px" type="button">🏠 Naar Start</button></div>`);
+ $("again").addEventListener("click",startRescue);$("backHome").addEventListener("click",home);
+}
+$("navHome").addEventListener("click",home);
+$("navTraining").addEventListener("click",startTutorial);
+$("navChallenge").addEventListener("click",startRescue);
+stats();home();
+</script>
+</body></html>
