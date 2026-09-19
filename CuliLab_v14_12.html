@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CuliLab • v14.10 Wereld</title>
+<style>
+*{box-sizing:border-box}
+:root{--cream:#f7f0e3;--dark:#20150e;--gold:#f5a019;--orange:#ed7410;--green:#e7f6e6;--red:#fde5df;--ink:#29231e}
+body{margin:0;background:#17110d;font-family:Arial,sans-serif;color:var(--ink)}
+.app{max-width:430px;margin:auto;min-height:100vh;background:var(--cream);overflow:hidden}
+header{padding:17px 17px 13px;color:#fff;background:linear-gradient(135deg,#21160f,#54351f)}
+.brand{font-size:27px;font-weight:900}.tag{font-size:11px;letter-spacing:1.2px;opacity:.75;margin-top:2px}
+.stats{display:flex;gap:7px;margin-top:12px}.pill{font-size:13px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;padding:7px 9px;border-radius:16px}
+.progress{height:7px;background:#ffffff20;border-radius:8px;margin-top:11px;overflow:hidden}.progress i{display:block;height:100%;width:12%;background:#ffc94f;transition:.3s}
+.mode{margin:13px 14px 9px;padding:13px;border-radius:18px;background:#fff0b8;text-align:center}
+.mode b{display:block;font-size:12px;letter-spacing:1px;color:#90651e}.mode h2{margin:5px 0 3px;font-size:21px}.mode p{margin:0;font-size:13px;line-height:1.35}
+.stage{position:relative}.stage img{width:100%;display:block}
+.sauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;background:#d7ab58;opacity:.93;transition:.35s;box-shadow:inset 0 5px 12px #fff7}
+.sauce.milk{background:#fff0c9}.sauce.good{background:#fff5d9}.sauce.burnt{background:#59301e}.sauce.lumpy{background:radial-gradient(circle,#fff8dc 0 8%,#d3bd82 9% 17%,#f3e3b9 18% 100%)}.sauce.thin{background:#f8f0d7;opacity:.7}
+.flame{position:absolute;left:46%;bottom:4%;font-size:34px;opacity:0}.flame.on{opacity:1}
+.tip{position:absolute;left:12px;right:12px;bottom:10px;background:#21170fe8;color:#fff;padding:10px 12px;border-radius:14px;font-size:13px;line-height:1.3;box-shadow:0 5px 15px #0005}
+.tip:after{content:"";position:absolute;bottom:-8px;left:24%;border:8px solid transparent;border-top-color:#21170fe8;border-bottom:0}
+.panel{padding:12px 15px 24px}.goal{text-align:center;font-size:19px;font-weight:900;margin:5px 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.group{background:#fff;border-radius:16px;padding:11px;margin-bottom:9px;box-shadow:0 3px 10px #0001}
+.group h3{font-size:12px;text-transform:uppercase;letter-spacing:.8px;margin:0 0 8px;color:#8b765e}
+button{width:100%;border:2px solid #e0d3c1;background:#fff;border-radius:13px;padding:11px 7px;font-size:14px;font-weight:800;color:#60411d;margin:3px 0;box-shadow:0 2px 0 #d4c2ac}
+button.selected{background:#ffe49a;border-color:#3a2b20}button.primary{background:linear-gradient(135deg,#f5a019,#ed7410);border:0;color:#fff;font-size:16px;box-shadow:0 4px 0 #a64d08;padding:13px}
+.feedback{padding:12px;border-radius:14px;text-align:center;background:#efebe5;line-height:1.35;margin-top:9px}.success{background:var(--green)}.error{background:var(--red)}
+.hidden{display:none!important}.stars{font-size:29px;letter-spacing:4px}.result{text-align:center;background:#fff0b8;border-radius:18px;padding:15px;margin-top:10px}
+.small{font-size:12px;color:#786b5d}.attempt{font-size:12px;font-weight:900;text-align:center;color:#9b650f;margin:7px}
+.choiceHint{animation:pulse 1s infinite}@keyframes pulse{50%{transform:scale(1.03);box-shadow:0 0 0 4px #ffc94f55}}
+
+.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 12px;background:#2a1b12;position:sticky;top:0;z-index:20}
+.nav button{margin:0;padding:9px 3px;background:#ffffff12;border:1px solid #ffffff25;box-shadow:none;color:#fff;font-size:12px}
+.nav button.active{background:#f5a019;border-color:#f5a019}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+
+.homecards{display:grid;gap:10px;margin-top:12px;text-align:left}
+.homecard{border:1px solid #ead8bd;background:#fff;border-radius:17px;padding:14px;box-shadow:0 3px 10px #0001}
+.homecard b{display:block;font-size:17px;margin-bottom:4px;color:#382719}
+.homecard span{font-size:13px;line-height:1.35;color:#756454}
+.homecard button{margin-top:10px}
+.badge{display:inline-block;background:#fff0b8;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;margin-top:5px}
+
+.toolgame{background:#fff;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 3px 10px #0001}
+.toolrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.toolchoice{min-height:105px;font-size:42px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.toolchoice span{font-size:13px;margin-top:6px}
+.lesson{font-size:13px;line-height:1.4;background:#fff7dd;border-radius:13px;padding:10px;margin:9px 0}
+
+/* v12 clean-build additions */
+#v12app{max-width:520px;margin:0 auto;background:#fbf4e7;min-height:100vh}
+.v12head{background:linear-gradient(135deg,#3a2116,#6b3b1f);color:#fff;padding:20px 18px 14px}
+.v12brand{font-size:29px;font-weight:800}.v12sub{font-size:11px;letter-spacing:1.4px;opacity:.8}
+.stats{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.pill{background:#ffffff18;border:1px solid #ffffff20;border-radius:13px;padding:9px 12px;font-weight:700}
+.bar{height:7px;background:#ffffff25;border-radius:8px;margin-top:14px;overflow:hidden}.bar i{display:block;height:100%;background:#ffc43d;width:25%}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;background:#2a1b14;padding:10px 12px;position:sticky;top:0;z-index:10}
+.nav button,.choice,.primary,.card button{border:0;border-radius:13px;padding:13px;font-weight:800;cursor:pointer}
+.nav button{background:#3a2921;color:#fff;border:1px solid #ffffff20}.nav button.active{background:#ff9d12}
+main{padding:14px}.hero{background:#ffefad;border-radius:17px;padding:16px;text-align:center;margin-bottom:12px}.hero small{font-weight:800;letter-spacing:1px;color:#8c5b16}.hero h2{margin:6px 0}
+.pan{width:100%;display:block;border-radius:15px;margin:10px 0 16px}
+.card{background:#fff;border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 2px 8px #00000010}
+.card h3{margin:0 0 8px}.card p{margin:6px 0 12px;color:#6b584b}
+.card button{width:100%;background:#fff;border:2px solid #dfcfbb;color:#5a381d}
+.group{background:#fff;border-radius:17px;padding:13px;margin:10px 0}.label{font-size:12px;font-weight:800;letter-spacing:1px;color:#8b735f;margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.choice{background:#fff;border:2px solid #dfcfbb;color:#53391f;min-height:50px}.choice.selected{background:#ffe39a;border-color:#3e2b20}
+.toolChoice{min-height:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;transition:.18s}
+.toolChoice img{width:115px;height:115px;object-fit:contain}
+.toolChoice.chosen{background:#ffe39a;border-color:#3e2b20;transform:scale(.98)}
+.toolChoice.correct{background:#dff4e3;border-color:#4d9a5b}
+.toolChoice.wrong,.choice.wrong{background:#ffe1dc;border-color:#c85a49}
+.toolChoice.correct,.choice.correct{background:#dff4e3;border-color:#4d9a5b}
+.cookstage{position:relative;margin:10px 0 16px;border-radius:15px;overflow:hidden}
+.cookstage .pan{margin:0}
+.panSauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;background:transparent;opacity:0;transition:.3s;box-shadow:inset 0 5px 12px #fff8}
+.panSauce.show{opacity:.92}
+.panSauce.milk{background:#fff0c9}
+.panSauce.warming{background:#f1d99d}
+.panSauce.good{background:#fff4d4}
+.panSauce.lumpy{background:radial-gradient(circle at 35% 35%,#fff9e8 0 7%,#cdb77d 8% 14%,#efe0b7 15% 100%)}
+.panSauce.burnt{background:#5b321f}
+.panSauce.thin{background:#f8f0d7;opacity:.72}
+.panSauce.thick{background:radial-gradient(ellipse at 50% 45%,#efd995 0 42%,#d0a94d 70%,#a77b2d 100%);transform:scale(.84,.68);box-shadow:inset 0 9px 16px #fff7,0 5px 0 #9a702a99,0 0 0 4px #c99c3f99}
+.panSauce.thick:after{content:"";position:absolute;left:7%;right:7%;bottom:-18%;height:42%;border-radius:50%;background:#c89d45;opacity:.8;filter:blur(1px)}
+.panSauce.scorch{background:radial-gradient(ellipse at 50% 78%,#4a2418 0 18%,#7c3e22 19% 29%,#bb7540 30% 39%,#e1c47f 40% 100%);box-shadow:inset 0 -8px 13px #5b2b1faa,0 0 14px #ff9d3b99;animation:heatPulse .85s ease-in-out infinite alternate}
+.panSauce.scorch:after{content:"♨";position:absolute;left:50%;top:-48%;transform:translateX(-50%);font-size:25px;color:#7b321e;text-shadow:0 -8px 0 #b85c2c88,0 -16px 0 #e38b3c55;animation:steamRise 1.1s ease-in-out infinite}
+.panSauce.rescued{animation:rescuePop .55s ease-out}
+@keyframes heatPulse{from{filter:saturate(1)}to{filter:saturate(1.35) brightness(.92)}}
+@keyframes steamRise{from{opacity:.45;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,-5px)}}
+@keyframes rescuePop{0%{transform:scale(.86);filter:brightness(1.25)}100%{transform:scale(1);filter:brightness(1)}}
+.panSauce.rescued{background:#fff4d4;box-shadow:inset 0 5px 12px #fff8,0 0 14px #ffe29a}
+.panSauce.lumpy:after{content:"";position:absolute;inset:18% 15%;border-radius:50%;background:radial-gradient(circle at 20% 35%,#fff 0 4%,transparent 5%),radial-gradient(circle at 55% 25%,#fff 0 5%,transparent 6%),radial-gradient(circle at 70% 60%,#fff 0 4%,transparent 5%),radial-gradient(circle at 35% 70%,#fff 0 5%,transparent 6%)}
+.panStatus{position:absolute;left:10px;right:10px;bottom:10px;background:#21170fe8;color:#fff;padding:9px 11px;border-radius:13px;text-align:center;font-size:13px}
+
+.primary{width:100%;background:#ff8e0a;color:#fff;font-size:17px;margin-top:12px;box-shadow:0 4px 0 #b85c00}
+.feedback{padding:13px;border-radius:14px;margin-top:12px;text-align:center;background:#f0ede7}.good{background:#e2f5e5}.bad{background:#ffe5df}
+.result{background:#ffefad;border-radius:17px;padding:18px;text-align:center;margin-top:12px}.stars{font-size:30px}
+.hidden{display:none!important}.muted{color:#765f4e;font-size:13px}.center{text-align:center}
+
+.labgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.element{background:#fff;border:2px solid #e2d2bd;border-radius:16px;padding:14px 8px;text-align:center;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:800}.element .emoji{font-size:38px;margin-bottom:6px}.element.selected{background:#ffe39a;border-color:#ff9d12;transform:scale(.98)}.element.locked{opacity:.42;filter:grayscale(1)}.labbench{background:#2f2119;color:#fff;border-radius:18px;padding:16px;text-align:center;margin:12px 0}.slots{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;margin:12px 0}.slot{background:#fff2;border:2px dashed #ffffff66;border-radius:14px;min-height:82px;display:flex;align-items:center;justify-content:center;padding:8px;font-weight:800}.discovery{background:#e2f5e5;border:2px solid #70aa79;border-radius:17px;padding:16px;text-align:center;margin-top:12px}.newbadge{display:inline-block;background:#ff9d12;color:#fff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900}.collection{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-top:9px}.chip{background:#fff;border:1px solid #e0cfb8;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800}.dish{min-height:112px}.dish .emoji{font-size:38px}.applyIntro{background:#fff4d7;border:2px solid #f1bf5c;border-radius:16px;padding:13px;text-align:center;margin:12px 0}
+
+/* v14 Tool Lab */
+.toolhub{background:#fff;border-radius:18px;padding:15px;margin:12px 0;box-shadow:0 3px 10px #00000010}
+.toolcards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.toolcard{border:2px solid #e2d2bd;background:#fff;border-radius:16px;padding:14px 8px;min-height:112px;text-align:center;font-weight:800}
+.toolcard .big{font-size:38px;display:block;margin-bottom:5px}
+.toolcard.locked{opacity:.45;filter:grayscale(1)}
+.measureCup{height:235px;width:150px;margin:14px auto;position:relative;border:5px solid #b9c7cf;border-top:2px solid #dbe5ea;border-radius:8px 8px 22px 22px;background:linear-gradient(to top,#dff5ff 0 50%,#ffffff 50% 100%);overflow:hidden}
+.measureCup:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(to top,transparent 0 23px,#72818a 24px 25px);opacity:.55}
+.measureLabel{position:absolute;right:8px;z-index:2;font-size:12px;font-weight:900;color:#4b5960}
+.convgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.convbtn{border:2px solid #e2d2bd;background:#fff;border-radius:15px;padding:14px;font-weight:900;font-size:16px}
+
+
+.nav{gap:6px}
+.nav button{padding:9px 4px;font-size:16px;min-width:0;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav button span{font-size:10px;font-weight:800}
+.moremenu{position:fixed;inset:0;background:#0008;z-index:99;display:flex;align-items:flex-end;justify-content:center}
+.morepanel{width:min(430px,100%);background:#fffaf0;border-radius:24px 24px 0 0;padding:16px 16px 24px;box-shadow:0 -10px 35px #0005}
+.morehead{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.morehead h3{margin:0;font-size:20px}
+.moreclose{border:0;background:#f1e8dc;border-radius:50%;width:36px;height:36px;font-size:18px}
+.moregrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.moreitem{border:1px solid #dfcfbb;background:white;border-radius:16px;padding:15px 10px;text-align:center;font-weight:850;font-size:14px;box-shadow:0 2px 0 #dcc8ad}
+.moreitem .mi{display:block;font-size:28px;margin-bottom:5px}.moreitem small{display:block;color:#817262;margin-top:4px;font-weight:600}
+.dashboardTool{margin-top:12px;border:1px solid #e1cda9;background:linear-gradient(135deg,#fff7d9,#fff);border-radius:17px;padding:14px}
+.dashboardTool h3{margin:0 0 5px}.dashboardTool p{margin:0 0 10px;font-size:13px;color:#6d6258}
+
+
+.nav{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:6px!important}
+.nav button{min-width:0!important;padding:8px 2px!important;font-size:17px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important}
+.nav button span{font-size:10px!important;line-height:1.1!important;font-weight:800!important}
+
+/* v14.10 — CuliLab Wereld */
+.worldWrap{padding:14px 12px 28px;background:linear-gradient(#f8f0df,#fffaf0)}
+.worldIntro{text-align:center;padding:8px 8px 12px}
+.worldIntro h2{margin:4px 0 3px;font-size:24px}.worldIntro p{margin:0;color:#75685b;font-size:13px}
+.worldMap{position:relative;max-width:430px;margin:0 auto;padding:10px 6px 22px}
+.worldPath{position:absolute;left:50%;top:35px;bottom:45px;width:8px;transform:translateX(-50%);border-radius:20px;background:repeating-linear-gradient(to bottom,#d7b77f 0 14px,#f4e3c4 14px 26px);opacity:.8}
+.worldStop{position:relative;display:flex;margin:0 0 22px;z-index:1}
+.worldStop.left{justify-content:flex-start}.worldStop.right{justify-content:flex-end}
+.worldNode{width:76%;min-height:94px;border:2px solid #dec59d;background:#fff;border-radius:22px;padding:13px 14px;text-align:left;box-shadow:0 4px 0 #e7d7bd;font:inherit;color:#4f3822}
+.worldNode .worldIcon{font-size:30px;display:block;margin-bottom:4px}
+.worldNode b{display:block;font-size:16px}.worldNode small{display:block;color:#7a6c5e;margin-top:3px;line-height:1.25}
+.worldNode.ready{border-color:#d99b3d;background:linear-gradient(135deg,#fff3c7,#fff)}
+.worldNode.done{border-color:#94c59c;background:#f2fbf2}
+.worldNode.locked{opacity:.55;filter:grayscale(.35)}
+.worldNode.locked::after{content:"🔒";float:right;margin-top:-30px}
+.worldYou{position:relative;z-index:2;width:max-content;margin:0 auto 18px;padding:7px 12px;border-radius:999px;background:#4d2f1f;color:white;font-size:12px;font-weight:800}
+.worldHint{text-align:center;font-size:12px;color:#796b5e;margin-top:4px}
+
+
+.marketGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.marketCard{border:2px solid #e2cfad;background:#fff;border-radius:18px;padding:16px 10px;text-align:center;min-height:104px;font:inherit;color:#523b27;box-shadow:0 3px 0 #eadcc5}
+.marketCard.good{background:#e5f5e7;border-color:#8fc79a}.marketCard.bad{background:#fff0ec;border-color:#df9a8a}
+.marketProgress{font-size:12px;font-weight:800;color:#8b6b3d;text-align:center;margin:6px 0 12px}
+.marketTag{display:inline-block;padding:5px 9px;border-radius:999px;background:#fff1b9;color:#77501f;font-size:11px;font-weight:900;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="v12app">
+  <header class="v12head">
+    <div class="v12brand">🧪 CuliLab</div>
+    <div class="v12sub">CHEF ACADEMY • LEER → ONTDEK → BEHEERS</div>
+    <div class="stats">
+      <span class="pill">👨‍🍳 Lv. <b id="level">2</b></span>
+      <span class="pill">⭐ <b id="xp">0</b> XP</span>
+      <span class="pill">🪙 <b id="coins">0</b></span>
+      <span class="pill">🏅 <b id="medals">0</b></span>
+    </div>
+    <div class="bar"><i id="progress"></i></div>
+  </header>
+
+  <nav class="nav">
+  <button id="navHome" type="button">🏠<span>Start</span></button>
+  <button id="navTraining" type="button">🎓<span>Leren</span></button>
+  <button id="navChallenge" type="button">🔥<span>Challenges</span></button>
+  <button id="navProgress" type="button">🏆<span>Voortgang</span></button>
+  <button id="navMore" type="button">☰<span>Meer</span></button>
+</nav>
+<button id="navLab" type="button" hidden aria-hidden="true"></button>
+  <main id="screen"></main>
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+function shuffled(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+const state = {
+  xp:0, coins:0, medals:0,
+  tutorialDone:false, toolsDone:false, freeDone:false, rescueDone:false,
+  tutorialStep:0, toolQ:0, toolMistakes:0, rescueQ:0, rescueMistakes:0,
+  picks:{ingredient:null,temp:null,tech:null},
+  discovered:["bechamel"], labPick:null, mornayDone:false, soubiseDone:false, mustardDone:false, applyDone:false, bechamelApply:[], mornayApply:[], mustardApply:[], tasteFound:{}, doseDone:{}, doseStep:{}, measureQ:0, measureMistakes:0, scaleQ:0, scaleMistakes:0
+};
+const pan = "culilab-pan.png";
+const garde = "culilab-garde.png?v=1200";
+const spatel = "culilab-spatel.png?v=1200";
+
+function stats(){
+  $("xp").textContent=state.xp; $("coins").textContent=state.coins; $("medals").textContent=state.medals;
+  const done=[state.tutorialDone,state.toolsDone,state.freeDone,state.rescueDone].filter(Boolean).length;
+  $("progress").style.width=(10+done*22.5)+"%";
+}
+function active(id){
+  ["navHome","navTraining","navChallenge","navLab"].forEach(x=>$(x).classList.toggle("active",x===id));
+}
+function reward(key,xp,coins,medal=0){
+  const k="_reward_"+key;
+  if(state[k]) return false;
+  state[k]=true; state.xp+=xp; state.coins+=coins; state.medals+=medal; stats(); return true;
+}
+function img(){return `<img class="pan" src="${pan}" alt="Pan">`;}
+function visualPan(kind="",status=""){
+ return `<div class="cookstage"><img class="pan" src="${pan}" alt="Pan"><div id="panSauce" class="panSauce ${kind?"show "+kind:""}"></div>${status?`<div id="panStatus" class="panStatus">${status}</div>`:""}</div>`;
+}
+function rescueVisual(i){
+ const visuals=[
+  ["lumpy","⚪ Kijk goed: de saus heeft zichtbare klontjes."],
+  ["thick","🥣 De saus is zwaar en veel te dik geworden."],
+  ["scorch","🔥 Let op: de saus begint onderin donker aan te zetten."]
+ ];
+ return visualPan(...visuals[i]);
+}
+function toolVisual(i){
+ const visuals=[
+  ["lumpy","⚪ Kleine klontjes zijn zichtbaar in de béchamel."],
+  ["thick","🥣 Dikke saus blijft aan bodem en randen hangen."],
+  ["milk","🥛 Melk en roux moeten nog glad worden gemengd."]
+ ];
+ return visualPan(...visuals[i]);
+}
+function rescueRecovered(text){
+ const sauce=$("panSauce"), status=$("panStatus");
+ if(sauce){sauce.className="panSauce show rescued";}
+ if(status){status.textContent="✨ "+text;}
+}
+function cookingPan(){
+ return `<div class="cookstage"><img class="pan" src="${pan}" alt="Pan waarin de saus wordt bereid"><div id="panSauce" class="panSauce"></div><div id="panStatus" class="panStatus">De pan is klaar. Maak je keuzes.</div></div>`;
+}
+function updatePan(){
+ const s=$("panSauce"), t=$("panStatus");
+ if(!s||!t) return;
+ s.className="panSauce";
+ const p=state.picks;
+ if(!p.ingredient&&!p.temp&&!p.tech){t.textContent="De pan is klaar. Maak je keuzes.";return;}
+ if(p.ingredient==="milk"){s.classList.add("show","milk");t.textContent="🥛 Melk toegevoegd — de vloeistof zit nu in de pan.";}
+ else if(p.ingredient==="stock"){s.classList.add("show","thin");t.textContent="🍲 Bouillon toegevoegd.";}
+ if(p.temp==="mid"){s.classList.add("show","warming");t.textContent="🔥 Middel vuur — de saus warmt gecontroleerd op.";}
+ if(p.temp==="high"){s.classList.add("show","burnt");t.textContent="🔥 Hoog vuur — pas op, de saus kan aanzetten.";}
+ if(p.temp==="low"){t.textContent="🔥 Laag vuur — de saus warmt langzaam op.";}
+ if(p.tech==="whisk"){t.textContent="🥄 Je klopt met de garde — het mengsel wordt gladder.";}
+ if(p.tech==="none"){s.classList.add("show","lumpy");t.textContent="✋ Niet mengen — er ontstaan klontjes.";}
+}
+function showPanResult(kind,text){
+ const s=$("panSauce"), t=$("panStatus");
+ if(!s||!t) return;
+ s.className="panSauce show "+kind;
+ t.textContent=text;
+}
+function setScreen(html){$("screen").innerHTML=html; window.scrollTo({top:0,behavior:"auto"});}
+function home(){
+  active("navHome"); stats();
+  const sauceReady = state.freeDone;
+  const sauceDone = state.mornayDone || state.soubiseDone || state.mustardDone;
+  setScreen(`<div class="worldWrap">
+    <div class="worldIntro">
+      <h2>🗺️ CuliLab Wereld</h2>
+      <p>Ontdek de keuken. Elke vaardigheid opent een nieuw pad.</p>
+    </div>
+    <div class="worldMap">
+      <div class="worldPath"></div>
+      <div class="worldYou">👨‍🍳 JIJ BENT HIER</div>
+
+      <div class="worldStop left">
+        <button id="worldAcademy" class="worldNode ready ${state.tutorialDone?"done":""}" type="button">
+          <span class="worldIcon">🏫</span><b>Chef Academy</b>
+          <small>${state.tutorialDone?"Training voltooid • opnieuw oefenen kan":"Begin hier • leer je eerste basissaus"}</small>
+        </button>
+      </div>
+
+      <div class="worldStop right">
+        <button id="worldTools" class="worldNode ${state.toolsDone?"done":"ready"}" type="button">
+          <span class="worldIcon">🧰</span><b>Tool Workshop</b>
+          <small>Gereedschap • meten • wegen</small>
+        </button>
+      </div>
+
+      <div class="worldStop left">
+        <button id="worldService" class="worldNode ${state.tutorialDone?"ready":"locked"}" type="button">
+          <span class="worldIcon">🔥</span><b>Servicekeuken</b>
+          <small>${state.tutorialDone?"Red sauzen onder druk":"Voltooi eerst je eerste training"}</small>
+        </button>
+      </div>
+
+      <div class="worldStop right">
+        <button id="worldSauce" class="worldNode ${sauceReady?"ready "+(sauceDone?"done":""):"locked"}" type="button">
+          <span class="worldIcon">🥣</span><b>Sausatelier</b>
+          <small>${sauceReady?"Combineer en ontdek nieuwe sauzen":"Beheers eerst zelfstandig béchamel"}</small>
+        </button>
+      </div>
+
+      <div class="worldStop left">
+        <button id="worldMarket" class="worldNode ${sauceDone?"ready":"locked"}" type="button" ${sauceDone?"":"disabled"}>
+          <span class="worldIcon">🥕</span><b>Ingrediëntenmarkt</b>
+          <small>${sauceDone?"Ontdek wat producten doen in een bereiding":"Ontdek eerst een nieuwe saus"}</small>
+        </button>
+      </div>
+
+      <div class="worldStop right">
+        <button class="worldNode locked" type="button" disabled>
+          <span class="worldIcon">🍽️</span><b>Restaurant</b>
+          <small>Binnenkort • combineer alles tijdens de service</small>
+        </button>
+      </div>
+    </div>
+    <div class="worldHint">Nieuwe gebieden verschijnen terwijl jouw culinaire wereld groeit.</div>
+  </div>`);
+
+  $("worldAcademy").addEventListener("click", startTutorial);
+  $("worldTools").addEventListener("click", startToolLab);
+  $("worldService").addEventListener("click", ()=>state.tutorialDone?startRescue():startTutorial());
+  $("worldSauce").addEventListener("click", ()=>state.freeDone?startLab():startFree());
+  if($("worldMarket")) $("worldMarket").addEventListener("click", startIngredientMarket);
+}
+
+
+const marketRounds=[
+ {icon:"🧀",name:"Kaas",q:"Wat kan kaas toevoegen aan een saus?",opts:["Smaak, zoutigheid en romigheid","Alleen kleur","Alleen extra vloeistof","Altijd zuur"],ok:0,why:"Kaas kan smaak, zoutigheid en romigheid toevoegen. De precieze werking hangt af van de kaassoort."},
+ {icon:"🧅",name:"Ui",q:"Wat kan zacht gegaarde ui vooral toevoegen?",opts:["Alleen bitterheid","Aroma en zoetere tonen","Alleen vocht","Alleen kleur"],ok:1,why:"Zacht gegaarde ui bouwt aroma op en kan zoetere tonen ontwikkelen."},
+ {icon:"🍲",name:"Bouillon",q:"Wat is bouillon vooral?",opts:["Een droge specerij","Een vloeibare smaakbasis","Een bindmiddel","Een vetstof"],ok:1,why:"Bouillon is een vloeibare smaakbasis: hij brengt vocht én smaak."},
+ {icon:"🟡",name:"Mosterd",q:"Hoe gebruik je mosterd meestal in een saus?",opts:["Gedoseerd als smaakmaker en daarna proeven","Als vervanging voor alle vloeistof","Om elke saus dik te maken","Alleen als garnering"],ok:0,why:"Mosterd is een krachtige smaakmaker. Doseer, proef en stuur daarna bij."}
+];
+let marketIndex=0,marketMistakes=0;
+function startIngredientMarket(){active("navHome");marketIndex=0;marketMistakes=0;renderIngredientMarket();}
+function renderIngredientMarket(){
+ const r=marketRounds[marketIndex];
+ setScreen(`<div class="worldWrap"><div class="worldIntro"><div class="marketTag">🥕 INGREDIËNTENMARKT</div><h2>Wat doet dit product?</h2><p>Herken niet alleen het ingrediënt, maar ook zijn functie.</p></div>
+ <div class="card" style="text-align:center"><div style="font-size:58px">${r.icon}</div><h2 style="margin:4px 0">${r.name}</h2><div class="marketProgress">${marketIndex+1} / ${marketRounds.length}</div><p style="font-weight:800">${r.q}</p><div id="marketAnswers" class="marketGrid"></div><div id="marketFeedback" class="feedback" style="display:none;margin-top:12px"></div></div>
+ <button id="marketBack" onclick="home()" class="choice" style="width:100%;margin-top:12px" type="button">← Terug naar CuliLab Wereld</button></div>`);
+ const box=$("marketAnswers");
+ r.opts.forEach((t,i)=>{const b=document.createElement("button");b.type="button";b.className="marketCard";b.textContent=t;b.onclick=()=>answerMarket(i,b);box.appendChild(b);});
+}
+function answerMarket(i,b){
+ const r=marketRounds[marketIndex],fb=$("marketFeedback");
+ if(i!==r.ok){marketMistakes++;b.classList.add("bad");fb.style.display="block";fb.className="feedback bad";fb.textContent="Nog niet. Denk aan de functie van het product in de bereiding.";setTimeout(()=>b.classList.remove("bad"),900);return;}
+ b.classList.add("good");[...$("marketAnswers").children].forEach(x=>x.disabled=true);fb.style.display="block";fb.className="feedback good";fb.textContent="✓ "+r.why;
+ setTimeout(()=>{marketIndex++;marketIndex<marketRounds.length?renderIngredientMarket():finishIngredientMarket();},1700);
+}
+function finishIngredientMarket(){
+ const stars=Math.max(1,3-Math.floor(marketMistakes/2)),prize=stars===3?[90,30,1]:stars===2?[70,22,0]:[50,15,0],got=reward("ingredientMarket",...prize);
+ setScreen(`<div class="worldWrap"><div class="worldIntro"><div class="marketTag">🥕 INGREDIËNTENMARKT</div><h2>Marktronde voltooid</h2><p>Je herkent nu ook wat deze producten in een bereiding kunnen doen.</p></div><div class="card" style="text-align:center"><div style="font-size:58px">🧺</div><h2>${"⭐".repeat(stars)}</h2><p>Fouten: ${marketMistakes}</p><b>${got?`+${prize[0]} XP • +${prize[1]} coins${prize[2]?` • 🥇 +${prize[2]}`:""}`:"Oefenronde — geen extra beloning."}</b></div><button id="marketWorld" onclick="home()" class="primary" style="width:100%;margin-top:12px" type="button">🗺️ Terug naar CuliLab Wereld</button></div>`);
+}
+
+function startTutorial(){
+  active("navTraining"); state.tutorialStep=0; state.picks={ingredient:null,temp:null,tech:null}; renderTutorial();
+}
+function renderTutorial(){
+  const steps=[
+    {title:"Stap 1 van 3 • VLOEISTOF",msg:"🥛 <b>Melk = vloeistof.</b><br>De melk maakt van de roux een saus. Voeg de vloeistof toe en meng goed.",group:"ingredient"},
+    {title:"Stap 2 van 3 • WARMTE",msg:"🔥 <b>Middel = gecontroleerde warmte.</b><br>De saus heeft warmte nodig om te binden. Te hoog vuur vergroot de kans op aanzetten.",group:"temp"},
+    {title:"Stap 3 van 3 • BEWEGING",msg:"🥄 <b>Garde = beweging.</b><br>Door te kloppen meng je melk en roux gelijkmatig en help je klontjes voorkomen.",group:"tech"}
+  ];
+  const d=steps[Math.min(state.tutorialStep,2)];
+  setScreen(`<div class="hero"><small>RONDE 1 • CHEF-TUTORIAL</small><h2>Béchamel leren</h2><div>De chef helpt je één keer. Daarna sta je er zelf voor.</div></div>
+  ${cookingPan()}<div class="feedback">${d.msg}</div><h2 class="center">Maak een gladde béchamel</h2><p class="center muted">Tutorial • ${d.title}</p>
+  ${cookGroups(true)}<button id="prepare" class="primary" type="button">🔍 Bereid saus</button><div id="out"></div>`);
+  wireCook(true);
+}
+function cookGroups(tutorial){
+ const ing=shuffled([["milk","🥛 Melk"],["stock","🍲 Bouillon"]]);
+ const temps=shuffled([["low","🔥 Laag"],["mid","🔥🔥 Middel"],["high","🔥🔥🔥 Hoog"]]);
+ const tech=shuffled([["whisk","🥄 Kloppen"],["none","✋ Niet mengen"]]);
+ const buttons=(kind,items)=>items.map(([v,label])=>`<button class="choice" data-kind="${kind}" data-val="${v}" type="button">${label}</button>`).join("");
+ return `<div class="group"><div class="label">INGREDIËNT</div><div class="grid2">${buttons("ingredient",ing)}</div></div>
+ <div class="group"><div class="label">TEMPERATUUR</div><div class="grid2">${buttons("temp",temps)}</div></div>
+ <div class="group"><div class="label">TECHNIEK</div><div class="grid2">${buttons("tech",tech)}</div></div>`;
+}
+function wireCook(tutorial){
+  document.querySelectorAll(".choice").forEach(b=>b.addEventListener("click",()=>{
+    const kind=b.dataset.kind,val=b.dataset.val;
+    if(tutorial){
+      const expected=[["ingredient","milk"],["temp","mid"],["tech","whisk"]][state.tutorialStep];
+      if(kind!==expected[0] || val!==expected[1]) return;
+      state.picks[kind]=val; document.querySelectorAll(`[data-kind="${kind}"]`).forEach(x=>x.classList.remove("selected")); b.classList.add("selected");
+      updatePan(); if(state.tutorialStep<2){state.tutorialStep++; setTimeout(renderTutorial,420);}
+    } else {
+      state.picks[kind]=val; document.querySelectorAll(`[data-kind="${kind}"]`).forEach(x=>x.classList.remove("selected")); b.classList.add("selected"); updatePan();
+    }
+  }));
+  $("prepare").addEventListener("click",()=> tutorial ? finishTutorial() : checkFree());
+}
+function finishTutorial(){
+  if(!(state.picks.ingredient==="milk"&&state.picks.temp==="mid"&&state.picks.tech==="whisk")){
+    $("out").innerHTML=`<div class="feedback">Volg eerst de drie aanwijzingen van de chef.</div>`; return;
+  }
+  state.tutorialDone=true; const got=reward("tutorial",50,10); stats();
+  $("out").innerHTML=`<div class="feedback good"><b>✓ Het kookprincipe:</b><br>🥛 vloeistof + 🔥 gecontroleerde warmte + 🥄 beweging = een gladde béchamel.</div>
+  <div class="result"><div class="stars">⭐⭐⭐</div><h2>Tutorial voltooid</h2><p>${got?"+50 XP • +10 coins":"Oefenronde • beloning al ontvangen"}<br><b>Nu verdwijnen de aanwijzingen.</b></p>
+  <button id="nextTools" class="primary" type="button">🥄 Naar Garde of spatel</button></div>`;
+  $("nextTools").addEventListener("click",startTools);
+}
+const toolQs=[
+ {q:"Je béchamelsaus heeft kleine klontjes. Wat pak je?",a:"whisk",ok:"Juist. Met een garde klop je kleine klontjes uit de saus."},
+ {q:"Een dikke saus moet je goed over de bodem en langs de randen bewegen. Wat pak je?",a:"spatula",ok:"Juist. Een spatel helpt je langs bodem en randen te schrapen."},
+ {q:"Je voegt melk aan de roux toe en wilt glad mengen terwijl de saus bindt. Wat pak je?",a:"whisk",ok:"Juist. De garde helpt de vloeistof gelijkmatig door de roux te mengen."}
+];
+function startTools(){active("navTraining");state.toolQ=0;state.toolMistakes=0;renderTool();}
+function renderTool(){
+ const d=toolQs[state.toolQ];
+ const tools=shuffled([
+   {id:"pickWhisk",v:"whisk",img:garde,name:"Garde"},
+   {id:"pickSpatula",v:"spatula",img:spatel,name:"Spatel"}
+ ]);
+ setScreen(`<div class="hero"><small>MINI-GAME • KEUKENTOOL</small><h2>Garde of spatel?</h2><div>Eerst herkennen. Daarna kiezen zonder hulp.</div></div>${toolVisual(state.toolQ)}
+ <h2 class="center">🥄 Kies het juiste gereedschap</h2><p class="center muted">Vraag ${state.toolQ+1} van ${toolQs.length}</p>
+ <div class="feedback"><b>${d.q}</b></div><div class="group"><div class="grid2">
+ ${tools.map(t=>`<button id="${t.id}" class="choice toolChoice" type="button"><img src="${t.img}" alt="${t.name}"><b>${t.name}</b></button>`).join("")}
+ </div></div><div id="toolOut" class="muted center">Kijk naar de situatie, niet alleen naar de naam.</div>`);
+ $("pickWhisk").addEventListener("click",()=>answerTool("whisk"));
+ $("pickSpatula").addEventListener("click",()=>answerTool("spatula"));
+}
+function answerTool(v){
+ const d=toolQs[state.toolQ];
+ const chosen=v==="whisk"?$("pickWhisk"):$("pickSpatula");
+ const other=v==="whisk"?$("pickSpatula"):$("pickWhisk");
+ chosen.classList.add("chosen");
+ chosen.disabled=true; other.disabled=true;
+ if(v!==d.a){
+   state.toolMistakes++;
+   chosen.classList.add("wrong");
+   $("toolOut").className="feedback bad";
+   $("toolOut").textContent="✕ Niet juist. Kijk naar wat je met de saus moet doen en probeer opnieuw.";
+   setTimeout(()=>{chosen.classList.remove("chosen","wrong");chosen.disabled=false;other.disabled=false;},2000);
+   return;
+ }
+ chosen.classList.add("correct");
+ $("toolOut").className="feedback good";
+ $("toolOut").textContent="✓ "+d.ok;
+ setTimeout(()=>{state.toolQ++; if(state.toolQ<toolQs.length) renderTool(); else finishTools();},2000);
+}
+function finishTools(){
+ state.toolsDone=true; const stars=Math.max(1,3-state.toolMistakes);
+ const toolPrize=stars===3?{xp:50,coins:10}:stars===2?{xp:40,coins:8}:{xp:30,coins:5};
+ const got=reward("tools",toolPrize.xp,toolPrize.coins);
+ setScreen(`<div class="hero"><small>MINI-GAME VOLTOOID</small><h2>Toolkennis</h2></div>${visualPan("good","✨ Gereedschap herkend — klaar om zelf te koken.")}
+ <div class="result"><div class="stars">${"⭐".repeat(stars)}</div><h2>Garde en spatel herkend</h2><p>${got?`+${toolPrize.xp} XP • +${toolPrize.coins} coins`:"Oefenronde • beloning al ontvangen"}</p>
+ <button id="nextFree" class="primary" type="button">👨‍🍳 Zelfstandig béchamel maken</button></div>`);
+ $("nextFree").addEventListener("click",startFree);
+}
+function startFree(){active("navTraining");state.picks={ingredient:null,temp:null,tech:null};
+ setScreen(`<div class="hero"><small>RONDE 2 • JIJ BENT DE CHEF</small><h2>Béchamel Challenge</h2><div>Geen aanwijzingen. Gebruik wat je hebt geleerd.</div></div>${cookingPan()}
+ <h2 class="center">Maak een gladde béchamel</h2><p class="center muted">Zelfstandig • poging</p>${cookGroups(false)}
+ <button id="prepare" class="primary" type="button">🔍 Bereid saus</button><div id="out"><div class="feedback">Feedback krijg je pas na je bereiding.</div></div>`);
+ wireCook(false);
+}
+function checkFree(){
+ const p=state.picks;
+ if(!p.ingredient||!p.temp||!p.tech){$("out").innerHTML='<div class="feedback bad">Maak eerst alle drie de keuzes.</div>';return;}
+ if(p.ingredient==="milk"&&p.temp==="mid"&&p.tech==="whisk"){
+   showPanResult("good","✨ Glad en romig — de béchamel is gelukt.");
+   state.freeDone=true;const got=reward("free",105,45,1);
+   $("out").innerHTML=`<div class="feedback good">🏆 Gelukt zonder aanwijzingen!</div><div class="result"><div class="stars">⭐⭐⭐</div><h2>Béchamel beheerst</h2><p>${got?"+105 XP • +45 coins":"Oefenronde • beloning al ontvangen"}</p><button id="nextLab" class="primary" type="button">🧪 Open Elementenlab</button><button id="nextRescue" class="choice" style="width:100%;margin-top:10px" type="button">🔥 Eerst Rescue spelen</button></div>`;
+   $("nextLab").addEventListener("click",startLab); $("nextRescue").addEventListener("click",startRescue);
+ } else {
+   let kind="lumpy", msg="De saus is nog niet goed.";
+   if(p.temp==="high"){kind="burnt";msg="🔥 De saus is te heet en begint aan te zetten.";}
+   else if(p.ingredient==="stock"){kind="thin";msg="💧 Dit is niet de juiste vloeistof voor deze béchamel.";}
+   else if(p.tech==="none"){kind="lumpy";msg="🥄 Zonder mengen ontstaan klontjes.";}
+   showPanResult(kind,msg);
+   $("out").innerHTML='<div class="feedback bad">'+msg+' Pas je keuzes aan en probeer opnieuw.</div>';
+ }
+}
+function startLab(){
+ active("navLab"); state.labPick=null; renderLab();
+}
+function renderLab(){
+ const hasM=state.discovered.includes("mornay");
+ const hasS=state.discovered.includes("soubise");
+ const hasMust=state.discovered.includes("mustardSauce");
+ // Na de eerste ontdekking verschijnen nieuwe elementen. Er is bewust geen genoemd doelrecept.
+ const elements=!hasM ? shuffled([
+   ["cheese","🧀","Kaas"],
+   ["tomato","🍅","Tomaat"],
+   ["lemon","🍋","Citroen"],
+   ["stock","🍲","Bouillon"]
+ ]) : shuffled([
+   ["onion","🧅","Uienpuree"],
+   ["mustard","🟡","Mosterd"],
+   ["tomato","🍅","Tomaat"],
+   ["lemon","🍋","Citroen"]
+ ]);
+ setScreen(`<div class="hero"><small>CULILAB • ELEMENTENLAB</small><h2>🧪 Combineer & ontdek</h2><div>Gebruik je béchamel als basis. Kies een element en ontdek zelf wat eruit ontstaat.</div></div>
+ <div class="labbench"><b>JOUW WERKBANK</b><div class="slots"><div class="slot">🥣 Béchamel</div><div style="font-size:28px">+</div><div id="labSlot" class="slot">Kies een element</div></div><button id="combine" class="primary" type="button" disabled>✨ Combineer</button></div>
+ <div class="feedback">🔬 <b>Experimenteer.</b> Nieuwe sauzen worden nooit vooraf verklapt. Sommige elementen leveren een ontdekking op, andere leren je iets over de basis.</div>
+ <div class="group"><div class="label">KIES 1 VAN DE 4 ELEMENTEN</div><div class="labgrid">${elements.map(e=>labElement(...e)).join("")}</div></div><div id="labOut"></div>`);
+ document.querySelectorAll(".element").forEach(b=>b.addEventListener("click",()=>pickLab(b.dataset.v,b.dataset.icon,b.dataset.name)));
+ $("combine").addEventListener("click",combineLab);
+}
+function labElement(v,icon,name){
+ return `<button class="element" data-v="${v}" data-icon="${icon}" data-name="${name}" type="button"><span class="emoji">${icon}</span>${name}</button>`;
+}
+function pickLab(v,icon,name){
+ state.labPick={v,icon,name}; document.querySelectorAll(".element").forEach(x=>x.classList.remove("selected"));
+ const b=[...document.querySelectorAll(".element")].find(x=>x.dataset.v===v); if(b)b.classList.add("selected");
+ $("labSlot").innerHTML=`${icon} ${name}`; $("combine").disabled=false; $("labOut").innerHTML='<div class="feedback">🤔 Wat verwacht je dat deze toevoeging met de béchamel doet?</div>';
+}
+function discoveryCard(icon,name,equation,explain,rewardKey,xp,coins,medal,first){
+ const got=first?reward(rewardKey,xp,coins,medal):false;
+ const sauceKey=name==="Mornaysaus"?"mornay":name==="Soubisesaus"?"soubise":name==="Mosterdsaus"?"mustard":"bechamel";
+ setScreen(`<div class="hero"><small>CULILAB • ONTDEKKING</small><h2>${first?"✨ Nieuwe ontdekking":"🔁 Opnieuw ontdekt"}</h2><div>Je combinatie heeft een saus opgeleverd.</div></div>
+ <div class="discovery" style="margin-top:14px;padding:22px 16px"><span class="newbadge">${first?"NIEUWE ONTDEKKING":"AL ONTDEKT"}</span><div style="font-size:60px;margin:12px">${icon}</div><h2 style="margin:4px 0 10px">${name}</h2><p style="font-size:17px">${equation}</p><p class="muted">${explain}</p><b style="display:block;margin:16px 0">${got?`+${xp} XP • +${coins} coins${medal?` • 🏅 +${medal}`:""}`:"Geen extra beloning bij herhalen"}</b></div>
+ <button id="discoverFurther" class="primary" type="button">🧑‍🍳 Ontdek ${name.replace("saus","")} verder →</button>
+ <button id="backAtelier" class="choice" style="width:100%;margin-top:10px" type="button">← Terug naar het Sausatelier</button>`);
+ $("discoverFurther").addEventListener("click",()=>showChefCard(sauceKey));
+ $("backAtelier").addEventListener("click",renderLab);
+}
+function combineLab(){
+ if(!state.labPick)return;
+ const p=state.labPick;
+ if(p.v==="cheese"){
+   const first=!state.mornayDone; state.mornayDone=true; if(!state.discovered.includes("mornay"))state.discovered.push("mornay");
+   discoveryCard("🧀","Mornaysaus","🥣 Béchamel + 🧀 kaas = <b>Mornaysaus</b>","Kaas smelt door de warme béchamel. Zo ontdek je een klassieke afleiding van béchamel.","mornay",80,25,1,first); return;
+ }
+ if(p.v==="onion"){
+   const first=!state.soubiseDone; state.soubiseDone=true; if(!state.discovered.includes("soubise"))state.discovered.push("soubise");
+   discoveryCard("🧅","Soubisesaus","🥣 Béchamel + 🧅 uienpuree = <b>Soubisesaus</b>","Een zachte uienpuree geeft de béchamel een uitgesproken uienkarakter. Dit is een klassieke béchamel-afleiding.","soubise",90,30,1,first); return;
+ }
+ if(p.v==="mustard"){
+   const first=!state.mustardDone; state.mustardDone=true; if(!state.discovered.includes("mustardSauce"))state.discovered.push("mustardSauce");
+   discoveryCard("🟡","Mosterdsaus","🥣 Béchamel + 🟡 mosterd = <b>mosterdsaus</b>","Mosterd geeft de romige basissaus pit en een herkenbare smaak. Je hebt een nieuwe sausvariant ontdekt.","mustard",90,30,1,first); return;
+ }
+ const feedback={
+   tomato:["🍅 Interessant experiment","Tomaat verandert kleur, zuurgraad en smaak van je basis. Je hebt met deze combinatie nog geen nieuwe ontdekking aan je verzameling toegevoegd."],
+   lemon:["🍋 Voorzichtig met zuur","Citroen brengt zuur in een saus op melkbasis. Denk na over balans en wat zuur met zuivel kan doen. Hier ontstaat nog geen nieuwe ontdekking."],
+   stock:["🍲 Andere richting","Bouillon verdunt de béchamel en brengt een andere smaakbasis mee. Deze combinatie voegt hier nog geen nieuwe ontdekking toe."]
+ };
+ const [head,body]=feedback[p.v]||["🧪 Interessant","Deze combinatie levert hier nog geen nieuwe ontdekking op."];
+ $("labOut").innerHTML=`<div class="feedback bad"><b>${head}</b><br>${body}<br><br><b>Geen strafpunten — experimenteren hoort bij het Lab.</b></div>`;
+}
+
+
+function showChefCard(sauce){
+ active("navLab");
+ const cards={
+  bechamel:{
+   icon:"🥣",name:"Béchamel",tag:"KLASSIEKE BASISSAUS",
+   text:"Een klassieke witte saus uit de Franse keuken, opgebouwd uit een roux en melk. De zachte, romige basis maakt béchamel geschikt om verder op te bouwen.",
+   tip:"Chef-tip: onthoud vooral de basis — roux + melk. Vanuit die basis kun je sauzen én gerechten verder ontdekken.",
+   next:()=>startTasteLab("bechamel")
+  },
+  mornay:{
+   icon:"🧀",name:"Mornaysaus",tag:"KLASSIEKE KAASSAUS",
+   text:"Mornay is een klassieke afleiding van béchamel waaraan kaas wordt toegevoegd. De saus wordt voller, hartiger en uitgesprokener van smaak.",
+   tip:"Chef-tip: kaas brengt al zout en umami mee. Proef dus vóór je extra kruidt.",
+   next:()=>startTasteLab("mornay")
+  },
+  soubise:{
+   icon:"🧅",name:"Soubisesaus",tag:"KLASSIEKE UIENSAUS",
+   text:"Soubise is een klassieke Franse saus waarin ui centraal staat. In deze CuliLab-route bouw je haar op vanuit béchamel met zachte uienpuree.",
+   tip:"Chef-tip: let straks op het zachte, romige uienkarakter wanneer je gaat experimenteren met gerechten.",
+   next:()=>startTasteLab("soubise")
+  },
+  mustard:{
+   icon:"🟡",name:"Mosterdsaus",tag:"ROMIGE MOSTERDVARIANT",
+   text:"In deze CuliLab-route ontstaat mosterdsaus door mosterd aan béchamel toe te voegen. De romige basis blijft herkenbaar, terwijl mosterd voor pit en scherpte zorgt.",
+   tip:"Chef-tip: mosterd is al krachtig van smaak. Breng de saus daarom stap voor stap verder op smaak en proef tussendoor.",
+   next:()=>startTasteLab("mustard")
+  }
+ };
+ const c=cards[sauce]; if(!c)return;
+ setScreen(`<div class="hero"><small>🧑‍🍳 CHEF-KAART • VERDIEPING</small><h2>${c.icon} ${c.name}</h2><div>${c.tag}</div></div>
+ <div class="card"><div style="font-size:52px;text-align:center">${c.icon}</div><h2 class="center" style="margin:4px 0 10px">Even kennismaken</h2><p style="line-height:1.55;margin:0">${c.text}</p></div>
+ <button id="chefContinue" class="primary" type="button">👃 Breng de saus op smaak →</button>
+ <button id="chefBack" onclick="renderLab()" class="choice" style="width:100%;margin-top:10px" type="button">← Terug naar Elementenlab</button>`);
+ $("chefContinue").addEventListener("click",c.next);
+}
+
+
+const tasteData={
+ bechamel:{icon:"🥣",name:"Béchamel",next:startBechamelApply,items:[
+  ["salt","🧂","Zout","classic","Klassiek. Zout brengt de zachte melksmaak in balans."],
+  ["whitepepper","⚪","Witte peper","classic","Klassiek. Witte peper geeft pit zonder donkere spikkels in de witte saus."],
+  ["nutmeg","🌰","Nootmuskaat","classic","Een klassieke smaakmaker bij béchamel. Gebruik hem subtiel."],
+  ["chili","🌶️","Chili","creative","Dat kan als creatieve variant, maar het verandert het klassieke smaakprofiel."]
+ ]},
+ mornay:{icon:"🧀",name:"Mornaysaus",next:startMornayApply,items:[
+  ["whitepepper","⚪","Witte peper","classic","Past goed bij een romige kaassaus en houdt het uiterlijk licht."],
+  ["nutmeg","🌰","Nootmuskaat","classic","Een kleine hoeveelheid kan de romige kaasbasis verdiepen."],
+  ["cayenne","🌶️","Cayenne","classic","Een snufje cayenne wordt in klassieke bereidingen gebruikt om de kaassmaak wat pit te geven."],
+  ["cinnamon","🟤","Kaneel","creative","Interessant experiment, maar dit hoort niet bij het klassieke smaakprofiel van Mornay."]
+ ]},
+ soubise:{icon:"🧅",name:"Soubisesaus",next:startSoubiseApply,items:[
+  ["salt","🧂","Zout","classic","Klassiek: zout helpt de zachte, zoete uiensmaak naar voren te brengen."],
+  ["whitepepper","⚪","Witte peper","classic","Witte peper geeft een subtiele warmte zonder het lichte uiterlijk te veranderen."],
+  ["nutmeg","🌰","Nootmuskaat","classic","Een kleine hoeveelheid past bij de romige béchamelbasis van deze versie."],
+  ["curry","🟡","Kerrie","creative","Dat maakt een andere smaakrichting. Leuk om te testen, maar niet de klassieke Soubise die je hier hebt ontdekt."]
+ ]},
+ mustard:{icon:"🟡",name:"Mosterdsaus",next:startMustardApply,items:[
+  ["salt","🧂","Zout","classic","Een beetje zout helpt de romige basis en mosterd in balans te brengen."],
+  ["whitepepper","⚪","Witte peper","classic","Witte peper geeft subtiele warmte zonder de mosterd te overstemmen."],
+  ["nutmeg","🌰","Nootmuskaat","creative","Dat kan bij een romige witte saus passen, maar in deze mosterdvariant zoeken we een eenvoudiger smaakprofiel."],
+  ["curry","🟡","Kerrie","creative","Dit stuurt de saus een andere kruidige richting op. Interessant experiment, maar niet de klassieke route van dit spel."]
+ ]}
+};
+function tasteBadges(sauce){
+ const d=tasteData[sauce];
+ const found=state.tasteFound[sauce]||[];
+ return found.map(id=>{const x=d.items.find(i=>i[0]===id);return x?`<span class="chip">${x[1]} ${x[2]}</span>`:"";}).join("");
+}
+function startTasteLab(sauce){
+ active("navLab");
+ const d=tasteData[sauce]; if(!d){renderLab();return;}
+ if(!state.tasteFound[sauce]) state.tasteFound[sauce]=[];
+ const items=shuffled(d.items);
+ const needed=d.items.filter(x=>x[3]==="classic").length;
+ setScreen(`<div class="hero"><small>CULILAB • SMAAKLAB</small><h2>👃 Breng ${d.name} op smaak</h2><div>Een saus is pas af als de smaak klopt. Proef, kies en ontdek.</div></div>
+ <div class="applyIntro"><b>${d.icon} ${d.name}</b><br><span class="muted">Deze saus heeft <b>${needed} klassieke smaakmakers</b> nodig om compleet op smaak te zijn. Welke dat zijn, ontdek je zelf.</span></div>
+ <div class="group"><div class="label">KIES EEN SMAAKMAKER</div><div class="labgrid">${items.map(x=>`<button class="element tasteChoice" data-taste="${x[0]}" type="button"><span class="emoji">${x[1]}</span>${x[2]}</button>`).join("")}</div></div>
+ <div id="tasteOut"><div class="feedback">👅 Proef in gedachten: ontdek <b>${needed}</b> klassieke smaakmakers. Je hebt er al <b>${state.tasteFound[sauce].length}</b> gevonden.</div></div>
+ <button id="tasteNext" class="primary" type="button" ${state.tasteFound[sauce].length<needed?"disabled":""}>⚖️ Ontdek de dosering →</button>
+ <button id="tasteBack" class="choice" style="width:100%;margin-top:10px" type="button">← Terug naar Chef-kaart</button>`);
+ document.querySelectorAll(".tasteChoice").forEach(b=>b.addEventListener("click",()=>answerTaste(sauce,b)));
+ $("tasteNext").addEventListener("click",()=>startDoseLab(sauce));
+ $("tasteBack").addEventListener("click",()=>showChefCard(sauce));
+}
+function answerTaste(sauce,btn){
+ const d=tasteData[sauce], item=d.items.find(x=>x[0]===btn.dataset.taste); if(!item)return;
+ const needed=d.items.filter(x=>x[3]==="classic").length;
+ document.querySelectorAll(".tasteChoice").forEach(x=>x.classList.remove("selected")); btn.classList.add("selected");
+ const [id,icon,name,type,feedback]=item;
+ if(type==="classic"){
+   const first=!state.tasteFound[sauce].includes(id); if(first) state.tasteFound[sauce].push(id);
+   const got=first?reward("taste_"+sauce+"_"+id,20,5,0):false;
+   $("tasteOut").innerHTML=`<div class="feedback good"><b>✨ Klassieke smaakmaker ontdekt: ${icon} ${name}</b><br>${feedback}<br><br><b>${got?"+20 XP • +5 coins":"Al ontdekt"}</b><br><div class="collection">${tasteBadges(sauce)}</div><span class="muted">Ontdekt: ${state.tasteFound[sauce].length}/${needed}</span>${state.tasteFound[sauce].length===needed?`<br><br><b>🎉 Smaak compleet! Je hebt zelf alle ${needed} klassieke smaakmakers voor ${d.name} ontdekt.</b>`:`<br><span class="muted">Nog ${needed-state.tasteFound[sauce].length} te ontdekken.</span>`}</div>`;
+ }else{
+   $("tasteOut").innerHTML=`<div class="feedback"><b>🧪 Creatieve richting: ${icon} ${name}</b><br>${feedback}<br><br><b>Geen strafpunten — smaak is ook experimenteren.</b></div>`;
+ }
+ if(state.tasteFound[sauce].length>=needed) $("tasteNext").disabled=false;
+}
+
+
+const doseData={
+ bechamel:{items:[
+  ["salt","🧂","Zout","taste","Begin met een beetje en proef. Zout doseer je naar smaak; je kunt altijd nog iets toevoegen."],
+  ["whitepepper","⚪","Witte peper","pinch","Een snufje is genoeg om subtiele warmte te geven."],
+  ["nutmeg","🌰","Nootmuskaat","pinch","Een snufje is voldoende. Nootmuskaat kan snel overheersen."]]},
+ mornay:{items:[
+  ["whitepepper","⚪","Witte peper","pinch","Een snufje geeft subtiele pit zonder de kaassmaak te overstemmen."],
+  ["nutmeg","🌰","Nootmuskaat","pinch","Gebruik een snufje: de kaas en saus moeten de hoofdrol houden."],
+  ["cayenne","🌶️","Cayenne","pinch","Een klein snufje geeft warmte; te veel neemt de saus over."]]},
+ soubise:{items:[
+  ["salt","🧂","Zout","taste","Begin met een beetje en proef. De zoete uiensmaak moet herkenbaar blijven."],
+  ["whitepepper","⚪","Witte peper","pinch","Een snufje geeft zachte warmte zonder de ui te overheersen."],
+  ["nutmeg","🌰","Nootmuskaat","pinch","Een snufje past bij de romige basis; doseer subtiel."]]},
+ mustard:{items:[
+  ["salt","🧂","Zout","taste","Begin met een beetje en proef: mosterd kan zelf al zout en krachtig zijn."],
+  ["whitepepper","⚪","Witte peper","pinch","Een snufje is genoeg om warmte toe te voegen zonder de mosterd te overstemmen."]]}
+};
+function startDoseLab(sauce){
+ active("navLab");
+ const d=tasteData[sauce], dd=doseData[sauce]; if(!d||!dd){renderLab();return;}
+ if(!state.doseDone[sauce]) state.doseDone[sauce]=[];
+ const remaining=dd.items.filter(x=>!state.doseDone[sauce].includes(x[0]));
+ if(!remaining.length){finishDoseLab(sauce);return;}
+ const item=remaining[0];
+ const opts=shuffled([
+   ["pinch","🤏","Een snufje"],
+   ["taste","🥄","Een beetje, dan proeven"],
+   ["generous","🥣","Royaal"]
+ ]);
+ setScreen(`<div class="hero"><small>CULILAB • DOSEERLAB</small><h2>⚖️ Hoeveel gebruik je?</h2><div>Je hebt de smaakmakers zelf ontdekt. Nu ontdek je hoe subtiel je ze doseert.</div></div>
+ <div class="applyIntro"><b>${d.icon} ${d.name}</b><br><span class="muted">Smaakmaker ${state.doseDone[sauce].length+1} van ${dd.items.length}. Kies zelf de beste startdosering. Je krijgt geen strafpunten voor proberen.</span></div>
+ <div class="card center"><div style="font-size:48px">${item[1]}</div><h2 style="margin:4px 0">${item[2]}</h2><span class="muted">Hoeveel zou jij als eerste toevoegen?</span></div>
+ <div class="group"><div class="label">KIES EEN HOEVEELHEID</div><div class="labgrid">${opts.map(o=>`<button class="element doseChoice" data-dose="${o[0]}" type="button"><span class="emoji">${o[1]}</span>${o[2]}</button>`).join("")}</div></div><div id="doseOut"><div class="feedback">💡 Hint: bij kruiden en specerijen kun je meestal beter voorzichtig beginnen en daarna proeven.</div></div>
+ <button id="doseBack" class="choice" style="width:100%" type="button">← Terug naar Smaaklab</button>`);
+ document.querySelectorAll(".doseChoice").forEach(b=>b.addEventListener("click",()=>answerDose(sauce,item,b)));
+ $("doseBack").addEventListener("click",()=>startTasteLab(sauce));
+}
+function answerDose(sauce,item,btn){
+ const [id,icon,name,correct,why]=item;
+ document.querySelectorAll(".doseChoice").forEach(x=>x.classList.remove("selected")); btn.classList.add("selected");
+ if(btn.dataset.dose!==correct){
+   const msg=btn.dataset.dose==="generous"?"Dat is een stevige start. Probeer een subtielere hoeveelheid.":"Bij deze smaakmaker is een andere startdosering handiger. Probeer opnieuw.";
+   $("doseOut").innerHTML=`<div class="feedback bad"><b>👅 Nog even proeven…</b><br>${msg}<br><br><b>Geen strafpunten.</b></div>`; return;
+ }
+ if(!state.doseDone[sauce].includes(id)) state.doseDone[sauce].push(id);
+ const got=reward("dose_"+sauce+"_"+id,15,5,0);
+ const total=doseData[sauce].items.length, done=state.doseDone[sauce].length;
+ $("doseOut").innerHTML=`<div class="feedback good"><b>✓ ${icon} ${name}: goede startdosering ontdekt</b><br>${why}<br><br><b>${got?"+15 XP • +5 coins":"Al ontdekt"}</b><br><span class="muted">Dosering ontdekt: ${done}/${total}</span></div><button id="doseContinue" class="primary" type="button">${done===total?"✨ Smaak afronden":"Volgende smaakmaker"} →</button>`;
+ document.querySelectorAll(".doseChoice").forEach(x=>x.disabled=true);
+ $("doseContinue").addEventListener("click",()=>done===total?finishDoseLab(sauce):startDoseLab(sauce));
+}
+function finishDoseLab(sauce){
+ const d=tasteData[sauce];
+ setScreen(`<div class="hero"><small>DOSEERLAB VOLTOOID</small><h2>✨ ${d.name} is op smaak</h2><div>Je hebt niet alleen ontdekt wat erin hoort, maar ook hoe voorzichtig je begint met doseren.</div></div>
+ <div class="result"><div style="font-size:52px">👃⚖️</div><h2>Proeven blijft de laatste stap</h2><p>Een startdosering is geen vast recept: ingrediënten verschillen. Begin subtiel, proef en stuur daarna bij.</p></div>
+ <button id="doseFinish" class="primary" type="button">${["bechamel","mornay","soubise","mustard"].includes(sauce)?"🍽️ Ontdek toepassingen":"🧪 Verder ontdekken"} →</button>`);
+ $("doseFinish").addEventListener("click",d.next);
+}
+
+
+function startBechamelApply(){
+ active("navLab");
+ const dishes=shuffled([
+  ["lasagne","🍝","Lasagne"],
+  ["cauliflower","🥦","Bloemkoolgratin"],
+  ["fruit","🍓","Fruitsalade"],
+  ["steak","🥩","Gegrilde steak"]
+ ]);
+ setScreen(`<div class="hero"><small>CULILAB • TOEPASSEN</small><h2>🍽️ Wat kun je met Béchamel?</h2><div>Je beheerst de saus. Ontdek nu waar je haar in gerechten kunt toepassen.</div></div>
+ <div class="applyIntro"><b>🥣 Béchamel</b><br><span class="muted">Romig en zacht. Er kan meer dan één goede toepassing tussen staan — ontdek ze door te proberen.</span></div>
+ <div class="group"><div class="label">KIES EEN GERECHT</div><div class="labgrid">${dishes.map(d=>`<button class="element dish" data-dish="${d[0]}" type="button"><span class="emoji">${d[1]}</span>${d[2]}</button>`).join("")}</div></div><div id="applyOut"></div>
+ <button id="backLab" class="choice" style="width:100%" type="button">← Terug naar Elementenlab</button>`);
+ document.querySelectorAll(".dish").forEach(b=>b.addEventListener("click",()=>answerBechamelApply(b)));
+ $("backLab").addEventListener("click",renderLab);
+}
+function answerBechamelApply(btn){
+ const v=btn.dataset.dish;
+ document.querySelectorAll(".dish").forEach(x=>x.classList.remove("selected")); btn.classList.add("selected");
+ const good={
+  lasagne:["🍝","Béchamel + lasagne","Béchamel is een klassieke romige laag in veel lasagnebereidingen."],
+  cauliflower:["🥦","Béchamel + bloemkoolgratin","Béchamel vormt een klassieke basis voor gegratineerde groentegerechten; met kaas kun je de gratin verder opbouwen."]
+ };
+ if(good[v]){
+   const first=!state.bechamelApply.includes(v); if(first) state.bechamelApply.push(v);
+   const got=first?reward("bechamelApply_"+v,45,15,0):false;
+   const d=good[v];
+   $("applyOut").innerHTML=`<div class="discovery"><span class="newbadge">${first?"NIEUWE TOEPASSING":"AL ONTDEKT"}</span><div style="font-size:48px;margin:8px">${d[0]}</div><h2>${d[1]}</h2><p>${d[2]}</p><b>${got?"+45 XP • +15 coins":"Geen extra beloning bij herhalen"}</b><p class="muted">Ontdekt: ${state.bechamelApply.length}/2 toepassingen</p><button id="applyAgain" class="primary" type="button">🍽️ Verder proberen</button></div>`;
+   $("applyAgain").addEventListener("click",startBechamelApply); return;
+ }
+ const f={fruit:"🍓 Béchamel is een hartige saus op basis van roux en melk. Deze zoete toepassing past niet bij wat je hier hebt geleerd.",steak:"🥩 Bij een gegrilde steak kies je doorgaans een andere saus of bereiding. Béchamel is hier niet de logische klassieke toepassing."};
+ $("applyOut").innerHTML=`<div class="feedback bad">${f[v]}<br><br><b>Geen strafpunten — toepassen is ook ontdekken.</b></div>`;
+}
+
+function startMornayApply(){
+ active("navLab");
+ const dishes=shuffled([["gratin","🥦","Groentegratin"],["fish","🐟","Gegratineerde vis"],["fruit","🍓","Fruitsalade"],["tomato","🍅","Tomatensalade"]]);
+ setScreen(`<div class="hero"><small>CULILAB • TOEPASSEN</small><h2>🍽️ Wat kun je met Mornay?</h2><div>De kaassaus is op smaak. Ontdek nu waar ze culinair goed tot haar recht komt.</div></div><div class="applyIntro"><b>🧀 Mornaysaus</b><br><span class="muted">Romig en kaasachtig. Er kan meer dan één goede toepassing tussen staan.</span></div><div class="group"><div class="label">KIES EEN GERECHT</div><div class="labgrid">${dishes.map(d=>`<button class="element dish" data-dish="${d[0]}" type="button"><span class="emoji">${d[1]}</span>${d[2]}</button>`).join("")}</div></div><div id="applyOut"></div><button id="backLab" class="choice" style="width:100%" type="button">← Terug naar Elementenlab</button>`);
+ document.querySelectorAll(".dish").forEach(b=>b.addEventListener("click",()=>answerMornayApply(b))); $("backLab").addEventListener("click",renderLab);
+}
+function answerMornayApply(btn){
+ const v=btn.dataset.dish; document.querySelectorAll(".dish").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");
+ const good={gratin:["🥦","Mornay + groentegratin","De romige kaassaus past goed bij gegratineerde groenten."],fish:["🐟","Mornay + gegratineerde vis","Mornay wordt klassiek gebruikt bij gegratineerde bereidingen, waaronder vis."]};
+ if(good[v]){const first=!state.mornayApply.includes(v);if(first)state.mornayApply.push(v);const got=first?reward("mornayApply_"+v,45,15,0):false;const d=good[v];$("applyOut").innerHTML=`<div class="discovery"><span class="newbadge">${first?"NIEUWE TOEPASSING":"AL ONTDEKT"}</span><div style="font-size:48px;margin:8px">${d[0]}</div><h2>${d[1]}</h2><p>${d[2]}</p><b>${got?"+45 XP • +15 coins":"Geen extra beloning bij herhalen"}</b><p class="muted">Ontdekt: ${state.mornayApply.length}/2 toepassingen</p><button id="applyAgain" class="primary" type="button">🍽️ Verder proberen</button></div>`;$("applyAgain").addEventListener("click",startMornayApply);return;}
+ const f={fruit:"🍓 De zoete, frisse richting van fruitsalade past niet bij deze romige kaassaus.",tomato:"🍅 Tomaat kan met kaas combineren, maar deze koude tomatensalade is niet de toepassing die we in deze Mornay-route zoeken."};$("applyOut").innerHTML=`<div class="feedback bad">${f[v]}<br><br><b>Geen strafpunten — toepassen is ook ontdekken.</b></div>`;
+}
+function startMustardApply(){
+ active("navLab");
+ const dishes=shuffled([["ham","🍖","Ham uit de oven"],["cauliflower","🥦","Bloemkool"],["fruit","🍓","Fruitsalade"],["cake","🍰","Cake"]]);
+ setScreen(`<div class="hero"><small>CULILAB • TOEPASSEN</small><h2>🍽️ Wat kun je met Mosterdsaus?</h2><div>Je kent het smaakprofiel. Ontdek nu waar deze romige mosterdsaus bij past.</div></div><div class="applyIntro"><b>🟡 Mosterdsaus</b><br><span class="muted">Romig met pit. Er kan meer dan één passende toepassing tussen staan.</span></div><div class="group"><div class="label">KIES EEN GERECHT</div><div class="labgrid">${dishes.map(d=>`<button class="element dish" data-dish="${d[0]}" type="button"><span class="emoji">${d[1]}</span>${d[2]}</button>`).join("")}</div></div><div id="applyOut"></div><button id="backLab" class="choice" style="width:100%" type="button">← Terug naar Elementenlab</button>`);
+ document.querySelectorAll(".dish").forEach(b=>b.addEventListener("click",()=>answerMustardApply(b))); $("backLab").addEventListener("click",renderLab);
+}
+function answerMustardApply(btn){
+ const v=btn.dataset.dish;document.querySelectorAll(".dish").forEach(x=>x.classList.remove("selected"));btn.classList.add("selected");
+ const good={ham:["🍖","Mosterdsaus + ham","De romige saus en de scherpe mosterd vormen een logische hartige combinatie met ham."],cauliflower:["🥦","Mosterdsaus + bloemkool","Een romige mosterdsaus kan zachte groenten zoals bloemkool extra pit geven."]};
+ if(good[v]){const first=!state.mustardApply.includes(v);if(first)state.mustardApply.push(v);const got=first?reward("mustardApply_"+v,45,15,0):false;const d=good[v];$("applyOut").innerHTML=`<div class="discovery"><span class="newbadge">${first?"NIEUWE TOEPASSING":"AL ONTDEKT"}</span><div style="font-size:48px;margin:8px">${d[0]}</div><h2>${d[1]}</h2><p>${d[2]}</p><b>${got?"+45 XP • +15 coins":"Geen extra beloning bij herhalen"}</b><p class="muted">Ontdekt: ${state.mustardApply.length}/2 toepassingen</p><button id="applyAgain" class="primary" type="button">🍽️ Verder proberen</button></div>`;$("applyAgain").addEventListener("click",startMustardApply);return;}
+ const f={fruit:"🍓 Deze zoete toepassing past niet bij het hartige smaakprofiel van de saus.",cake:"🍰 Een romige mosterdsaus hoort niet bij deze zoete bereiding. Probeer een hartige toepassing."};$("applyOut").innerHTML=`<div class="feedback bad">${f[v]}<br><br><b>Geen strafpunten — toepassen is ook ontdekken.</b></div>`;
+}
+
+function startSoubiseApply(){
+ active("navLab");
+ const dishes=shuffled([
+  ["lamb","🍖","Lamskotelet"],
+  ["salmon","🐟","Gebakken zalm"],
+  ["pasta","🍝","Pasta met tomatensaus"],
+  ["fruit","🍓","Fruitsalade"]
+ ]);
+ setScreen(`<div class="hero"><small>CULILAB • TOEPASSEN</small><h2>🍽️ Waar past Soubise bij?</h2><div>Je hebt de saus ontdekt. Nu ontdek je hoe je haar in een gerecht kunt gebruiken.</div></div>
+ <div class="applyIntro"><b>🧅 Soubisesaus</b><br><span class="muted">Romig, zacht en duidelijk uiig. Kies een gerecht waarvan jij denkt dat deze saus er culinair goed bij past.</span></div>
+ <div class="group"><div class="label">KIES EEN GERECHT</div><div class="labgrid">${dishes.map(d=>`<button class="element dish" data-dish="${d[0]}" type="button"><span class="emoji">${d[1]}</span>${d[2]}</button>`).join("")}</div></div><div id="applyOut"></div>
+ <button id="backLab" class="choice" style="width:100%" type="button">← Terug naar Elementenlab</button>`);
+ document.querySelectorAll(".dish").forEach(b=>b.addEventListener("click",()=>answerSoubiseApply(b)));
+ $("backLab").addEventListener("click",renderLab);
+}
+function answerSoubiseApply(btn){
+ const v=btn.dataset.dish;
+ document.querySelectorAll(".dish").forEach(x=>x.classList.remove("selected")); btn.classList.add("selected");
+ if(v==="lamb"){
+   const first=!state.applyDone; state.applyDone=true;
+   const got=first?reward("soubiseApply",70,20,1):false;
+   $("applyOut").innerHTML=`<div class="discovery"><span class="newbadge">${first?"NIEUWE TOEPASSING":"AL ONTDEKT"}</span><div style="font-size:48px;margin:8px">🍖</div><h2>Soubise + lamsvlees</h2><p>De zachte uiensmaak en romigheid van Soubise passen klassiek bij lams- en schapenvlees.</p><b>${got?"+70 XP • +20 coins • 🏅 +1":"Geen extra beloning bij herhalen"}</b><button id="applyAgain" class="primary" type="button">🧪 Verder ontdekken</button></div>`;
+   $("applyAgain").addEventListener("click",renderLab); return;
+ }
+ const f={
+   salmon:"🐟 Vis kan met romige sauzen combineren, maar dit is niet de toepassing die we hier zoeken. Kijk naar het uitgesproken uienkarakter en probeer verder.",
+   pasta:"🍝 Dit gerecht heeft al een duidelijke tomatenbasis. De Soubise is hier niet de logische klassieke combinatie. Probeer verder.",
+   fruit:"🍓 De hartige, romige uiensaus past niet bij deze zoete toepassing. Probeer een hartig hoofdgerecht."
+ };
+ $("applyOut").innerHTML=`<div class="feedback bad">${f[v]}<br><br><b>Geen strafpunten — toepassen is ook ontdekken.</b></div>`;
+}
+
+const rescue=[
+ {q:"De saus is hobbelig en niet glad.",opts:[["Krachtig kloppen","whisk"],["Vuur hoger","high"]],a:"whisk",ok:"Goed gezien: kloppen helpt kleine klontjes glad te maken."},
+ {q:"De saus is veel te dik geworden.",opts:[["Beetje melk toevoegen","milk"],["Niet meer roeren","stop"]],a:"milk",ok:"Juist: een beetje melk maakt de saus weer soepeler."},
+ {q:"De saus dreigt aan te branden.",opts:[["Vuur lager","low"],["Vuur hoger","high"]],a:"low",ok:"Juist: verlaag de hitte en blijf controleren."}
+];
+function startRescue(){active("navChallenge");state.rescueQ=0;state.rescueMistakes=0;renderRescue();}
+function renderRescue(){
+ const d=rescue[state.rescueQ];
+ setScreen(`<div class="hero"><small>RESCUE CHALLENGE • SERVICE!</small><h2>Red de saus</h2><div>Kijk goed naar de situatie. Jij bepaalt wat er moet gebeuren.</div></div>${rescueVisual(state.rescueQ)}
+ <h2 class="center">Situatie ${state.rescueQ+1} van 3</h2><div class="feedback"><b>${d.q}</b></div><div class="group"><div class="grid2">
+ ${shuffled(d.opts).map((o,i)=>`<button class="choice rescuePick" data-v="${o[1]}" type="button">${o[0]}</button>`).join("")}</div></div><div id="rescueOut"></div>`);
+ document.querySelectorAll(".rescuePick").forEach(b=>b.addEventListener("click",()=>answerRescue(b.dataset.v)));
+}
+function answerRescue(v){
+ const d=rescue[state.rescueQ];
+ const buttons=[...document.querySelectorAll(".rescuePick")];
+ const chosen=buttons.find(b=>b.dataset.v===v);
+ buttons.forEach(b=>b.disabled=true);
+ if(v!==d.a){
+   state.rescueMistakes++; chosen.classList.add("wrong");
+   $("rescueOut").innerHTML='<div class="feedback bad">✕ Niet juist. Bekijk de situatie nog eens en probeer opnieuw.</div>';
+   setTimeout(()=>{chosen.classList.remove("wrong");buttons.forEach(b=>b.disabled=false);},2000); return;
+ }
+ chosen.classList.add("correct");
+ const recoverText=state.rescueQ===0?"De klontjes verdwijnen en de saus wordt glad.":state.rescueQ===1?"De saus wordt zichtbaar soepeler en romiger.":"De donkere rand trekt weg; de hitte is onder controle.";
+ setTimeout(()=>rescueRecovered(recoverText),350);
+ $("rescueOut").innerHTML=`<div class="feedback good">✓ ${d.ok}</div>`;
+ setTimeout(()=>{state.rescueQ++; if(state.rescueQ<rescue.length) renderRescue(); else finishRescue();},2400);
+}
+function finishRescue(){
+ state.rescueDone=true;const stars=Math.max(1,3-state.rescueMistakes);
+ const rescuePrize=stars===3?{xp:195,coins:75,medals:2}:stars===2?{xp:150,coins:55,medals:1}:{xp:100,coins:35,medals:0};
+ const got=reward("rescue",rescuePrize.xp,rescuePrize.coins,rescuePrize.medals);
+ setScreen(`<div class="hero"><small>RESCUE CHALLENGE • VOLTOOID</small><h2>Service gered!</h2></div>${visualPan("rescued","✨ Glad en romig — de saus is gered.")}
+ <div class="feedback good">🏆 Je redde 3/3 sauzen.</div><div class="result"><div class="stars">${"⭐".repeat(stars)}</div><h2>Rescue Chef</h2><p>${got?`+${rescuePrize.xp} XP • +${rescuePrize.coins} coins${rescuePrize.medals?` • 🏅 +${rescuePrize.medals}`:""}`:"Oefenronde • geen extra XP/coins"}</p><p style="font-size:13px;opacity:.72;margin-top:6px">${stars===3?"Foutloos gered — maximale beloning.":stars===2?"Sterk gered — 1 fout gemaakt.":"Service gered — 2 of meer fouten gemaakt."}</p>
+ <button id="again" class="primary" type="button">🔁 Speel Rescue opnieuw</button><button id="backHome" class="choice" style="width:100%;margin-top:12px" type="button">🏠 Naar Start</button></div>`);
+ $("again").addEventListener("click",startRescue);$("backHome").addEventListener("click",home);
+}
+$("navHome").addEventListener("click",home);
+$("navTraining").addEventListener("click",startTutorial);
+$("navChallenge").addEventListener("click",startRescue);
+$("navLab").addEventListener("click",()=>state.freeDone?startLab():startFree());
+stats();home();
+
+
+function openMore(){
+ const old=document.getElementById("moreMenu"); if(old) old.remove();
+ const m=document.createElement("div"); m.id="moreMenu"; m.className="moremenu";
+ m.innerHTML=`<div class="morepanel">
+  <div class="morehead"><h3>☰ Meer in CuliLab</h3><button class="moreclose" id="closeMore">×</button></div>
+  <div class="moregrid">
+   <button class="moreitem" id="moreTools"><span class="mi">🧰</span>Tool Lab<small>Gereedschap & meten</small></button>
+   <button class="moreitem" id="moreBook"><span class="mi">📖</span>Sauce Book<small>Ontdekkingen</small></button>
+   <button class="moreitem" disabled style="opacity:.48"><span class="mi">🥕</span>Ingrediënten<small>Binnenkort</small></button>
+   <button class="moreitem" disabled style="opacity:.48"><span class="mi">🔪</span>Technieken<small>Binnenkort</small></button>
+  </div></div>`;
+ document.body.appendChild(m);
+ $("closeMore").onclick=()=>m.remove();
+ m.onclick=e=>{if(e.target===m)m.remove()};
+ $("moreTools").onclick=()=>{m.remove();startToolLab()};
+ $("moreBook").onclick=()=>{m.remove(); if(typeof sauceBook==="function") sauceBook(); else dashboard();};
+}
+
+/* ===== v14.0 TOOL LAB ===== */
+
+/* ===== v14.1 WEEGSCHAAL LAB ===== */
+const scaleQs=[
+ {q:"Je wilt 250 g bloem afwegen. Wat gebruik je?",choices:["🥛 Maatbeker","⚖️ Weegschaal","🌡️ Thermometer","🥄 Pollepel"],a:"⚖️ Weegschaal",why:"Bloem is een droog ingrediënt. Als het recept gram aangeeft, weeg je het op de weegschaal."},
+ {q:"Je zet een lege kom op de weegschaal. Wat doe je vóór je de bloem toevoegt?",choices:["Tarra / 0 zetten","Komgewicht onthouden","Bloem meteen toevoegen","Maatbeker pakken"],a:"Tarra / 0 zetten",why:"Met tarra zet je de weegschaal terug op 0. Daarna zie je alleen het gewicht van het ingrediënt."},
+ {q:"Het recept vraagt 1,5 kg aardappelen. Hoeveel gram is dat?",choices:["150 g","500 g","1500 g","15.000 g"],a:"1500 g",why:"1 kg = 1000 g. Dus 1,5 kg = 1500 g."},
+ {q:"Het recept vraagt 300 ml melk. Welk hulpmiddel ligt het meest voor de hand?",choices:["🥛 Maatbeker","⚖️ Weegschaal","🔪 Koksmes","🧺 Vergiet"],a:"🥛 Maatbeker",why:"Voor een vloeistof die in ml wordt aangegeven, is de maatbeker de meest directe keuze."},
+ {q:"Je hebt géén maatbeker. Je moet 500 ml water afmeten. Kan een weegschaal helpen?",choices:["Ja, ongeveer 500 g water","Nee, vloeistof kun je nooit wegen","Ja, 50 g water","Ja, 5 kg water"],a:"Ja, ongeveer 500 g water",why:"Bij water is in de keuken ongeveer 1 ml = 1 g. Dat geldt niet automatisch voor alle vloeistoffen."},
+ {q:"Je hebt 200 g bloem in de kom. Nu moet er 80 g suiker bij. Wat is een handige werkwijze?",choices:["Opnieuw tarra / 0 en suiker toevoegen","Alles uit de kom halen","80 ml suiker afmeten","De kom omwisselen"],a:"Opnieuw tarra / 0 en suiker toevoegen",why:"Door opnieuw tarra te gebruiken kun je het volgende ingrediënt direct in dezelfde kom afwegen."}
+];
+function startScaleIntro(){
+ active("navTraining");
+ setScreen(`<div class="hero"><small>TOOL LAB • NIEUWE TOOL</small><h2>⚖️ Weegschaal</h2><div>Ontdek wanneer je weegt, wanneer je meet en waarom tarra zo handig is.</div></div>
+ <div class="feedback"><b>🧠 Eerst zelf nadenken</b><br>Droge ingrediënten worden vaak in gram of kilogram aangegeven. Vloeistoffen zie je vaak in ml of liter. Maar in de keuken zijn er uitzonderingen — die ga je zelf ontdekken.</div>
+ <div class="toolhub"><b>Wat ga je oefenen?</b><p>⚖️ gram & kilogram • 🥣 tarra / nulstellen • 🌾 droog versus vloeibaar • 🥛 meten of wegen</p></div>
+ <button id="scaleStart" class="primary" type="button">🎮 Start Weegschaal Challenge</button>
+ <button id="scaleBack" class="choice" style="width:100%;margin-top:10px" type="button">← Tool Lab</button>`);
+ $("scaleStart").onclick=()=>{state.scaleQ=0;state.scaleMistakes=0;renderScaleQ();};
+ $("scaleBack").onclick=startToolLab;
+}
+function renderScaleQ(){
+ const d=scaleQs[state.scaleQ], opts=shuffled(d.choices);
+ setScreen(`<div class="hero"><small>TOOL LAB • WEGEN</small><h2>⚖️ Weegschaal Challenge</h2><div>Situatie ${state.scaleQ+1} van ${scaleQs.length}</div></div>
+ <div class="result" style="background:#f3efe8"><div style="font-size:58px">⚖️</div><b id="scaleDisplay">${["250 g ?","KOM OP WEEGSCHAAL","1,5 kg","300 ml MELK","500 ml WATER","200 g BLOEM"][state.scaleQ]}</b></div>
+ <div class="feedback"><b>${d.q}</b></div>
+ <div class="convgrid">${opts.map(x=>`<button class="convbtn" data-scale="${x}" type="button">${x}</button>`).join("")}</div>
+ <div id="scaleOut" class="muted center" style="margin-top:12px">Kies wat jij in de keuken zou doen.</div>`);
+ document.querySelectorAll("[data-scale]").forEach(b=>b.onclick=()=>answerScale(b));
+}
+function answerScale(btn){
+ const d=scaleQs[state.scaleQ],v=btn.dataset.scale;
+ document.querySelectorAll("[data-scale]").forEach(x=>x.disabled=true);
+ if(v!==d.a){
+  state.scaleMistakes++; btn.style.background="#ffe5df";
+  $("scaleOut").className="feedback bad";
+  $("scaleOut").innerHTML="✕ Nog niet. Denk aan wat het recept aangeeft en probeer opnieuw.";
+  setTimeout(()=>{document.querySelectorAll("[data-scale]").forEach(x=>{x.disabled=false;x.style.background=""});$("scaleOut").className="muted center";$("scaleOut").textContent="Probeer opnieuw.";},1600);
+  return;
+ }
+ btn.style.background="#e2f5e5";
+ const after=["250 g ✓","0 g • TARRA ✓","1500 g ✓","🥛 MAATBEKER ✓","≈ 500 g WATER ✓","200 g → TARRA → 0 g → +80 g ✓"][state.scaleQ];
+ $("scaleDisplay").textContent=after;
+ $("scaleOut").className="feedback good"; $("scaleOut").innerHTML="✓ "+d.why;
+ setTimeout(()=>{state.scaleQ++;if(state.scaleQ<scaleQs.length)renderScaleQ();else finishScale();},2200);
+}
+function finishScale(){
+ const stars=state.scaleMistakes===0?3:state.scaleMistakes<=2?2:1;
+ const prize=stars===3?[100,30,1]:stars===2?[75,22,0]:[50,15,0];
+ const got=reward("scaleLab",prize[0],prize[1],prize[2]);
+ setScreen(`<div class="hero"><small>TOOL LAB VOLTOOID</small><h2>⚖️ Wegen in de keuken</h2><div>Je hebt droog/vloeibaar, tarra, g/kg en meten versus wegen toegepast.</div></div>
+ <div class="result"><div class="stars">${"⭐".repeat(stars)}</div><h2>Weegschaal beheerst</h2><p>Fouten: ${state.scaleMistakes}</p><b>${got?`+${prize[0]} XP • +${prize[1]} coins${prize[2]?" • 🏅 +1":""}`:"Oefenronde — beloning is al eerder verdiend"}</b></div>
+ <div class="feedback good"><b>Chef-inzicht</b><br>Lees eerst de eenheid in het recept. Gram/kg wijst meestal naar wegen; ml/liter meestal naar meten. Gebruik tarra om ingrediënten één voor één in dezelfde kom af te wegen.</div>
+ <button id="scaleAgain" class="primary" type="button">🔁 Nog een ronde</button>
+ <button id="scaleHub" class="choice" style="width:100%;margin-top:10px" type="button">🧰 Terug naar Tool Lab</button>`);
+ $("scaleAgain").onclick=()=>{state.scaleQ=0;state.scaleMistakes=0;renderScaleQ();};
+ $("scaleHub").onclick=startToolLab;
+}
+
+const measureQs=[
+ {q:"Een recept vraagt ½ liter melk. Hoeveel milliliter is dat?", choices:["250 ml","500 ml","750 ml","1000 ml"], a:"500 ml", why:"½ liter is 500 ml."},
+ {q:"Je hebt 3 dl melk nodig. Hoeveel milliliter meet je af?", choices:["30 ml","300 ml","500 ml","3000 ml"], a:"300 ml", why:"1 dl = 100 ml, dus 3 dl = 300 ml."},
+ {q:"Een recept vraagt 750 ml. Hoeveel liter is dat?", choices:["0,075 L","0,75 L","7,5 L","75 L"], a:"0,75 L", why:"1000 ml = 1 liter, dus 750 ml = 0,75 liter."},
+ {q:"Je hebt ¼ liter bouillon nodig. Hoeveel milliliter is dat?", choices:["25 ml","100 ml","250 ml","400 ml"], a:"250 ml", why:"¼ van 1000 ml is 250 ml."}
+];
+function startToolLab(){
+ active("navTraining");
+ setScreen(`<div class="hero"><small>CULILAB • TOOL LAB</small><h2>🧰 Ontdek je keukengereedschap</h2><div>Herken een tool en ontdek welke kennis ermee wordt geopend.</div></div>
+ <div class="toolhub"><b>Jouw eerste tools</b><div class="toolcards">
+ <button id="oldTools" class="toolcard" type="button"><span class="big">🥄</span>Garde & spatel<br><span class="muted">Herkennen & toepassen</span></button>
+ <button id="measureTool" class="toolcard" type="button"><span class="big">🥛</span>Maatbeker<br><span class="muted">Meten & omrekenen</span></button>
+ <button id="scaleTool" class="toolcard" type="button"><span class="big">⚖️</span>Weegschaal<br><span class="muted">Wegen • tarra • droog/nat</span></button>
+ <div class="toolcard locked"><span class="big">🔪</span>Koksmes<br><span class="muted">Binnenkort</span></div>
+ </div></div>
+ <button id="toolBack" class="choice" style="width:100%" type="button">← Terug</button>`);
+ $("oldTools").onclick=startTools;
+ $("measureTool").onclick=startMeasureIntro;
+ $("scaleTool").onclick=startScaleIntro;
+ $("toolBack").onclick=dashboard;
+}
+function startMeasureIntro(){
+ active("navTraining");
+ setScreen(`<div class="hero"><small>TOOL LAB • NIEUWE TOOL</small><h2>🥛 Maatbeker</h2><div>Met een maatbeker meet je vloeistoffen af. De schaal kan ml, dl of liter tonen.</div></div>
+ <div class="feedback"><b>📏 Chef-tip</b><br>Onthoud niet alleen een tabel — gebruik de verhoudingen tijdens het koken.</div>
+ <div class="result"><b>Basis die je nodig hebt</b><p>1 liter = 1000 ml<br>1 dl = 100 ml<br>½ liter = 500 ml<br>¼ liter = 250 ml</p></div>
+ <button id="measureStart" class="primary" type="button">🎮 Start Meten & Omrekenen</button>
+ <button id="measureBack" class="choice" style="width:100%;margin-top:10px" type="button">← Tool Lab</button>`);
+ $("measureStart").onclick=()=>{state.measureQ=0;state.measureMistakes=0;renderMeasureQ();};
+ $("measureBack").onclick=startToolLab;
+}
+function renderMeasureQ(){
+ const d=measureQs[state.measureQ], opts=shuffled(d.choices);
+ setScreen(`<div class="hero"><small>TOOL LAB • METEN</small><h2>🥛 Maatbeker Challenge</h2><div>Vraag ${state.measureQ+1} van ${measureQs.length}</div></div>
+ <div class="measureCup">
+ <span class="measureLabel" style="top:8px">1000 ml</span><span class="measureLabel" style="top:62px">750 ml</span><span class="measureLabel" style="top:116px">500 ml</span><span class="measureLabel" style="top:172px">250 ml</span>
+ </div>
+ <div class="feedback"><b>${d.q}</b></div>
+ <div class="convgrid">${opts.map(x=>`<button class="convbtn" data-answer="${x}" type="button">${x}</button>`).join("")}</div>
+ <div id="measureOut" class="muted center" style="margin-top:12px">Kies je antwoord.</div>`);
+ document.querySelectorAll(".convbtn").forEach(b=>b.onclick=()=>answerMeasure(b));
+}
+function answerMeasure(btn){
+ const d=measureQs[state.measureQ], v=btn.dataset.answer;
+ document.querySelectorAll(".convbtn").forEach(x=>x.disabled=true);
+ if(v!==d.a){
+   state.measureMistakes++;
+   btn.style.background="#ffe5df";
+   $("measureOut").className="feedback bad";
+   $("measureOut").innerHTML="✕ Nog niet. Kijk naar de verhouding en probeer opnieuw.";
+   setTimeout(()=>{document.querySelectorAll(".convbtn").forEach(x=>{x.disabled=false;x.style.background=""});$("measureOut").className="muted center";$("measureOut").textContent="Probeer opnieuw.";},1600);
+   return;
+ }
+ btn.style.background="#e2f5e5";
+ $("measureOut").className="feedback good";
+ $("measureOut").innerHTML="✓ "+d.why;
+ setTimeout(()=>{state.measureQ++; if(state.measureQ<measureQs.length)renderMeasureQ();else finishMeasure();},1700);
+}
+function finishMeasure(){
+ const stars=Math.max(1,3-Math.floor(state.measureMistakes/2));
+ const prize=stars===3?[80,25,1]:stars===2?[60,18,0]:[40,12,0];
+ const wasRewarded=!!state._reward_measureLab;
+ const got=reward("measureLab",prize[0],prize[1],prize[2]);
+ setScreen(`<div class="hero"><small>TOOL LAB VOLTOOID</small><h2>🥛 Maatbeker beheerst</h2><div>Je hebt ml, dl en liter in praktijksituaties omgerekend.</div></div>
+ <div class="result"><div class="stars">${"⭐".repeat(stars)}</div><h2>Meten & Omrekenen</h2><p>Fouten: ${state.measureMistakes}</p><b>${!wasRewarded&&got?`+${prize[0]} XP • +${prize[1]} coins${prize[2]?" • 🏅 +1":""}`:"Oefenronde — beloning is al eerder verdiend"}</b></div>
+ <button id="measureAgain" class="primary" type="button">🔁 Nog een ronde</button>
+ <button id="measureHub" class="choice" style="width:100%;margin-top:10px" type="button">🧰 Terug naar Tool Lab</button>`);
+ $("measureAgain").onclick=()=>{state.measureQ=0;state.measureMistakes=0;renderMeasureQ();};
+ $("measureHub").onclick=startToolLab;
+}
+
+</script>
+
+
+
+
+<script>
+window.addEventListener("load",()=>{
+ const more=document.getElementById("navMore");
+ if(more) more.onclick=openMore;
+});
+</script>
+
+
+<script>
+document.addEventListener("click",e=>{
+ const b=e.target.closest("#dashTools");
+ if(b) startToolLab();
+});
+</script>
+
+
+<script>
+function showProgress(){
+  if(typeof active==="function") active("navProgress");
+  const sc=document.getElementById("screen");
+  if(!sc) return;
+  const xp=(typeof state!=="undefined" && state.xp!=null)?state.xp:0;
+  const coins=(typeof state!=="undefined" && state.coins!=null)?state.coins:0;
+  const medals=(typeof state!=="undefined" && state.medals!=null)?state.medals:0;
+  sc.innerHTML=`
+    <section style="padding:16px">
+      <div class="hero">
+        <div class="eyebrow">CULILAB • JOUW ROUTE</div>
+        <h2>🏆 Voortgang</h2>
+        <p>Leer vaardigheden, beheers de basis en speel nieuwe ontdekkingen vrij.</p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>👨‍🍳 Chef-profiel</h3>
+        <p><b>⭐ ${xp} XP</b> &nbsp; • &nbsp; 🪙 ${coins} &nbsp; • &nbsp; 🏅 ${medals}</p>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h3>🥣 Béchamel → 🧪 Elementenlab</h3>
+        <p>Beheers eerst de basis. Daarna wordt het Elementenlab onderdeel van je ontdekkingsroute.</p>
+        <div style="margin-top:10px;padding:12px;border-radius:14px;background:#f3eee5;text-align:center;font-weight:800">
+          🔒 Elementenlab — eerst Béchamel beheersen
+        </div>
+      </div>
+      <button class="choice" style="margin-top:14px;width:100%" onclick="resetToTraining()">🎓 Verder leren</button>
+    </section>`;
+}
+window.addEventListener("load",function(){
+  const p=document.getElementById("navProgress");
+  if(p) p.onclick=function(e){e.preventDefault();showProgress();};
+});
+</script>
+
+</body></html>
