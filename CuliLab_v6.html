@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CuliLab • Sauce Rush</title>
+<style>
+*{box-sizing:border-box}
+:root{--cream:#f8f3e9;--dark:#20160f;--gold:#f4a018;--orange:#ed7410;--green:#e8f7e7;--red:#fde7e2;--ink:#28231f}
+body{margin:0;background:linear-gradient(180deg,#18120e 0 38%,#eee5d5 38%);font-family:Arial,sans-serif;color:var(--ink)}
+.phone{max-width:430px;margin:auto;min-height:100vh;background:var(--cream);box-shadow:0 0 34px #0005;overflow:hidden}
+.hero{padding:18px 18px 12px;background:linear-gradient(135deg,#24170f,#52351f);color:#fff}
+.brand{font-size:27px;font-weight:900}.sub{font-size:12px;opacity:.8;margin-top:3px}
+.stats{display:flex;gap:8px;margin-top:14px}.pill{background:#ffffff14;border:1px solid #ffffff25;padding:8px 10px;border-radius:18px;font-weight:800;font-size:13px}
+.progress{height:8px;background:#ffffff20;border-radius:8px;margin-top:12px;overflow:hidden}.progress i{display:block;height:100%;width:18%;background:#ffc94f;transition:.4s}
+.mission{margin:16px;background:#fff0b9;border-radius:20px;padding:15px;text-align:center}
+.mission small{font-weight:900;letter-spacing:1.2px;color:#8d6b31}.mission h2{margin:7px 0 4px;font-size:22px}.mission p{margin:4px 0;font-size:14px;line-height:1.35}
+.stage{position:relative}.stage img{width:100%;display:block}
+.sauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;background:#d7ab58;opacity:.93;transition:.35s;box-shadow:inset 0 5px 12px #fff8}
+.sauce.milk{background:#fff2ce}.sauce.good{background:#fff6dc}.sauce.burnt{background:#5a3323}.sauce.lumpy{background:radial-gradient(circle,#fff8dc 0 9%,#d3bd82 10% 17%,#f4e6bd 18% 100%)}
+.flame{position:absolute;left:46%;bottom:4%;font-size:35px;opacity:0;transform:scale(.8);transition:.2s}.flame.on{opacity:1;transform:scale(1)}
+.float{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:0;font-weight:900;color:#fff;text-shadow:0 2px 6px #000;pointer-events:none}.float.pop{animation:pop .8s}@keyframes pop{0%{font-size:12px;opacity:0}30%{font-size:30px;opacity:1}100%{font-size:24px;top:25%;opacity:0}}
+.panel{padding:14px 16px 22px}.state{text-align:center;font-size:20px;font-weight:900;margin:4px 0 12px}
+.task{background:#fff;border-radius:17px;padding:13px;box-shadow:0 4px 13px #0001;margin-bottom:12px}
+.tasktop{display:flex;justify-content:space-between;align-items:center;font-weight:900}.timer{font-variant-numeric:tabular-nums;background:#251b14;color:#fff;border-radius:14px;padding:6px 9px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:11px}
+button{border:2px solid #e2d5c4;background:#fff;border-radius:15px;padding:13px 9px;font-size:15px;font-weight:800;color:#60421d;box-shadow:0 3px 0 #d8c8b4}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 #d8c8b4}button.selected{background:#ffe59b;border-color:#33291f}
+button.primary{grid-column:1/-1;background:linear-gradient(135deg,#f5a019,#ed7410);border:0;color:#fff;font-size:17px;box-shadow:0 4px 0 #a84e08}
+button:disabled{opacity:.45}
+.meter{height:12px;background:#eee;border-radius:10px;overflow:hidden;margin-top:10px}.meter i{display:block;width:0;height:100%;background:#f4a018;transition:.25s}
+.feedback{border-radius:15px;padding:13px;text-align:center;line-height:1.35;margin-top:10px;background:#f1eee8}.success{background:var(--green)}.error{background:var(--red)}
+.stars{font-size:29px;letter-spacing:5px;margin:7px}.unlock{background:#fff0b9;border-radius:18px;padding:16px;text-align:center;margin-top:12px}.hidden{display:none!important}
+.combo{font-size:12px;font-weight:900;color:#a66300;margin-top:8px;text-align:center}
+@media(max-width:500px){.phone{max-width:none}.mission{margin:12px}}
+</style>
+</head>
+<body>
+<main class="phone">
+<header class="hero">
+<div class="brand">🧪 CuliLab</div><div class="sub">SAUCE RUSH • speel • kook • ontdek</div>
+<div class="stats"><div class="pill">👩‍🍳 Level <span id="level">2</span></div><div class="pill">⭐ <span id="xp">225</span> XP</div><div class="pill">🪙 <span id="coins">120</span></div></div>
+<div class="progress"><i id="progress"></i></div>
+</header>
+
+<section class="mission">
+<small>CHEF-MISSIE</small>
+<h2 id="missionTitle">Béchamel Rush</h2>
+<p id="missionText">Bouw de saus stap voor stap. Goede timing en techniek leveren extra sterren op.</p>
+</section>
+
+<div class="stage">
+<img src="culilab-pan.png" alt="Professionele sauspan">
+<div id="sauce" class="sauce"></div><div id="flame" class="flame">🔥</div><div id="float" class="float"></div>
+</div>
+
+<section class="panel">
+<div id="state" class="state">Roux staat klaar</div>
+<div class="task">
+<div class="tasktop"><span id="stepLabel">Stap 1/4 • Voeg melk toe</span><span class="timer" id="timer">20</span></div>
+<div class="meter"><i id="meter"></i></div>
+<div class="actions" id="actions">
+<button id="milk">🥛 Melk toevoegen</button>
+<button id="heat" disabled>🔥 Zet op middel</button>
+<button id="whisk" disabled>🥄 Kloppen</button>
+<button id="wait" disabled>⏱️ Laten binden</button>
+<button id="serve" class="primary" disabled>🍽️ Serveer de saus</button>
+</div>
+<div id="combo" class="combo">Combo x1 • werk netjes voor bonus-XP</div>
+</div>
+<div id="feedback" class="feedback">Begin met de juiste vloeistof voor je roux.</div>
+
+<div id="result" class="unlock hidden">
+<div class="stars" id="stars">⭐⭐⭐</div>
+<h2>Missie voltooid!</h2>
+<p id="scoreText"></p>
+<button class="primary" id="nextSauce">🔓 Ontgrendel Mornay</button>
+</div>
+
+<div id="mornay" class="unlock hidden">
+<small>NIEUWE SAUS ONTGRENDELD</small>
+<h2>🧀 Mornay Challenge</h2>
+<p>Je béchamel wordt de basis. Welke toevoeging maakt er een klassieke Mornay van?</p>
+<div class="actions">
+<button data-answer="cream">🥛 Room</button>
+<button data-answer="cheese">🧀 Kaas</button>
+<button data-answer="tomato">🍅 Tomaat</button>
+<button data-answer="stock">🍲 Bouillon</button>
+</div>
+<div id="mornayFeedback" class="feedback">Kies je ingrediënt.</div>
+</div>
+</section>
+</main>
+<script>
+let xp=225,coins=120,step=1,time=20,combo=1,errors=0,ticking=true;
+const $=id=>document.getElementById(id);
+const sauce=$("sauce"), feedback=$("feedback"), meter=$("meter");
+function pop(t){const f=$("float");f.textContent=t;f.classList.remove("pop");void f.offsetWidth;f.classList.add("pop")}
+function reward(points,c=0){xp+=points;coins+=c;$("xp").textContent=xp;$("coins").textContent=coins;pop("+"+points+" XP")}
+function setStep(n,label,state,pct){step=n;$("stepLabel").textContent=`Stap ${n}/4 • ${label}`;$("state").textContent=state;meter.style.width=pct+"%";$("progress").style.width=(18+pct*.72)+"%";time=20}
+function wrong(msg){errors++;combo=1;$("combo").textContent="Combo x1 • herstel en probeer opnieuw";feedback.className="feedback error";feedback.innerHTML="⚠️ "+msg;time=Math.max(5,time-3)}
+function good(msg,pts){combo++;reward(pts);$("combo").textContent=`Combo x${combo} • +${combo*5} bonus mogelijk`;feedback.className="feedback success";feedback.innerHTML="✓ "+msg}
+$("milk").onclick=()=>{if(step!==1)return wrong("De melk komt pas aan het begin bij de roux.");sauce.className="sauce milk";good("Melk toegevoegd. Nu gecontroleerd verwarmen.",20);$("milk").disabled=true;$("heat").disabled=false;setStep(2,"Controleer de hitte","Melk + roux",25)}
+$("heat").onclick=()=>{if(step!==2)return wrong("Controleer eerst de volgorde.");$("flame").className="flame on";$("heat").classList.add("selected");good("Middelhoog is beheersbaar: nu blijven kloppen.",20);$("heat").disabled=true;$("whisk").disabled=false;setStep(3,"Klop tot glad","Saus begint te binden",50)}
+let whisks=0;
+$("whisk").onclick=()=>{if(step!==3)return wrong("Klop wanneer de saus verwarmt.");whisks++;pop("🥄");meter.style.width=(50+whisks*8)+"%";if(whisks>=3){sauce.className="sauce good";good("Mooi glad! Laat de saus kort binden.",30);$("whisk").disabled=true;$("wait").disabled=false;setStep(4,"Laat kort binden","Gladde béchamel",80)}else{feedback.className="feedback";feedback.textContent=`Klop door… ${whisks}/3`}}
+$("wait").onclick=()=>{if(step!==4)return wrong("De saus is nog niet klaar om te rusten.");good("De saus nappeert: klaar om te serveren.",25);meter.style.width="100%";$("wait").disabled=true;$("serve").disabled=false;$("state").textContent="Béchamel klaar";ticking=false}
+$("serve").onclick=finish;
+function finish(){let stars=errors===0&&time>=8?3:errors<=1?2:1;let bonus=stars*20+combo*5;reward(bonus,stars*10);$("stars").textContent="⭐".repeat(stars)+"☆".repeat(3-stars);$("scoreText").innerHTML=`${stars}/3 sterren • +${bonus} bonus-XP • +${stars*10} coins<br>Je hebt de basisbewegingen van béchamel beheerst.`;$("result").classList.remove("hidden");$("serve").disabled=true;$("progress").style.width="100%";pop("🏆")}
+$("nextSauce").onclick=()=>{$("result").classList.add("hidden");$("mornay").classList.remove("hidden");$("missionTitle").textContent="Mornay unlocked";$("missionText").textContent="Gebruik je béchamelkennis om een nieuwe sausfamilie te ontdekken.";window.scrollTo({top:document.body.scrollHeight,behavior:"smooth"})}
+document.querySelectorAll("[data-answer]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-answer]").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");if(b.dataset.answer==="cheese"){reward(50,25);$("mornayFeedback").className="feedback success";$("mornayFeedback").innerHTML="🏆 Juist! Béchamel + kaas = Mornay. <b>+50 XP • +25 coins</b><br>Nieuwe saus toegevoegd aan je collectie."}else{$("mornayFeedback").className="feedback error";$("mornayFeedback").textContent="Nog niet. Denk aan de klassieke afleiding van béchamel."}})
+setInterval(()=>{if(!ticking)return;if(time>0){time--;$("timer").textContent=time;if(time===5)$("timer").style.background="#9b2d20"}else{ticking=false;wrong("Tijd voorbij. Je kunt doorgaan, maar je sterrenbonus wordt lager.");$("timer").textContent="0"}},1000)
+</script>
+</body></html>
