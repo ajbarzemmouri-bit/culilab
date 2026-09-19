@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CuliLab – Sauce Lab • Level 2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:0;background:linear-gradient(180deg,#181512,#30261c 42%,#eee5d5 42%);font-family:Arial,sans-serif;color:#252525;text-align:center;min-height:100vh}.phone{max-width:430px;margin:auto;min-height:100vh;background:#f8f3e9;overflow:hidden;box-shadow:0 0 45px #0005}.hero{padding:18px 18px 12px;background:linear-gradient(135deg,#1e1b18,#46301d);color:white;text-align:left}.brand{font-size:25px;font-weight:900;letter-spacing:.3px}.sub{font-size:12px;opacity:.75;margin-top:2px}.stats{display:flex;gap:8px;margin-top:14px}.pill{background:#ffffff18;border:1px solid #ffffff25;border-radius:18px;padding:8px 11px;font-weight:700;font-size:13px}.xpbar{height:8px;background:#ffffff22;border-radius:10px;margin-top:10px;overflow:hidden}.xpfill{height:100%;width:65%;background:#f7c94b;border-radius:10px}.app
+.app{max-width:430px;margin:auto;background:#f8f3e9;padding:16px 14px 28px;box-shadow:none}.mission{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#8a6a36;margin-bottom:5px}
+.top{display:none}.challenge{background:#fff1c4;border-radius:18px;padding:17px;margin:20px 0}
+.challenge h2{margin:0 0 6px;font-size:21px}.challenge p{margin:5px}.stage{position:relative;max-width:560px;margin:auto}.stage img{width:100%;display:block;border-radius:16px}
+.sauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;opacity:.92;transition:.5s;box-shadow:inset 0 5px 12px #fff7,0 2px 5px #0002}
+.roux{background:#d7ab58}.bechamel{background:#fff5d7}.burnt{background:#5c341f}.lumpy{background:radial-gradient(circle,#fff7dd 0 9%,#d9c89c 10% 18%,#f3e5c3 19% 100%)}
+.thin{background:#f8f1d8;opacity:.7}.good{background:#fff4d4}.flame{position:absolute;left:43%;bottom:3%;font-size:40px;opacity:0}.flame.on{opacity:1}
+.state{font-size:21px;font-weight:700;margin:12px 0 18px}.buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:9px}h3{font-size:17px;margin:13px 0 8px}
+button{font-size:16px;padding:13px 16px;border:2px solid #e2d9c9;border-radius:15px;background:#fff;color:#6a4319;font-weight:700;box-shadow:0 3px 0 #e2d9c9;transition:.12s}button:active{transform:translateY(2px);box-shadow:0 1px 0 #e2d9c9}button.selected{background:#ffedaf;border-color:#333;color:#222}
+.prepare{margin:18px 0 9px;background:linear-gradient(135deg,#ef9d24,#d96c16);color:#fff;border:0;padding:15px 40px;width:100%;font-size:18px;box-shadow:0 5px 0 #a84d0d}.feedback{background:#f6f6f6;border-radius:14px;padding:14px;min-height:70px;line-height:1.4}
+.error{background:#fde7e2}.success{background:#e8f7e7}.book{text-align:left;border-top:1px solid #ddd;margin-top:18px;padding-top:15px}.entry{background:#eaf7e9;padding:9px;border-radius:8px;margin:6px 0}
+.badge{display:inline-block;background:#222;color:#fff;border-radius:20px;padding:5px 11px;font-size:13px;margin-top:8px}.hidden{display:none}
+@media(max-width:600px){body{padding:8px}.app{padding:14px}button{font-size:15px}}
+</style></head>
+<body><div class="phone"><header class="hero"><div class="brand">🧪 CuliLab</div><div class="sub">Speel • kook • ontdek</div><div class="stats"><div class="pill">👩‍🍳 Level 2</div><div class="pill">⭐ <span id="xpHero">225</span> XP</div><div class="pill">🪙 120</div></div><div class="xpbar"><div class="xpfill" id="xpfill"></div></div></header><main class="app">
+<div class="top"><span>🧪 CuliLab – Sauce Lab</span><span>⭐ <span id="xp">225</span> XP</span></div>
+<section class="challenge"><div class="mission">Huidige missie</div><h2 id="title">Level 2 — Red de saus</h2><p id="instruction">Maak een béchamel. Let op: temperatuur en techniek tellen nu mee.</p><span class="badge" id="round">Challenge 1 van 3</span></section>
+<div class="stage"><img src="culilab-pan.png" alt="Professionele sauspan"><div id="sauce" class="sauce roux"></div><div id="flame" class="flame">🔥</div></div>
+<div class="state" id="state">Basis in de pan: roux</div>
+<div id="game">
+<h3>Ingrediënt</h3><div class="buttons"><button id="milk">🥛 Melk</button></div>
+<h3>Temperatuur</h3><div class="buttons"><button data-temp="laag">🔥 Laag</button><button data-temp="middel">🔥🔥 Middel</button><button data-temp="hoog">🔥🔥🔥 Hoog</button></div>
+<h3>Techniek</h3><div class="buttons"><button id="mix">🥄 Goed mengen</button><button id="nomix">🚫 Niet mengen</button></div>
+<button id="prepare" class="prepare">Bereid</button>
+</div>
+<div id="feedback" class="feedback">Kies melk, temperatuur en techniek.</div>
+<section class="book"><b>📖 Mijn Sauce Book</b><div id="book"><div class="entry">✓ Roux</div><div class="entry">✓ Béchamel</div><div class="entry">✓ Velouté</div></div></section>
+</main>
+<script>
+let xp=225,round=1,milk=false,temp="",tech="";
+const $=x=>document.getElementById(x);
+function sel(btn,group){document.querySelectorAll(group).forEach(b=>b.classList.remove("selected"));btn.classList.add("selected")}
+$("milk").onclick=()=>{milk=!milk;$("milk").classList.toggle("selected",milk)}
+document.querySelectorAll("[data-temp]").forEach(b=>b.onclick=()=>{temp=b.dataset.temp;sel(b,"[data-temp]");$("flame").className="flame on"})
+$("mix").onclick=()=>{tech="mix";sel($("mix"),"#mix,#nomix")}
+$("nomix").onclick=()=>{tech="nomix";sel($("nomix"),"#mix,#nomix")}
+function resetChoices(){milk=false;temp="";tech="";$("milk").classList.remove("selected");document.querySelectorAll("[data-temp],#mix,#nomix").forEach(b=>b.classList.remove("selected"));$("flame").className="flame"}
+function nextRound(){
+ round++;resetChoices();$("round").textContent=`Challenge ${round} van 3`;
+ $("sauce").className="sauce roux";$("state").textContent="Basis in de pan: roux";
+ $("feedback").className="feedback";$("feedback").textContent=round===2?"Nieuwe pan. Probeer bewust wat er gebeurt bij te hoge temperatuur.":"Laat de saus nu bewust mislukken door niet te mengen.";
+}
+$("prepare").onclick=()=>{
+ if(!milk||!temp||!tech){$("feedback").className="feedback error";$("feedback").innerHTML="<b>Nog niet compleet.</b><br>Kies melk, een temperatuur én een mengtechniek.";return}
+ if(round===1){
+   if(temp==="middel"&&tech==="mix"){
+     $("sauce").className="sauce bechamel";$("state").textContent="Gladde béchamel";
+     xp+=50;$("xp").textContent=xp;$("feedback").className="feedback success";$("feedback").innerHTML="✓ <b>Goed bereid! +50 XP</b><br>De roux bindt de melk tot een gladde béchamel.";
+     addNextButton(250);
+   } else {
+     let type=temp==="hoog"?"burnt":tech==="nomix"?"lumpy":"thin";
+     $("sauce").className="sauce "+type;$("state").textContent=type==="burnt"?"Saus aangebrand":type==="lumpy"?"Klontjes in de saus":"Saus bindt onvoldoende";
+     $("feedback").className="feedback error";$("feedback").innerHTML="<b>Chef-alarm!</b><br>"+(type==="burnt"?"Te hoge hitte kan roux en melk laten aanzetten of verbranden.":type==="lumpy"?"Zonder goed mengen ontstaan gemakkelijk klontjes.":"Gebruik gecontroleerde warmte en blijf goed mengen.");
+   }
+ } else if(round===2){
+   if(temp==="hoog"){
+     $("sauce").className="sauce burnt";$("state").textContent="Aangebrande saus";
+     xp+=25;$("xp").textContent=xp;$("feedback").className="feedback error";$("feedback").innerHTML="🔥 <b>Fout herkend: aangebrand. +25 XP</b><br>Een verbrande smaak kun je niet betrouwbaar uit de saus verwijderen. Begin opnieuw in een schone pan.";
+     addNextButton(250);
+   } else {$("feedback").className="feedback";$("feedback").innerHTML="Deze challenge vraagt je te onderzoeken wat <b>te hoge temperatuur</b> doet."}
+ } else {
+   if(tech==="nomix"){
+     $("sauce").className="sauce lumpy";$("state").textContent="Béchamel met klontjes";
+     xp+=25;$("xp").textContent=xp;$("feedback").className="feedback error";$("feedback").innerHTML="🥄 <b>Fout herkend: klontjes. +25 XP</b><br>Probeer de saus nu te redden door krachtig te kloppen.";
+     setTimeout(showRescue,1500);
+   } else {$("feedback").innerHTML="Deze challenge vraagt je te ontdekken wat er gebeurt als je <b>niet mengt</b>."}
+ }
+}
+function showRescue(){
+ $("game").innerHTML='<h3>Red de saus</h3><div class="buttons"><button id="whisk">🥄 Krachtig kloppen</button><button id="water">💧 Water toevoegen</button><button id="moreflour">🌾 Meer bloem</button></div>';
+ $("whisk").onclick=()=>{
+   $("sauce").className="sauce good";$("state").textContent="Saus gered: gladde béchamel";xp+=75;$("xp").textContent=xp;
+   $("feedback").className="feedback success";$("feedback").innerHTML="🏆 <b>Saus gered! +75 XP</b><br>Goed kloppen kan lichte klontvorming vaak herstellen.";
+   $("book").innerHTML+='<div class="entry">⭐ Rescue-techniek — klontjes herstellen</div>';
+   setTimeout(finish,1700);
+ };
+ $("water").onclick=$("moreflour").onclick=()=>{$("feedback").className="feedback error";$("feedback").innerHTML="<b>Nog niet.</b><br>Denk aan welke handeling de bestaande klontjes mechanisch kan gladmaken."}
+}
+function finish(){
+ $("title").textContent="🏆 Level 2 voltooid";$("instruction").textContent="Je kunt nu niet alleen een saus maken, maar ook fouten herkennen en herstellen.";$("round").textContent="Sauce Rescue ✓";
+ $("game").innerHTML='<div style="font-size:22px;font-weight:bold;margin:22px">Volgende level: afleidingen & nieuwe sauzen 🔒</div>';
+}
+
+// Mobile-game HUD sync
+const originalXpNode = $("xp");
+const xpObserver = new MutationObserver(()=>{ $("xpHero").textContent=originalXpNode.textContent; const n=Number(originalXpNode.textContent)||0; $("xpfill").style.width=Math.min(100,(n%500)/5)+"%"; });
+xpObserver.observe(originalXpNode,{childList:true,subtree:true,characterData:true});
+function addNextButton(delay=0){ setTimeout(()=>{ if($("nextChallenge"))return; const f=$("feedback"); const b=document.createElement("button"); b.id="nextChallenge"; b.className="prepare"; b.textContent="Volgende challenge  →"; b.onclick=()=>{b.remove();nextRound()}; f.insertAdjacentElement("afterend",b); },delay); }
+// Override progression so the player chooses when to continue.
+const oldNextRound=nextRound;
+// intercept timers by replacing successful branch calls below was not practical after load; explicit buttons are added via state observation.
+const fbObserver=new MutationObserver(()=>{ const t=$("feedback").textContent; if((t.includes("Goed bereid")||t.includes("Fout herkend: aangebrand")) && round<3){ clearTimeout(window.__dummy); } });
+fbObserver.observe($("feedback"),{childList:true,subtree:true});
+</script></main></div></body></html>
