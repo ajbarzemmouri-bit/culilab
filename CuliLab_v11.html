@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CuliLab • Chef Academy v11</title>
+<style>
+*{box-sizing:border-box}
+:root{--cream:#f7f0e3;--dark:#20150e;--gold:#f5a019;--orange:#ed7410;--green:#e7f6e6;--red:#fde5df;--ink:#29231e}
+body{margin:0;background:#17110d;font-family:Arial,sans-serif;color:var(--ink)}
+.app{max-width:430px;margin:auto;min-height:100vh;background:var(--cream);overflow:hidden}
+header{padding:17px 17px 13px;color:#fff;background:linear-gradient(135deg,#21160f,#54351f)}
+.brand{font-size:27px;font-weight:900}.tag{font-size:11px;letter-spacing:1.2px;opacity:.75;margin-top:2px}
+.stats{display:flex;gap:7px;margin-top:12px}.pill{font-size:13px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;padding:7px 9px;border-radius:16px}
+.progress{height:7px;background:#ffffff20;border-radius:8px;margin-top:11px;overflow:hidden}.progress i{display:block;height:100%;width:12%;background:#ffc94f;transition:.3s}
+.mode{margin:13px 14px 9px;padding:13px;border-radius:18px;background:#fff0b8;text-align:center}
+.mode b{display:block;font-size:12px;letter-spacing:1px;color:#90651e}.mode h2{margin:5px 0 3px;font-size:21px}.mode p{margin:0;font-size:13px;line-height:1.35}
+.stage{position:relative}.stage img{width:100%;display:block}
+.sauce{position:absolute;left:35%;top:48%;width:31%;height:18%;border-radius:50%;background:#d7ab58;opacity:.93;transition:.35s;box-shadow:inset 0 5px 12px #fff7}
+.sauce.milk{background:#fff0c9}.sauce.good{background:#fff5d9}.sauce.burnt{background:#59301e}.sauce.lumpy{background:radial-gradient(circle,#fff8dc 0 8%,#d3bd82 9% 17%,#f3e3b9 18% 100%)}.sauce.thin{background:#f8f0d7;opacity:.7}
+.flame{position:absolute;left:46%;bottom:4%;font-size:34px;opacity:0}.flame.on{opacity:1}
+.tip{position:absolute;left:12px;right:12px;bottom:10px;background:#21170fe8;color:#fff;padding:10px 12px;border-radius:14px;font-size:13px;line-height:1.3;box-shadow:0 5px 15px #0005}
+.tip:after{content:"";position:absolute;bottom:-8px;left:24%;border:8px solid transparent;border-top-color:#21170fe8;border-bottom:0}
+.panel{padding:12px 15px 24px}.goal{text-align:center;font-size:19px;font-weight:900;margin:5px 0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.group{background:#fff;border-radius:16px;padding:11px;margin-bottom:9px;box-shadow:0 3px 10px #0001}
+.group h3{font-size:12px;text-transform:uppercase;letter-spacing:.8px;margin:0 0 8px;color:#8b765e}
+button{width:100%;border:2px solid #e0d3c1;background:#fff;border-radius:13px;padding:11px 7px;font-size:14px;font-weight:800;color:#60411d;margin:3px 0;box-shadow:0 2px 0 #d4c2ac}
+button.selected{background:#ffe49a;border-color:#3a2b20}button.primary{background:linear-gradient(135deg,#f5a019,#ed7410);border:0;color:#fff;font-size:16px;box-shadow:0 4px 0 #a64d08;padding:13px}
+.feedback{padding:12px;border-radius:14px;text-align:center;background:#efebe5;line-height:1.35;margin-top:9px}.success{background:var(--green)}.error{background:var(--red)}
+.hidden{display:none!important}.stars{font-size:29px;letter-spacing:4px}.result{text-align:center;background:#fff0b8;border-radius:18px;padding:15px;margin-top:10px}
+.small{font-size:12px;color:#786b5d}.attempt{font-size:12px;font-weight:900;text-align:center;color:#9b650f;margin:7px}
+.choiceHint{animation:pulse 1s infinite}@keyframes pulse{50%{transform:scale(1.03);box-shadow:0 0 0 4px #ffc94f55}}
+
+.nav{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 12px;background:#2a1b12;position:sticky;top:0;z-index:20}
+.nav button{margin:0;padding:9px 3px;background:#ffffff12;border:1px solid #ffffff25;box-shadow:none;color:#fff;font-size:12px}
+.nav button.active{background:#f5a019;border-color:#f5a019}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+
+.homecards{display:grid;gap:10px;margin-top:12px;text-align:left}
+.homecard{border:1px solid #ead8bd;background:#fff;border-radius:17px;padding:14px;box-shadow:0 3px 10px #0001}
+.homecard b{display:block;font-size:17px;margin-bottom:4px;color:#382719}
+.homecard span{font-size:13px;line-height:1.35;color:#756454}
+.homecard button{margin-top:10px}
+.badge{display:inline-block;background:#fff0b8;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;margin-top:5px}
+
+.toolgame{background:#fff;border-radius:18px;padding:14px;margin-top:10px;box-shadow:0 3px 10px #0001}
+.toolrow{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.toolchoice{min-height:105px;font-size:42px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.toolchoice span{font-size:13px;margin-top:6px}
+.lesson{font-size:13px;line-height:1.4;background:#fff7dd;border-radius:13px;padding:10px;margin:9px 0}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+<div class="brand">🧪 CuliLab</div><div class="tag">CHEF ACADEMY • LEER → ONTDEK → BEHEERS</div>
+<div class="stats"><div class="pill">👩‍🍳 Lv. 2</div><div class="pill">⭐ <span id="xp">225</span> XP</div><div class="pill">🪙 <span id="coins">120</span></div><div class="pill">🏅 <span id="best">0</span></div></div>
+<div class="progress"><i id="progress"></i></div>
+</header>
+<nav class="nav">
+<button id="navStart" class="active">🏠 Start</button>
+<button id="navTraining">🎓 Training</button>
+<button id="navChallenge">🔥 Challenges</button>
+</nav>
+
+<section class="mode">
+<b id="modeLabel">RONDE 1 • CHEF-TUTORIAL</b>
+<h2 id="title">Béchamel leren</h2>
+<p id="subtitle">De chef helpt je één keer. Daarna sta je er zelf voor.</p>
+</section>
+
+<div class="stage">
+<img src="culilab-pan.png" alt="Professionele sauspan">
+<div id="sauce" class="sauce"></div><div id="flame" class="flame">🔥</div>
+<div id="tip" class="tip">👨‍🍳 Chef: Begin met melk. Ik laat je deze ronde zien waarom.</div>
+</div>
+
+<section class="panel">
+<div class="goal" id="goal">Maak een gladde béchamel</div>
+<div class="attempt" id="attempt">Tutorial • stap 1 van 3</div>
+
+<div class="group">
+<h3>Ingrediënt</h3>
+<div class="grid">
+<button id="milk">🥛 Melk</button><button id="stock">🍲 Bouillon</button>
+</div></div>
+
+<div class="group">
+<h3>Temperatuur</h3>
+<div class="grid">
+<button data-temp="low">🔥 Laag</button><button data-temp="medium">🔥🔥 Middel</button>
+<button data-temp="high">🔥🔥🔥 Hoog</button>
+</div></div>
+
+<div class="group">
+<h3>Techniek</h3>
+<div class="grid">
+<button data-tech="whisk">🥄 Kloppen</button><button data-tech="leave">✋ Niet mengen</button>
+</div></div>
+
+<button id="cook" class="primary">🍳 Bereid saus</button>
+<div id="feedback" class="feedback">Volg de chef tijdens je eerste bereiding.</div>
+
+<div id="result" class="result hidden">
+<div id="stars" class="stars">⭐⭐⭐</div>
+<h2 id="resultTitle">Tutorial voltooid</h2>
+<p id="resultText"></p>
+<button id="next" class="primary">🎮 Nu zonder hulp</button>
+</div>
+</section>
+</main>
+
+<script>
+let xp=225,coins=120,mode="tutorial",tutorialStep=1,ingredient="",temp="",tech="",attempts=0;
+const $=id=>document.getElementById(id);
+function select(btn,selector){document.querySelectorAll(selector).forEach(x=>x.classList.remove("selected"));btn.classList.add("selected")}
+function clear(){ingredient="";temp="";tech="";document.querySelectorAll("button.selected").forEach(x=>x.classList.remove("selected"));$("flame").className="flame";$("sauce").className="sauce"}
+function reward(x,c=0){xp+=x;coins+=c;$("xp").textContent=xp;$("coins").textContent=coins}
+function chef(text){$("tip").textContent="👨‍🍳 Chef: "+text;$("tip").classList.remove("hidden")}
+function tutorialGuide(){
+ document.querySelectorAll(".choiceHint").forEach(x=>x.classList.remove("choiceHint"));
+ if(tutorialStep===1){chef("Een roux bindt met vloeistof. Kies melk voor béchamel.");$("milk").classList.add("choiceHint");$("attempt").textContent="Tutorial • stap 1 van 3"}
+ if(tutorialStep===2){chef("Gebruik gecontroleerde warmte. Te hoog kan de saus laten aanzetten.");document.querySelector('[data-temp="medium"]').classList.add("choiceHint");$("attempt").textContent="Tutorial • stap 2 van 3"}
+ if(tutorialStep===3){chef("Blijf kloppen terwijl de saus bindt. Zo voorkom je klontjes.");document.querySelector('[data-tech="whisk"]').classList.add("choiceHint");$("attempt").textContent="Tutorial • stap 3 van 3"}
+}
+$("milk").onclick=e=>{ingredient="milk";select(e.currentTarget,"#milk,#stock");$("sauce").className="sauce milk";if(mode==="tutorial"&&tutorialStep===1){tutorialStep=2;tutorialGuide()}}
+$("stock").onclick=e=>{ingredient="stock";select(e.currentTarget,"#milk,#stock");if(mode==="tutorial")chef("Bouillon hoort bij een andere sausfamilie. Voor béchamel kies je melk.")}
+document.querySelectorAll("[data-temp]").forEach(b=>b.onclick=e=>{temp=e.currentTarget.dataset.temp;select(e.currentTarget,"[data-temp]");$("flame").className="flame on";if(mode==="tutorial"&&tutorialStep===2&&temp==="medium"){tutorialStep=3;tutorialGuide()}else if(mode==="tutorial"&&temp!=="medium")chef("Probeer middel: genoeg warmte om te binden, maar beter beheersbaar.")})
+document.querySelectorAll("[data-tech]").forEach(b=>b.onclick=e=>{tech=e.currentTarget.dataset.tech;select(e.currentTarget,"[data-tech]");if(mode==="tutorial"&&tutorialStep===3&&tech==="whisk"){chef("Mooi. Nu heb je alle keuzes. Druk op Bereid saus.");$("attempt").textContent="Tutorial • klaar om te bereiden";document.querySelectorAll(".choiceHint").forEach(x=>x.classList.remove("choiceHint"))}else if(mode==="tutorial"&&tech==="leave")chef("Zonder mengen kan de saus klonteren. Kies kloppen.")})
+$("cook").onclick=()=>{
+ if(!ingredient||!temp||!tech){$("feedback").className="feedback error";$("feedback").textContent="Je bereiding is nog niet compleet.";return}
+ attempts++;
+ const ok=ingredient==="milk"&&temp==="medium"&&tech==="whisk";
+ if(ok){
+   $("sauce").className="sauce good";$("feedback").className="feedback success";
+   if(mode==="tutorial"){
+     onceReward('tutorial',50,10);$("feedback").innerHTML="✓ Gladde béchamel. Je hebt gezien wat vloeistof, warmte en beweging doen.";
+     $("resultTitle").textContent="Tutorial voltooid";$("resultText").innerHTML="+50 XP • +10 coins<br><b>Nu verdwijnen de aanwijzingen.</b>";$("stars").textContent="⭐⭐⭐";$("result").classList.remove("hidden");$("progress").style.width="45%"
+   }else{
+     let stars=attempts===1?3:attempts<=2?2:1,bonus=stars*35;onceReward('free',bonus,stars*15);updateBest(stars);
+     $("feedback").innerHTML="🏆 Gelukt zonder aanwijzingen!";
+     $("resultTitle").textContent="Béchamel beheerst";$("resultText").innerHTML=`${stars}/3 sterren • +${bonus} XP • +${stars*15} coins<br>Volgende uitdaging: fouten herkennen en herstellen.`;$("stars").textContent="⭐".repeat(stars)+"☆".repeat(3-stars);$("result").classList.remove("hidden");$("next").textContent="🔥 Start Rescue Challenge";$("progress").style.width="100%"
+   }
+ }else{
+   let type=temp==="high"?"burnt":tech==="leave"?"lumpy":ingredient==="stock"?"thin":"thin";
+   $("sauce").className="sauce "+type;$("feedback").className="feedback error";
+   if(mode==="free"){
+     let why=type==="burnt"?"Te hoge hitte: de saus is aangezet/verbrand.":type==="lumpy"?"Niet mengen: er zijn klontjes ontstaan.":ingredient==="stock"?"Je koos bouillon: dat is niet de klassieke vloeistof voor béchamel.":"De combinatie bindt niet zoals bedoeld.";
+     $("feedback").innerHTML=`❌ ${why}<br><b>Probeer opnieuw.</b>`;
+     clear()
+   } else chef("Kijk naar de gemarkeerde keuze. Tijdens de tutorial help ik je nog.")
+ }
+}
+$("next").onclick=()=>{
+ if(mode==="tutorial"){
+   mode="free";attempts=0;clear();$("result").classList.add("hidden");$("tip").classList.add("hidden");$("modeLabel").textContent="RONDE 2 • JIJ BENT DE CHEF";$("title").textContent="Béchamel Challenge";$("subtitle").textContent="Geen pijlen. Geen stappen. Gebruik wat je net hebt geleerd.";$("attempt").textContent="Zelfstandig • poging 1";$("feedback").className="feedback";$("feedback").textContent="Maak een gladde béchamel. Feedback krijg je pas na je bereiding.";document.querySelectorAll(".choiceHint").forEach(x=>x.classList.remove("choiceHint"));$("progress").style.width="55%"
+ }else{
+   startRescue();
+ }
+}
+
+function startRescue(){
+ hideHome();
+ mode="rescue";
+ $("result").classList.add("hidden");
+ $("tip").classList.add("hidden");
+ $("modeLabel").textContent="RESCUE CHALLENGE • SERVICE!";
+ $("title").textContent="Red de saus";
+ $("subtitle").textContent="Kijk goed naar de pan. Jij bepaalt wat er moet gebeuren.";
+ $("goal").textContent="🔥 Chef, we hebben een probleem!";
+ $("attempt").textContent="Rescue • 0 van 3 gered";
+ $("cook").classList.add("hidden");
+ document.querySelectorAll(".group").forEach(g=>g.classList.add("hidden"));
+ $("feedback").className="feedback";
+ $("feedback").textContent="De oplossing wordt niet voorgezegd. Kies op basis van wat je ziet.";
+ rescueScore=0; rescueRound=0; rescueMistakes=0;
+ nextRescue();
+}
+
+let rescueScore=0,rescueRound=0,rescueMistakes=0,currentProblem=null;
+const rescueProblems=[
+ {name:"Klontjes", cls:"lumpy", clue:"De saus is hobbelig en niet glad.", correct:"whisk",
+  actions:[["whisk","🥄 Krachtig kloppen"],["milk","🥛 Meer melk"],["heat","🔥 Vuur hoger"]],
+  success:"Goed gezien! Kloppen maakt de saus weer glad.",
+  fail:"Dat lost de klontjes niet op."},
+ {name:"Te dik", cls:"good", clue:"De saus blijft zwaar aan de garde hangen en vloeit bijna niet.", correct:"milk",
+  actions:[["milk","🥛 Beetje melk toevoegen"],["bind","⏱️ Langer binden"],["heat","🔥 Vuur hoger"]],
+  success:"Precies. Een beetje melk brengt de saus terug op dikte.",
+  fail:"De saus wordt hiermee niet dunner."},
+ {name:"Dreigt aan te branden", cls:"burnt", clue:"De bodem kleurt donker en de hitte is te fel.", correct:"low",
+  actions:[["low","🔥 Vuur lager"],["bind","⏱️ Langer laten staan"],["heat","🔥 Vuur hoger"]],
+  success:"Op tijd! De hitte is teruggebracht voordat de saus verloren gaat.",
+  fail:"Oei — de bodem wordt donkerder."}
+];
+
+function nextRescue(){
+ if(rescueRound>=3){finishRescue();return}
+ currentProblem=rescueProblems[rescueRound];
+ $("sauce").className="sauce "+currentProblem.cls;
+ $("flame").className=currentProblem.correct==="low"?"flame on":"flame";
+ $("goal").textContent="Wat is er mis?";
+ $("attempt").textContent=`Rescue • ${rescueRound} van 3 gered`;
+ $("feedback").className="feedback";
+ $("feedback").innerHTML=`👀 <b>${currentProblem.clue}</b><br>Welke actie kies je?`;
+ showRescueActions();
+}
+function showRescueActions(){
+ let holder=document.getElementById("rescueActions");
+ if(!holder){
+   holder=document.createElement("div");holder.id="rescueActions";holder.className="group";
+   $("feedback").after(holder);
+ }
+ holder.innerHTML="<h3>Jouw actie</h3>";
+ currentProblem.actions.forEach(a=>{
+   let b=document.createElement("button");b.textContent=a[1];
+   b.onclick=()=>rescueChoice(a[0]);holder.appendChild(b);
+ });
+}
+function rescueChoice(choice){
+ let holder=document.getElementById("rescueActions");
+ if(choice===currentProblem.correct){
+   rescueScore++;
+   $("feedback").className="feedback success";
+   $("feedback").innerHTML=`✓ ${currentProblem.success}<br><b>Situatie gered!</b>`;
+   $("sauce").className="sauce good";$("flame").className="flame";
+   holder.innerHTML='<button class="primary" id="continueRescue">➡️ Volgende situatie</button>';
+   document.getElementById("continueRescue").onclick=()=>{rescueRound++;nextRescue()};
+ }else{
+   rescueMistakes++;
+   $("feedback").className="feedback error";
+   $("feedback").innerHTML=`❌ ${currentProblem.fail}<br><b>Kijk opnieuw naar de pan en herstel je keuze.</b>`;
+   if(currentProblem.name==="Dreigt aan te branden") $("sauce").className="sauce burnt";
+ }
+}
+function finishRescue(){
+ const stars=rescueMistakes===0?3:rescueMistakes<=2?2:1;
+ const bonus=stars*25; const paid=onceReward('rescue',bonus+120,stars*10+45);updateBest(stars);
+ let holder=document.getElementById("rescueActions"); if(holder) holder.remove();
+ $("sauce").className="sauce good";$("flame").className="flame";
+ $("goal").textContent="Service gered!";
+ $("attempt").textContent="Rescue Challenge voltooid";
+ $("feedback").className="feedback success";
+ $("feedback").textContent=`🏆 Je redde ${rescueScore}/3 sauzen.`;
+ $("result").classList.remove("hidden");
+ $("stars").textContent="⭐".repeat(stars)+"☆".repeat(3-stars);
+ $("resultTitle").textContent="Rescue Chef";
+ $("resultText").innerHTML=paid?`${stars}/3 sterren • +${bonus+120} XP • +${stars*10+45} coins<br><b>Je herkent nu fouten én weet hoe je moet ingrijpen.</b>`:`${stars}/3 sterren • oefenronde<br><b>Geen extra XP/coins: deze challenge is al beloond.</b>`;
+ $("next").textContent="🔁 Speel Rescue opnieuw";
+ $("next").onclick=()=>startRescue();
+ $("progress").style.width="100%";
+}
+
+// v9 app navigation + anti-farming rewards
+let earned={tutorial:false,free:false,rescue:false};
+let bestStars=0;
+function updateBest(n){ if(n>bestStars){bestStars=n;$("best").textContent=n;} }
+const originalReward=reward;
+function onceReward(key,x,c){
+ if(!earned[key]){ earned[key]=true; originalReward(x,c); return true; }
+ return false;
+}
+function resetToTraining(){
+ hideHome();
+ mode="tutorial";tutorialStep=1;attempts=0;clear();
+ $("result").classList.add("hidden");$("tip").classList.remove("hidden");
+ $("modeLabel").textContent="RONDE 1 • CHEF-TUTORIAL";$("title").textContent="Béchamel leren";
+ $("subtitle").textContent="De chef helpt je één keer. Daarna sta je er zelf voor.";
+ $("goal").textContent="Maak een gladde béchamel";$("attempt").textContent="Tutorial • stap 1 van 3";
+ $("feedback").className="feedback";$("feedback").textContent="Volg de chef tijdens je eerste bereiding.";
+ $("cook").classList.remove("hidden");document.querySelectorAll(".group").forEach(g=>g.classList.remove("hidden"));
+ let ra=document.getElementById("rescueActions");if(ra)ra.remove();
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("navTraining").classList.add("active");
+ tutorialGuide();
+}
+function startHome(){
+ mode="home";clear();$("result").classList.add("hidden");$("tip").classList.add("hidden");
+ $("modeLabel").textContent="CULILAB • CHEF ACADEMY";$("title").textContent="Wat wil je doen?";
+ $("subtitle").textContent="Leer een techniek, oefen zelfstandig of ga voor een topscore.";
+ $("goal").textContent="👩‍🍳 Chef Dashboard";
+ $("attempt").textContent=`Beste score • ${bestStars}/3 sterren`;
+ $("cook").classList.add("hidden");document.querySelectorAll(".group").forEach(g=>g.classList.add("hidden"));
+ let ra=document.getElementById("rescueActions");if(ra)ra.remove();
+ $("feedback").className="feedback";
+ $("feedback").innerHTML=`⭐ ${xp} XP &nbsp; • &nbsp; 🪙 ${coins} coins &nbsp; • &nbsp; 🏅 ${bestStars}`;
+ let home=document.getElementById("homeCards");
+ if(!home){home=document.createElement("div");home.id="homeCards";home.className="homecards";$("feedback").after(home);}
+ home.innerHTML=`
+ <div class="homecard"><b>🎓 Training</b><span>Leer béchamel één keer stap voor stap met de chef.</span><div class="badge">${earned.tutorial?"✓ gevolgd":"Aanbevolen start"}</div><button id="homeTrain">Start training</button></div>
+ <div class="homecard"><b>🥄 Keukentools</b><span>Leer gereedschap herkennen en kies wat je in een echte kooksituatie nodig hebt.</span><div class="badge">Mini-game</div><button id="homeTools">Garde of spatel?</button></div>
+ <div class="homecard"><b>👩‍🍳 Zelfstandig koken</b><span>Geen aanwijzingen. Laat zien dat je de techniek beheerst.</span><div class="badge">${earned.free?"✓ voltooid":"Challenge"}</div><button id="homeFree">Speel zelfstandig</button></div>
+ <div class="homecard"><b>🔥 Rescue Challenge</b><span>Herken wat er misgaat en red drie sauzen tijdens de service.</span><div class="badge">${earned.rescue?"✓ gespeeld":"3 situaties"}</div><button id="homeRescue">Start Rescue</button></div>`;
+ $("homeTrain").onclick=resetToTraining;
+ $("homeTools").onclick=startToolGame;
+ $("homeFree").onclick=startFreeMode;
+ $("homeRescue").onclick=()=>{setActiveNav("navChallenge");startRescue();};
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("navStart").classList.add("active");
+}
+function hideHome(){let h=document.getElementById("homeCards");if(h)h.remove();let t=document.getElementById("toolGame");if(t)t.remove();}
+function setActiveNav(id){document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$(id).classList.add("active");}
+
+let toolRound=0,toolMistakes=0;
+const toolQuestions=[
+ {q:"Je béchamelsaus heeft kleine klontjes. Wat pak je?",answer:"whisk",why:"Een garde verdeelt en mengt snel door de hele saus en helpt klontjes glad te kloppen."},
+ {q:"Je wilt een dikke saus rustig over de bodem bewegen en goed langs de rand schrapen. Wat pak je?",answer:"spatula",why:"Een spatel is handig om te roeren, omscheppen en langs bodem en randen te werken."},
+ {q:"Je wilt melk en roux tijdens het binden voortdurend glad mengen. Wat pak je?",answer:"whisk",why:"Bij het glad mengen van een saus is de garde de logische keuze."}
+];
+function startToolGame(){
+ hideHome();mode="tools";toolRound=0;toolMistakes=0;clear();
+ $("result").classList.add("hidden");$("tip").classList.add("hidden");$("cook").classList.add("hidden");
+ document.querySelectorAll(".group").forEach(g=>g.classList.add("hidden"));
+ $("modeLabel").textContent="MINI-GAME • KEUKENTOOLS";$("title").textContent="Garde of spatel?";
+ $("subtitle").textContent="Eerst herken je het gereedschap. Daarna kies je zonder hulp.";
+ $("goal").textContent="🥄 Kies het juiste gereedschap";setActiveNav("navTraining");
+ showToolQuestion();
+}
+function showToolQuestion(){
+ $("attempt").textContent=`Keukentools • vraag ${toolRound+1} van ${toolQuestions.length}`;
+ let q=toolQuestions[toolRound];
+ $("feedback").className="feedback";$("feedback").innerHTML=`<b>${q.q}</b>`;
+ let h=document.getElementById("toolGame");if(!h){h=document.createElement("div");h.id="toolGame";h.className="toolgame";$("feedback").after(h);}
+ h.innerHTML=`<div class="toolrow"><button class="toolchoice" id="pickWhisk">🥄<span>Garde</span></button><button class="toolchoice" id="pickSpatula">🍳<span>Spatel</span></button></div><div class="small">Kijk naar de situatie, niet alleen naar de naam van het gereedschap.</div>`;
+ $("pickWhisk").onclick=()=>toolAnswer("whisk");$("pickSpatula").onclick=()=>toolAnswer("spatula");
+}
+function toolAnswer(choice){
+ let q=toolQuestions[toolRound],h=$("toolGame");
+ if(choice===q.answer){
+   $("feedback").className="feedback success";$("feedback").innerHTML=`✓ <b>Goed gekozen.</b><br>${q.why}`;
+   h.innerHTML='<button class="primary" id="nextTool">➡️ Volgende</button>';
+   $("nextTool").onclick=()=>{toolRound++;if(toolRound<toolQuestions.length)showToolQuestion();else finishTools();};
+ }else{
+   toolMistakes++;$("feedback").className="feedback error";
+   $("feedback").innerHTML=`❌ Dat is hier niet de beste keuze.<br><b>Denk aan wat je met het gereedschap wilt doen.</b>`;
+ }
+}
+function finishTools(){
+ let h=document.getElementById("toolGame");if(h)h.remove();
+ const stars=toolMistakes===0?3:toolMistakes<=2?2:1;updateBest(stars);
+ $("result").classList.remove("hidden");$("feedback").className="feedback success";
+ $("feedback").textContent="🧠 Je hebt garde en spatel in praktijksituaties leren onderscheiden.";
+ $("stars").textContent="⭐".repeat(stars)+"☆".repeat(3-stars);
+ $("resultTitle").textContent="Toolkennis voltooid";
+ $("resultText").innerHTML=`${stars}/3 sterren<br><b>Nu terug naar het koken: kun je de juiste techniek ook toepassen?</b>`;
+ $("next").textContent="👩‍🍳 Zelfstandig béchamel maken";$("next").onclick=startFreeMode;
+}
+
+function startFreeMode(){
+ hideHome();mode="free";attempts=0;clear();$("result").classList.add("hidden");$("tip").classList.add("hidden");
+ $("modeLabel").textContent="RONDE 2 • JIJ BENT DE CHEF";$("title").textContent="Béchamel Challenge";
+ $("subtitle").textContent="Geen pijlen. Geen stappen. Gebruik wat je hebt geleerd.";
+ $("goal").textContent="Maak een gladde béchamel";$("attempt").textContent="Zelfstandig • poging 1";
+ $("feedback").className="feedback";$("feedback").textContent="Maak een gladde béchamel. Feedback krijg je pas na je bereiding.";
+ $("cook").classList.remove("hidden");document.querySelectorAll(".group").forEach(g=>g.classList.remove("hidden"));
+ setActiveNav("navTraining");
+}
+$("navStart").onclick=startHome;
+$("navTraining").onclick=resetToTraining;
+$("navChallenge").onclick=()=>{document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));$("navChallenge").classList.add("active");startRescue();};
+
+tutorialGuide();
+startHome();
+</script>
+</body></html>
