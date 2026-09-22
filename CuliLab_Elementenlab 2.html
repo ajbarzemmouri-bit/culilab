@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CuliLab • Elementenlab</title>
+<style>
+/* ============================================================
+   CuliLab: Elementenlab — standalone
+   Eén schone bron. Geen aparte "patch"-scripts meer: alle fixes
+   en uitbreidingen zitten in de hoofdlogica hieronder.
+   ============================================================ */
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#f7f0e3; --dark:#20150e; --gold:#f5a019; --orange:#ed7410;
+  --green:#e7f6e6; --red:#fde5df; --ink:#29231e; --paper:#fff;
+}
+body{margin:0;background:#17110d;font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+.app{max-width:460px;margin:auto;min-height:100vh;background:var(--cream);overflow:hidden;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
+header{padding:18px 18px 14px;color:#fff;background:linear-gradient(135deg,#21160f,#54351f)}
+.brandrow{display:flex;justify-content:space-between;align-items:flex-start}
+.brand{font-size:26px;font-weight:900}
+.tag{font-size:11px;letter-spacing:1.2px;opacity:.75;margin-top:2px}
+.rank{font-size:11px;font-weight:800;background:#ffffff18;border:1px solid #ffffff2a;border-radius:14px;padding:6px 10px;white-space:nowrap}
+.stats{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;padding:7px 10px;border-radius:16px}
+.progress{height:7px;background:#ffffff20;border-radius:8px;margin-top:12px;overflow:hidden}
+.progress i{display:block;height:100%;background:#ffc94f;transition:.3s}
+
+nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 12px;background:#2a1b12;position:sticky;top:0;z-index:20}
+nav.tabs button{margin:0;padding:9px 3px;background:#ffffff12;border:1px solid #ffffff25;color:#fff;font-size:12px;border-radius:12px;font-weight:800}
+nav.tabs button.active{background:var(--gold);border-color:var(--gold);color:#2a1b12}
+
+main{padding:14px 15px 26px}
+button{font-family:inherit;cursor:pointer}
+.btn{width:100%;border:2px solid #e0d3c1;background:#fff;border-radius:13px;padding:12px 8px;font-size:14px;font-weight:800;color:#60411d;box-shadow:0 2px 0 #d4c2ac}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--orange));border:0;color:#fff;font-size:16px;box-shadow:0 4px 0 #a64d08;padding:14px}
+.btn.primary:disabled{opacity:.5;box-shadow:none;filter:grayscale(.3)}
+.btn.ghost{background:transparent;border:2px solid #e0d3c1;color:#60411d;box-shadow:none}
+
+.hero{background:#ffefad;border-radius:17px;padding:18px;text-align:center;margin-bottom:12px}
+.hero h1{margin:6px 0 4px;font-size:22px}
+.hero p{margin:0;font-size:13.5px;line-height:1.4;color:#6b584b}
+.hero small{font-weight:900;letter-spacing:1.2px;color:#8c5b16;font-size:11px}
+
+.card{background:#fff;border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 2px 8px #00000010}
+
+/* ---- combine screen ---- */
+.roundline{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:#8b765e;margin-bottom:8px}
+.combine{position:relative;background:#2f2016;border-radius:18px;min-height:132px;padding:14px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.combine.haspick{background:#3a2717}
+.combineEmpty{color:#e8d3b6;text-align:center;font-size:13px;opacity:.85}
+.combineEmpty span{display:block;font-size:26px;margin-bottom:4px}
+.pick{background:#fff2d2;border-radius:14px;padding:8px 10px;text-align:center;font-weight:800;font-size:12px;color:#5b3c17;position:relative;min-width:56px;cursor:pointer;border:2px solid #ffd98a;transition:.15s}
+.pick:active{transform:scale(.94)}
+.pick .emoji{display:block;font-size:24px;margin-bottom:2px}
+.pick .x{position:absolute;top:-6px;right:-6px;background:#3a2717;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:900}
+.pickhint{text-align:center;font-size:11px;color:#c9ac86;margin-top:6px}
+
+.shelfLabel{font-size:11px;font-weight:900;letter-spacing:1px;color:#8b765e;margin:14px 0 8px}
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ing{background:#fff;border:2px solid #e2d2bd;border-radius:14px;padding:12px 4px;text-align:center;font-weight:800;font-size:12px;color:#5a3c1b}
+.ing .emoji{display:block;font-size:26px;margin-bottom:4px}
+.ing.locked{opacity:.4;filter:grayscale(1);background:#efe6d6}
+
+.feedback{padding:12px;border-radius:14px;text-align:center;background:#efebe5;line-height:1.4;margin-top:10px;font-size:13.5px}
+.feedback.good{background:var(--green)}
+.feedback.bad{background:var(--red)}
+
+.actiongrid,.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.choice{background:#fff;border:2px solid #e2d2bd;border-radius:15px;padding:16px 6px;text-align:center;font-weight:800;color:#5a3c1b;min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.choice .big{font-size:28px}
+.choice.wrong{background:#ffe1dc;border-color:#c85a49}
+.toolSvg{width:44px;height:44px}
+
+/* ---- do-phase mechanics ---- */
+.doZone{background:#2f2016;border-radius:18px;padding:22px 14px;text-align:center;margin:12px 0;position:relative;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none;user-select:none}
+.doZone .doIcon{font-size:46px;transition:transform .05s linear}
+.doLabel{color:#f3e3c8;font-size:13px;margin-top:10px;font-weight:700}
+.doBarWrap{width:100%;height:12px;background:#ffffff22;border-radius:8px;margin-top:14px;overflow:hidden}
+.doBar{height:100%;background:linear-gradient(90deg,#ffc94f,#ff8e0a);width:0%;transition:width .05s linear}
+.doBar.burnzone{background:linear-gradient(90deg,#ffc94f,#e03b1f)}
+.doGoodBand{position:relative;height:0}
+.doGoodBand i{position:absolute;top:-12px;height:12px;background:#ffffff33;border-radius:4px}
+.tapcount{font-size:22px;font-weight:900;color:#ffc94f;margin-top:8px}
+
+/* ---- discovery card ---- */
+.discover{background:#fff0b8;border-radius:18px;padding:22px;text-align:center;margin-top:6px}
+.discover .bowl{font-size:46px}
+.discover h2{margin:8px 0 4px;font-size:19px}
+.discover p{margin:0;font-size:13px;color:#6b584b;line-height:1.4}
+.discover .fresh{display:inline-block;margin-top:8px;background:#ff9d12;color:#fff;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:900}
+
+/* ---- celebration ---- */
+.celebrate{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.celebrateCard{position:relative;z-index:2;background:#fff;border-radius:20px;padding:26px 20px;text-align:center;box-shadow:0 10px 30px #0003;max-width:340px}
+.celebrateCard .trophy{font-size:44px}
+.celebrateCard h2{margin:6px 0}
+.celebrateCard .rank{display:inline-block;margin-top:4px}
+.unlock{background:#fff4d7;border:2px solid #f1bf5c;border-radius:16px;padding:14px;margin:14px 0;font-weight:800}
+.unlock span{font-size:36px;display:block;margin:4px 0}
+.fall{position:absolute;top:-10%;font-size:22px;animation:fall linear infinite;opacity:.9}
+@keyframes fall{
+  0%{transform:translateY(-10vh) rotate(0);opacity:.9}
+  90%{opacity:.9}
+  100%{transform:translateY(115vh) rotate(300deg);opacity:0}
+}
+
+/* ---- book & badges ---- */
+.tierBlock{margin-bottom:14px}
+.tierHead{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;color:#6b4a22;margin-bottom:8px}
+.tierHead .em{font-size:20px}
+.recipeRow{background:#fff;border-radius:13px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;box-shadow:0 1px 4px #0000000d}
+.recipeRow .em{font-size:22px;width:28px;text-align:center}
+.recipeRow b{font-size:13px;display:block}
+.recipeRow small{color:#8b765e;font-size:11px}
+.recipeRow.locked{opacity:.55}
+
+.badgeGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{background:#fff;border-radius:15px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px #00000010}
+.badge .em{font-size:30px;display:block;margin-bottom:6px}
+.badge b{font-size:12.5px;display:block}
+.badge small{font-size:11px;color:#8b765e}
+.badge.locked{opacity:.38;filter:grayscale(.6)}
+
+.center{text-align:center}
+.muted{color:#786b5d;font-size:12.5px}
+.hidden{display:none!important}
+.tipbtn{position:relative}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   1) DATA — alle ingrediënten, rondes en recepten op één plek.
+      Nieuwe ronde toevoegen = hier één object toevoegen, verder
+      hoeft er niets aangepast te worden.
+   ========================================================== */
+
+const TIERS = [
+  { unlock:null, recipes:[
+    {ids:['oil','vinegar'], product:'Vinaigrette', emoji:'🥗', act:'whisk',
+     story:'Olie en azijn met een garde krachtig kloppen geeft een simpele vinaigrette.'},
+    {ids:['oil','lemon'], product:'Citroendressing', emoji:'🍋', act:'whisk',
+     story:'Olie en citroensap met een garde kloppen geeft een frisse dressing.'},
+    {ids:['vinegar','mustard'], product:'Mosterd-azijnbasis', emoji:'🟡', act:'whisk',
+     story:'Mosterd en azijn glad kloppen levert een smaakvolle basis op.'},
+  ]},
+  { unlock:{id:'egg',icon:'🥚',name:'Ei'}, recipes:[
+    {ids:['egg','oil','mustard','lemon'], product:'Mayonaise', emoji:'🥣', act:'whisk',
+     story:'Ei, olie, mosterd en citroen emulgeren door goed kloppen tot mayonaise.'},
+    {ids:['egg','oil','mustard','vinegar'], product:'Mayonaise met azijn', emoji:'🥣', act:'whisk',
+     story:'Ook met azijn als zuur bouw je met ei, olie en mosterd een mayonaise op.'},
+  ]},
+  { unlock:{id:'garlic',icon:'🧄',name:'Knoflook'}, recipes:[
+    {ids:['garlic','oil'], product:'Knoflookolie', emoji:'🧄', act:'stir',
+     story:'Knoflook en olie rustig door elkaar roeren geeft een eenvoudige knoflookolie.'},
+    {ids:['garlic','oil','lemon'], product:'Citroen-knoflookolie', emoji:'🍋', act:'stir',
+     story:'Knoflook, olie en citroen samen roeren geeft een frisse smaakolie.'},
+    {ids:['garlic','oil','mustard','lemon'], product:'Knoflook-mosterddressing', emoji:'🥗', act:'whisk',
+     story:'Met mosterd en citroen wordt de knoflook-olie een dressing die je goed kunt kloppen.'},
+  ]},
+  { unlock:{id:'parsley',icon:'🌿',name:'Peterselie'}, recipes:[
+    {ids:['parsley','oil'], product:'Peterselieolie', emoji:'🌿', act:'stir',
+     story:'Peterselie en olie rustig roeren geeft een groene kruidenolie.'},
+    {ids:['parsley','oil','lemon'], product:'Citroen-peterselieolie', emoji:'🍋', act:'stir',
+     story:'Peterselie, olie en citroen samen vormen een frisse kruidenolie.'},
+    {ids:['parsley','garlic','oil'], product:'Knoflook-kruidenolie', emoji:'🧄', act:'stir',
+     story:'Peterselie, knoflook en olie samen roeren geeft een aromatische kruidenolie.'},
+  ]},
+  { unlock:{id:'basil',icon:'🌱',name:'Basilicum'}, recipes:[
+    {ids:['basil','oil'], product:'Basilicumolie', emoji:'🌱', act:'stir',
+     story:'Basilicum en olie rustig roeren geeft een aromatische basilicumolie.'},
+    {ids:['basil','oil','lemon'], product:'Citroen-basilicumolie', emoji:'🍋', act:'stir',
+     story:'Basilicum, olie en citroen samen vormen een frisse kruidenolie.'},
+    {ids:['basil','garlic','oil'], product:'Knoflook-basilicumolie', emoji:'🧄', act:'stir',
+     story:'Basilicum, knoflook en olie samen roeren geeft een aromatische smaakolie.'},
+  ]},
+  { unlock:{id:'mint',icon:'🍃',name:'Munt'}, recipes:[
+    {ids:['mint','oil'], product:'Muntolie', emoji:'🍃', act:'stir',
+     story:'Munt en olie samen roeren geeft een frisse muntolie.'},
+    {ids:['mint','oil','lemon'], product:'Citroen-muntolie', emoji:'🍋', act:'stir',
+     story:'Munt, olie en citroen samen vormen een frisse kruidenolie.'},
+    {ids:['mint','lemon'], product:'Citroen-muntbasis', emoji:'🍃', act:'stir',
+     story:'Munt en citroen vormen samen een frisse basis voor verdere bereidingen.'},
+  ]},
+  { unlock:{id:'honey',icon:'🍯',name:'Honing'}, recipes:[
+    {ids:['honey','mustard'], product:'Honing-mosterddressing', emoji:'🍯', act:'heat',
+     story:'Honing en mosterd zachtjes verwarmen laat ze soepel mengen tot een glanzende dressing.'},
+    {ids:['honey','lemon','oil'], product:'Honing-citroendressing', emoji:'🍋', act:'heat',
+     story:'Honing licht verwarmen met citroen en olie geeft een gladde, glanzende dressing.'},
+    {ids:['honey','garlic','oil'], product:'Honing-knoflookglaze', emoji:'🧄', act:'heat',
+     story:'Honing zachtjes verwarmen met knoflook en olie geeft een glanzende glaze.'},
+    {ids:['honey','mustard','garlic','lemon'], product:'Chef\'s Honing-mosterd-knoflookglaze', emoji:'🌟', act:'heat', signature:true,
+     story:'Vier smaken tegelijk in balans brengen: honing, mosterd, knoflook en citroen zachtjes verwarmen tot een glanzende chef-glaze.'},
+  ]},
+  { unlock:{id:'cream',icon:'🥛',name:'Room'}, recipes:[
+    {ids:['cream','mustard'], product:'Romige mosterdsaus', emoji:'🥛', act:'mix',
+     story:'Room en mosterd goed mixen geeft een romige, pittige saus.'},
+    {ids:['cream','lemon'], product:'Citroenroomsaus', emoji:'🍋', act:'mix',
+     story:'Room en citroen mixen geeft een frisse, romige saus.'},
+    {ids:['cream','garlic','parsley'], product:'Kruidenroomsaus', emoji:'🌿', act:'mix',
+     story:'Room mixen met knoflook en peterselie geeft een volle kruidenroomsaus.'},
+    {ids:['cream','honey','mustard','garlic'], product:'Meesterlijke Roomsaus', emoji:'🌟', act:'mix', signature:true,
+     story:'Room, honing, mosterd en knoflook in balans mixen tot een volle, gelaagde saus — vraagt gevoel voor verhoudingen.'},
+  ]},
+  { unlock:{id:'chili',icon:'🌶️',name:'Chili'}, recipes:[
+    {ids:['chili','oil'], product:'Chiliolie', emoji:'🌶️', act:'heat',
+     story:'Chili zachtjes verwarmen in olie trekt de pit erin en geeft chiliolie.'},
+    {ids:['chili','honey','lemon'], product:'Zoetzure chilisaus', emoji:'🍯', act:'heat',
+     story:'Chili met honing en citroen verwarmen geeft een zoetzure saus.'},
+    {ids:['chili','garlic','oil'], product:'Pittige knoflookpasta', emoji:'🧄', act:'stir',
+     story:'Chili, knoflook en olie samen roeren geeft een pittige pasta.'},
+    {ids:['chili','honey','garlic','oil','lemon'], product:'Chef\'s Vuur-en-Honingsaus', emoji:'🌟', act:'heat', signature:true,
+     story:'Vijf ingrediënten in evenwicht verwarmen zonder te verbranden — pit, zoet, knoflook en citroen in één glanzende saus.'},
+  ]},
+  { unlock:{id:'ginger',icon:'🫚',name:'Gember'}, recipes:[
+    {ids:['ginger','lemon','honey'], product:'Gember-citroendressing', emoji:'🫚', act:'stir',
+     story:'Gember roeren met citroen en honing geeft een frisse, scherpe dressing.'},
+    {ids:['ginger','garlic','oil'], product:'Gember-knoflookolie', emoji:'🧄', act:'stir',
+     story:'Gember en knoflook samen roeren door olie geeft een pittige smaakolie.'},
+    {ids:['ginger','mint','lemon'], product:'Frisse gembersaus', emoji:'🍃', act:'mix',
+     story:'Gember mixen met munt en citroen geeft een verfrissende saus.'},
+    {ids:['ginger','chili','honey','lemon','garlic'], product:'Chef\'s Gember-vuursaus', emoji:'🌟', act:'mix', signature:true,
+     story:'Vijf ingrediënten uit je reis tot nu toe samenbrengen tot één gedurfde, pittige saus.'},
+  ]},
+  { unlock:{id:'tomato',icon:'🍅',name:'Tomaat'}, recipes:[
+    {ids:['tomato','oil','garlic'], product:'Tomaten-knoflookolie', emoji:'🍅', act:'stir',
+     story:'Tomaat, olie en knoflook rustig roeren geeft een smaakvolle tomatenolie.'},
+    {ids:['tomato','basil','oil'], product:'Tomaat-basilicumolie', emoji:'🌱', act:'stir',
+     story:'Tomaat, basilicum en olie samen roeren geeft een zomerse kruidenolie.'},
+    {ids:['tomato','chili','garlic'], product:'Pittige tomatensaus', emoji:'🌶️', act:'heat',
+     story:'Tomaat, chili en knoflook zachtjes verwarmen geeft een pittige tomatensaus.'},
+    {ids:['tomato','cream','basil','garlic'], product:'Chef\'s Tomaten-roomsaus', emoji:'🌟', act:'mix', signature:true,
+     story:'Tomaat, room, basilicum en knoflook in balans mixen tot een volle, romige tomatensaus.'},
+  ]},
+  { unlock:{id:'butter',icon:'🧈',name:'Boter'}, recipes:[
+    {ids:['butter','lemon'], product:'Citroenboter', emoji:'🍋', act:'heat',
+     story:'Boter zachtjes smelten met citroen geeft een frisse, romige botersaus.'},
+    {ids:['butter','garlic','parsley'], product:'Kruidenboter', emoji:'🌿', act:'heat',
+     story:'Boter smelten met knoflook en peterselie geeft een klassieke kruidenboter.'},
+    {ids:['butter','mustard','honey'], product:'Honing-mosterdboter', emoji:'🍯', act:'heat',
+     story:'Boter smelten met mosterd en honing geeft een zoet-pittige botersaus.'},
+    {ids:['butter','lemon','garlic','parsley','chili'], product:'Chef\'s Kruidenboter Deluxe', emoji:'🌟', act:'heat', signature:true,
+     story:'Vijf ingrediënten voorzichtig samensmelten zonder te verbranden tot een gelaagde kruidenboter.'},
+  ]},
+  { unlock:{id:'soy',icon:'🫘',name:'Sojasaus'}, recipes:[
+    {ids:['soy','ginger'], product:'Gember-sojasaus', emoji:'🫚', act:'stir',
+     story:'Sojasaus en gember samen roeren geeft een pittige, zilte basis.'},
+    {ids:['soy','honey','garlic'], product:'Teriyaki-stijl saus', emoji:'🍯', act:'heat',
+     story:'Sojasaus, honing en knoflook zachtjes verwarmen geeft een glanzende, zoet-zilte saus.'},
+    {ids:['soy','lemon','chili'], product:'Pittige soja-limoensaus', emoji:'🌶️', act:'stir',
+     story:'Sojasaus, citroen en chili samen roeren geeft een frisse, pittige dipsaus.'},
+    {ids:['soy','ginger','honey','chili','garlic'], product:'Chef\'s Aziatische Signatuursaus', emoji:'🌟', act:'mix', signature:true,
+     story:'Vijf ingrediënten uit de Aziatische hoek samenbrengen tot één diepe, gelaagde saus.'},
+  ]},
+  { unlock:{id:'yogurt',icon:'🫙',name:'Yoghurt'}, recipes:[
+    {ids:['yogurt','lemon','garlic'], product:'Tzatziki-achtige dip', emoji:'🥒', act:'mix',
+     story:'Yoghurt, citroen en knoflook mixen geeft een frisse, romige dip.'},
+    {ids:['yogurt','mint','lemon'], product:'Muntyoghurtsaus', emoji:'🍃', act:'mix',
+     story:'Yoghurt, munt en citroen mixen geeft een verfrissende sausbasis.'},
+    {ids:['yogurt','honey'], product:'Honingyoghurtdressing', emoji:'🍯', act:'mix',
+     story:'Yoghurt en honing samen mixen geeft een zachte, zoete dressing.'},
+    {ids:['yogurt','garlic','mint','lemon','parsley'], product:'Chef\'s Yoghurt-kruidensaus', emoji:'🌟', act:'mix', signature:true,
+     story:'Vijf ingrediënten in balans mixen tot een volle, frisse yoghurtsaus met kruiden.'},
+  ]},
+  { unlock:{id:'capers',icon:'🫒',name:'Kappertjes'}, recipes:[
+    {ids:['capers','lemon','oil'], product:'Kappertjes-citroenolie', emoji:'🍋', act:'stir',
+     story:'Kappertjes, citroen en olie samen roeren geeft een pittig-frisse smaakolie.'},
+    {ids:['capers','butter','lemon'], product:'Kappertjessaus', emoji:'🧈', act:'heat',
+     story:'Kappertjes zachtjes verwarmen met boter en citroen geeft een klassieke pittige botersaus.'},
+    {ids:['capers','garlic','parsley','oil'], product:'Kappertjes-kruidenolie', emoji:'🌿', act:'stir',
+     story:'Kappertjes, knoflook, peterselie en olie samen roeren geeft een kruidige smaakolie.'},
+    {ids:['capers','butter','lemon','parsley','garlic'], product:'Meesterproef: CuliLab Signatuursaus', emoji:'👑', act:'heat', signature:true,
+     story:'De ultieme test: vijf ingrediënten uit je hele reis door de keuken samenbrengen tot één signatuursaus.'},
+  ]},
+];
+
+
+const START_INGREDIENTS = [
+  {id:'oil',icon:'🫗',name:'Olie'}, {id:'vinegar',icon:'🍶',name:'Azijn'},
+  {id:'lemon',icon:'🍋',name:'Citroen'}, {id:'mustard',icon:'🟡',name:'Mosterd'},
+];
+
+const TOOL_OF = {whisk:'🌀 Garde', stir:'🥄 Lepel', heat:'🔥 Pan', mix:'⚡ Mixer'};
+const TOOL_SVG = {
+  whisk:`<svg class="toolSvg" viewBox="0 0 80 80"><g fill="none" stroke="#39434a" stroke-width="3" stroke-linecap="round"><path d="M40 55L40 74" stroke-width="7"/><path d="M40 56C15 42 20 10 40 8C60 10 65 42 40 56Z"/><path d="M40 56C28 40 29 15 40 8C51 15 52 40 40 56Z"/><path d="M40 56C35 38 35 17 40 8C45 17 45 38 40 56Z"/></g></svg>`,
+  stir:`<svg class="toolSvg" viewBox="0 0 80 80"><g stroke="#39434a" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="40" cy="18" rx="8.5" ry="12.5" fill="#d9e0e4" stroke-width="2.2"/><path d="M40 30.5 L40 70" fill="none" stroke-width="5.5"/><path d="M36.5 69.5 Q40 74 43.5 69.5" fill="none" stroke-width="2"/></g></svg>`,
+  heat:`<svg class="toolSvg" viewBox="0 0 80 80"><ellipse cx="40" cy="55" rx="28" ry="10" fill="#d9e0e4" stroke="#39434a" stroke-width="3"/><path d="M18 55 L12 55" stroke="#39434a" stroke-width="5" stroke-linecap="round"/><path d="M40 40C34 30 44 24 38 12C48 18 52 30 44 38C50 36 52 30 50 26C56 32 54 44 40 40Z" fill="#ff9d12"/></svg>`,
+  mix:`<svg class="toolSvg" viewBox="0 0 80 80"><rect x="34" y="10" width="12" height="34" rx="5" fill="#c9d2d7" stroke="#39434a" stroke-width="2"/><path d="M40 44 L28 70 M40 44 L52 70" stroke="#39434a" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="70" r="3" fill="#39434a"/><circle cx="52" cy="70" r="3" fill="#39434a"/></g></svg>`,
+};
+
+const RANKS = [
+  {min:0,  name:'Keukenhulp'}, {min:3,  name:'Kok in opleiding'},
+  {min:9,  name:'Sous-chef'},  {min:17, name:'Chef'},
+  {min:25, name:'Meesterchef'},{min:33, name:'Grootmeester'},
+  {min:41, name:'Sterrenchef'},{min:53, name:'Culinair Legende'},
+];
+
+const SIGNATURE_PRODUCTS = TIERS.flatMap(t=>t.recipes).filter(r=>r.signature).map(r=>r.product);
+const BADGES = [
+  {id:'first',  em:'✨', name:'Eerste ontdekking', need:s=>s.products.size>=1},
+  {id:'tier0',  em:'🥗', name:'Basis beheerst',     need:s=>s.products.size>=3},
+  {id:'half',   em:'🌗', name:'Halverwege',          need:s=>s.products.size>=15},
+  {id:'all',    em:'🏆', name:'Alles ontdekt',       need:s=>s.products.size>=TOTAL_RECIPES()},
+  {id:'streak5',em:'🔥', name:'5 op rij zonder fout',need:s=>s.bestStreak>=5},
+  {id:'notip',  em:'🧠', name:'5x zonder tip',       need:s=>s.bestNoTipStreak>=5},
+  {id:'heat3',  em:'🍯', name:'Warmte onder controle',need:s=>s.heatSuccesses>=3},
+  {id:'fast',   em:'⚡', name:'Snelle handen',        need:s=>s.fastestDo!=null&&s.fastestDo<2200},
+  {id:'signature', em:'👑', name:'Signatuurchef',    need:s=>SIGNATURE_PRODUCTS.every(p=>s.products.has(p))},
+];
+
+function TOTAL_RECIPES(){ return TIERS.reduce((n,t)=>n+t.recipes.length,0); }
+
+/* ==========================================================
+   2) STATE
+   ========================================================== */
+const SAVE_KEY = 'culilab_elementenlab_save_v1';
+
+/* Vingerafdruk van de huidige receptendata. Verandert automatisch zodra ik
+   rondes/recepten toevoeg of wijzig — zo herkent het spel een save die niet
+   meer bij de huidige inhoud past, en start het dan schoon op in plaats van
+   vast te lopen op een mismatch tussen oude voortgang en nieuwe data. */
+function currentDataVersion(){
+  return TOTAL_RECIPES()+':'+TIERS.map(t=>t.recipes.length).join(',');
+}
+
+function freshState(){
+  return {
+    phase:'home',           // home | ingredients | action | tool | do | discover | celebrate | book | badges | win
+    pick:[],                // gekozen ingrediënten (objecten)
+    current:null,            // huidig recept tijdens action/tool/do/discover
+    msg:'Kies ingrediënten en tik daarna op Bereid.',
+    msgType:'',
+    tierIndex:0,             // hoogste ontgrendelde tier-index
+    products:new Set(),      // ontdekte productnamen
+    tipCount:0,
+    streak:0, bestStreak:0,
+    tipStreak:0, bestNoTipStreak:0,
+    heatSuccesses:0,
+    fastestDo:null,
+    pendingUnlock:null,
+    mistakesThisAttempt:0,
+    muted:false,
+  };
+}
+let S = freshState();
+
+function serialize(){
+  return JSON.stringify({...S, products:[...S.products], dataVersion:currentDataVersion()});
+}
+function loadRaw(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    if(d.dataVersion !== currentDataVersion()){
+      try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+      return null;
+    }
+    d.products = new Set(d.products||[]);
+    if(d.phase==='celebrate'||d.phase==='action'||d.phase==='tool'||d.phase==='do'||d.phase==='discover'){
+      d.phase='ingredients'; d.pick=[]; d.current=null;
+    }
+    return d;
+  }catch(e){ return null; }
+}
+function save(){ try{ localStorage.setItem(SAVE_KEY, serialize()); }catch(e){} }
+function hasSave(){ return loadRaw()!==null; }
+function load(){ const d=loadRaw(); S = d || freshState(); }
+
+/* ==========================================================
+   2b) GELUID — gesynthetiseerd met de Web Audio API, geen
+       externe bestanden nodig. Alles faalt stil als de
+       browser geen AudioContext ondersteunt.
+   ========================================================== */
+let audioCtx = null;
+function getAudioCtx(){
+  if(S.muted) return null;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    return audioCtx;
+  }catch(e){ return null; }
+}
+function tone(freq, start, dur, type, gain){
+  const ctx = getAudioCtx(); if(!ctx) return;
+  const osc = ctx.createOscillator(); const g = ctx.createGain();
+  osc.type = type||'sine'; osc.frequency.value = freq;
+  osc.connect(g); g.connect(ctx.destination);
+  const t0 = ctx.currentTime + start;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain||0.15, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function sndClick(){ tone(520,0,0.08,'sine',0.06); }
+function sndSuccess(){ tone(523,0,0.14,'sine',0.12); tone(659,0.08,0.16,'sine',0.12); tone(784,0.16,0.22,'sine',0.14); }
+function sndSignature(){ tone(523,0,0.12,'triangle',0.12); tone(659,0.1,0.12,'triangle',0.12); tone(784,0.2,0.12,'triangle',0.12); tone(1047,0.3,0.3,'triangle',0.16); }
+function sndFail(){ tone(300,0,0.12,'sawtooth',0.08); tone(220,0.1,0.2,'sawtooth',0.08); }
+function sndFanfare(){
+  const notes=[523,659,784,1047,784,1047];
+  notes.forEach((f,i)=> tone(f, i*0.13, 0.22, 'triangle', 0.14));
+}
+function toggleMute(){ S.muted=!S.muted; save(); render(); }
+
+/* ==========================================================
+   3) SPELLOGICA
+   ========================================================== */
+function availableIngredients(){
+  const list=[...START_INGREDIENTS];
+  for(let i=0;i<S.tierIndex;i++){ if(TIERS[i+1] && TIERS[i+1].unlock) list.push(TIERS[i+1].unlock); }
+  return list;
+}
+function visibleRecipes(){
+  let list=[];
+  for(let i=0;i<=S.tierIndex;i++) list = list.concat(TIERS[i].recipes);
+  return list;
+}
+function findExactRecipe(ids){
+  const key=[...ids].sort().join('|');
+  return visibleRecipes().find(r=>[...r.ids].sort().join('|')===key) || null;
+}
+function findPartialRecipe(ids){
+  // Zoekt een recept waar de huidige keuze een deel van is (maar nog niet compleet) —
+  // gebruikt om een bemoedigende hint te geven in plaats van "fout".
+  return visibleRecipes().find(r=>r.ids.length>ids.length && ids.every(id=>r.ids.includes(id))) || null;
+}
+function rank(){
+  let cur=RANKS[0];
+  for(const r of RANKS){ if(S.products.size>=r.min) cur=r; }
+  return cur.name;
+}
+function maxPick(){ return S.tierIndex>=1 ? 5 : 2; }
+
+/* Een mislukte poging: ingrediënten kwijt, streak weg, terug naar start.
+   Dit maakt fouten echt kostbaar in plaats van gratis herkansen. */
+function failAttempt(msg){
+  S.streak=0;
+  S.pick=[]; S.current=null; S.phase='ingredients';
+  S.msg=msg; S.msgType='bad';
+  S.mistakesThisAttempt=0;
+  sndFail();
+  save();
+  render();
+}
+
+function selectIngredient(id){
+  const e = availableIngredients().find(x=>x.id===id);
+  if(!e) return;
+  const ix = S.pick.findIndex(x=>x.id===id);
+  if(ix>=0){ S.pick.splice(ix,1); S.msg='Kies je ingrediënten.'; S.msgType=''; render(); return; }
+  if(S.pick.length>=maxPick()) S.pick.shift();
+  S.pick.push(e);
+  S.msg = S.pick.length===1 ? 'Kies nog een ingrediënt, of tik op Bereid wanneer je klaar bent.' : 'Klaar? Tik op Bereid.';
+  S.msgType='';
+  render();
+}
+function removePick(idx){
+  S.pick.splice(idx,1);
+  S.msg = S.pick.length ? 'Pas je combinatie aan of tik op Bereid.' : 'Kies ingrediënten.';
+  render();
+}
+function prepare(){
+  if(S.pick.length<2){ S.msg='Kies eerst minstens twee ingrediënten.'; S.msgType='bad'; render(); return; }
+  const ids = S.pick.map(x=>x.id);
+  const r = findExactRecipe(ids);
+  if(!r){
+    const partial = findPartialRecipe(ids);
+    if(partial){
+      const missing = partial.ids.length - ids.length;
+      S.msg='🤔 Interessant begin! Deze combinatie heeft nog '+missing+(missing===1?' ingrediënt':' ingrediënten')+' nodig om iets te worden.';
+      S.msgType=''; render();
+      return;
+    }
+    S.msg='Nog geen bekende combinatie. Probeer iets anders.'; S.msgType='bad'; render();
+    setTimeout(()=>{ S.pick=[]; S.msg='Kies opnieuw en ontdek wat wél samenwerkt.'; S.msgType=''; render(); }, 1000);
+    return;
+  }
+  if(S.products.has(r.product)){
+    S.msg='✓ Al ontdekt: '+r.product+'. Terug te vinden in je receptenboek.'; S.msgType='good'; render();
+    return;
+  }
+  S.current=r; S.phase='action'; S.msg='✨ Combinatie gevonden! Welke handeling hoort hierbij?'; S.msgType='';
+  S.mistakesThisAttempt=0;
+  render();
+}
+function chooseAction(a){
+  if(a!==S.current.act){
+    S.mistakesThisAttempt++;
+    if(S.mistakesThisAttempt>=2){
+      failAttempt('❌ Tweede misser — de combinatie is mislukt. Begin opnieuw.');
+      return;
+    }
+    S.streak=0;
+    S.msg='↩️ Dat geeft niet het gewenste effect. Let op: nog één misser en je verliest deze combinatie.'; S.msgType='bad'; render();
+    return;
+  }
+  S.phase='tool'; S.msg='✓ Goed! Welk gereedschap heb je hierbij nodig?'; S.msgType=''; render();
+}
+function chooseTool(t){
+  const expected = S.current.act; // tool-id komt overeen met actie-id in dit ontwerp
+  if(t!==expected){
+    S.mistakesThisAttempt++;
+    if(S.mistakesThisAttempt>=2){
+      failAttempt('❌ Tweede misser — de combinatie is mislukt. Begin opnieuw.');
+      return;
+    }
+    S.streak=0;
+    S.msg='↩️ Dit gereedschap past niet bij deze handeling. Let op: nog één misser en je verliest deze combinatie.'; S.msgType='bad'; render();
+    return;
+  }
+  S.phase='do'; S.msg=''; S.doStart=Date.now();
+  render();
+}
+function completeDo(){
+  const elapsed = Date.now()-(S.doStart||Date.now());
+  if(S.fastestDo==null || elapsed<S.fastestDo) S.fastestDo=elapsed;
+  const r=S.current;
+  const fresh = !S.products.has(r.product);
+  S.products.add(r.product);
+  S.streak++; if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+  if(S.tipCount===0){ S.tipStreak++; if(S.tipStreak>S.bestNoTipStreak) S.bestNoTipStreak=S.tipStreak; } else S.tipStreak=0;
+  if(r.act==='heat') S.heatSuccesses++;
+  S.tipCount=0;
+  S.phase='discover';
+  S.msg = fresh ? '✨ Nieuw product toegevoegd aan je verzameling!' : '🔁 Deze ken je al — goed uitgevoerd.';
+  S.freshDiscovery=fresh;
+  if(r.signature) sndSignature(); else if(fresh) sndSuccess(); else sndClick();
+  save();
+  render();
+}
+function afterDiscover(){
+  const nextTier = TIERS[S.tierIndex+1];
+  const tierRecipeCount = TIERS.slice(0,S.tierIndex+1).reduce((n,t)=>n+t.recipes.length,0);
+  if(nextTier && S.products.size>=tierRecipeCount && S.products.size===tierRecipeCount){
+    S.pendingUnlock = nextTier.unlock;
+    S.tierIndex++;
+    S.phase='celebrate';
+    sndFanfare();
+    render();
+    return;
+  }
+  if(S.products.size>=TOTAL_RECIPES()){
+    S.phase='win'; sndFanfare(); render(); return;
+  }
+  S.phase='ingredients'; S.pick=[]; S.current=null; S.msg='Wat kun je nog ontdekken?'; S.msgType='';
+  render();
+}
+function useTip(){
+  if(S.tipCount>=3) return;
+  S.tipCount++;
+  const generic = [
+    'Begin met twee ingrediënten die je nog niet samen probeerde.',
+    'Een zuur ingrediënt (azijn of citroen) combineert vaak met olie of mosterd.',
+    'Sommige combinaties hebben drie of vier ingrediënten nodig — kijk wat je nog niet probeerde.',
+  ];
+  S.msg='🧪 Tip '+S.tipCount+'/3: '+generic[S.tipCount-1];
+  S.msgType='';
+  render();
+}
+function resetGame(){
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  S = freshState();
+  render();
+}
+
+/* ==========================================================
+   4) DO-FASE MECHANIEK (per actietype)
+   ========================================================== */
+let gesture = {active:false,lastAngle:0,travel:0};
+let holdRaf = null, holdVal=0, holdDir=1;
+let tapCount = 0;
+
+function bindDoMechanic(){
+  const act = S.current.act;
+  if(act==='whisk' || act==='stir') bindGesture(act);
+  else if(act==='heat') bindHold();
+  else if(act==='mix') bindTap();
+}
+function bindGesture(act){
+  const zone = document.getElementById('doZone');
+  if(!zone) return;
+  const required = act==='stir' ? Math.PI*13 : Math.PI*9;
+  gesture = {active:false,lastAngle:0,travel:0};
+  const angle=(p,r)=>Math.atan2(p.clientY-(r.top+r.height/2), p.clientX-(r.left+r.width/2));
+  const start=e=>{
+    e.preventDefault();
+    const r=zone.getBoundingClientRect();
+    const p=e.touches?e.touches[0]:e;
+    gesture.active=true; gesture.lastAngle=angle(p,r);
+  };
+  const move=e=>{
+    if(!gesture.active) return;
+    e.preventDefault();
+    const r=zone.getBoundingClientRect();
+    const p=e.touches?e.touches[0]:e;
+    const a=angle(p,r);
+    let d=a-gesture.lastAngle;
+    if(d>Math.PI) d-=Math.PI*2; if(d<-Math.PI) d+=Math.PI*2;
+    gesture.travel+=Math.abs(d); gesture.lastAngle=a;
+    const pct=Math.min(100,(gesture.travel/required)*100);
+    const bar=document.getElementById('doBar'); if(bar) bar.style.width=pct+'%';
+    const icon=document.getElementById('doIcon'); if(icon) icon.style.transform=`rotate(${gesture.travel*57.2958}deg)`;
+    if(pct>=100){ gesture.active=false; completeDo(); }
+  };
+  const end=()=>{ gesture.active=false; };
+  zone.addEventListener('pointerdown',start); zone.addEventListener('pointermove',move);
+  zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end);
+  zone.addEventListener('touchstart',start,{passive:false}); zone.addEventListener('touchmove',move,{passive:false});
+  zone.addEventListener('touchend',end);
+}
+function bindHold(){
+  const zone=document.getElementById('doZone');
+  if(!zone) return;
+  holdVal=0;
+  let holding=false, burnt=false;
+  const GOOD_MIN=72, GOOD_MAX=100, BURN_AT=100;
+  const step=()=>{
+    if(!holding) return;
+    holdVal += 1.6;
+    const bar=document.getElementById('doBar'); const wrap=document.getElementById('doBar');
+    if(bar) bar.style.width=Math.min(100,holdVal)+'%';
+    if(holdVal>=BURN_AT+18 && !burnt){
+      burnt=true; holding=false;
+      holdVal=0;
+      failAttempt('🔥 Verbrand! Je ingrediënten zijn onbruikbaar geworden — begin opnieuw.');
+      return;
+    }
+    holdRaf=requestAnimationFrame(step);
+  };
+  const start=e=>{ e.preventDefault(); holding=true; burnt=false; holdVal=0; holdRaf=requestAnimationFrame(step); };
+  const stop=e=>{
+    e && e.preventDefault();
+    if(!holding) return;
+    holding=false; cancelAnimationFrame(holdRaf);
+    if(burnt) return;
+    if(holdVal>=GOOD_MIN && holdVal<=BURN_AT+18){ completeDo(); }
+    else { S.msg='Nog niet warm genoeg — hou iets langer vast.'; S.msgType='bad'; holdVal=0; render(); }
+  };
+  zone.addEventListener('pointerdown',start); zone.addEventListener('pointerup',stop);
+  zone.addEventListener('pointercancel',stop);
+  zone.addEventListener('touchstart',start,{passive:false}); zone.addEventListener('touchend',stop);
+}
+function bindTap(){
+  tapCount=0;
+  const NEEDED=12;
+  const btn=document.getElementById('tapBtn');
+  if(!btn) return;
+  const onTap=e=>{
+    e.preventDefault();
+    tapCount++;
+    const bar=document.getElementById('doBar'); if(bar) bar.style.width=Math.min(100,(tapCount/NEEDED)*100)+'%';
+    const label=document.getElementById('tapCount'); if(label) label.textContent=tapCount+' / '+NEEDED;
+    const icon=document.getElementById('doIcon'); if(icon){ icon.style.transform=`rotate(${tapCount*35}deg)`; }
+    if(tapCount>=NEEDED) completeDo();
+  };
+  btn.addEventListener('pointerdown',onTap);
+}
+
+/* ==========================================================
+   5) RENDER
+   ========================================================== */
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+function header(showBack){
+  const total=TOTAL_RECIPES();
+  return `
+  <header>
+    <div class="brandrow">
+      <div><div class="brand">🧪 Elementenlab</div><div class="tag">CULILAB • ONTDEK &amp; COMBINEER</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="btnMute" style="border:0;background:#ffffff18;color:#fff;border-radius:12px;width:34px;height:34px;font-size:15px" type="button">${S.muted?'🔇':'🔊'}</button>
+        <div class="rank">${rank()}</div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="pill">🔬 ${S.products.size}/${total}</div>
+      <div class="pill">🔥 streak ${S.streak}</div>
+    </div>
+    <div class="progress"><i style="width:${(S.products.size/total*100).toFixed(1)}%"></i></div>
+  </header>
+  ${showBack?`<nav class="tabs">
+    <button data-nav="ingredients" class="${S.phase==='ingredients'?'active':''}">🧪 Lab</button>
+    <button data-nav="book">📖 Recepten</button>
+    <button data-nav="badges">🏅 Prestaties</button>
+  </nav>`:''}
+  `;
+}
+
+function screenHome(){
+  const resumable = S.products.size>0;
+  return `
+  <main>
+    <div class="hero">
+      <small>CULILAB PRESENTEERT</small>
+      <h1>🧪 Elementenlab</h1>
+      <p>Combineer ingrediënten, ontdek wat werkt, en bouw je eigen sauzenkeuken op — van vinaigrette tot gemberdressing.</p>
+    </div>
+    <div class="card">
+      <p class="muted" style="margin-top:0">${TOTAL_RECIPES()} combinaties te ontdekken, verdeeld over ${TIERS.length} rondes. Elke ronde ontgrendel je een nieuw ingrediënt.</p>
+      <button class="btn primary" id="btnStart">${resumable?'▶️ Verdergaan':'🚀 Start Elementenlab'}</button>
+      ${resumable?'<button class="btn ghost" id="btnReset" style="margin-top:8px">🔄 Opnieuw beginnen</button>':''}
+    </div>
+  </main>`;
+}
+
+function screenIngredients(){
+  const shelf = availableIngredients().filter(e=>!S.pick.some(p=>p.id===e.id));
+  const nextTier = TIERS[S.tierIndex+1];
+  return `
+  <main>
+    <div class="roundline"><span>RONDE ${S.tierIndex+1} / ${TIERS.length}</span><span>💡 <button class="tipbtn" id="btnTip" style="border:0;background:none;font-weight:900;color:#8b5a17" ${S.tipCount>=3?'disabled':''}>Tip ${3-S.tipCount}/3</button></span></div>
+    <div class="combine ${S.pick.length?'haspick':''}" id="combineZone">
+      ${S.pick.length ? S.pick.map((p,i)=>`<div class="pick" data-remove="${i}"><span class="emoji">${p.icon}</span>${p.name}<span class="x">✕</span></div>`).join('')
+        : `<div class="combineEmpty"><span>＋</span>Kies hieronder je eerste ingrediënt</div>`}
+    </div>
+    ${S.pick.length?'<div class="pickhint">Tik op een ingrediënt om het terug te leggen.</div>':''}
+    <button class="btn primary" id="btnPrepare" style="margin-top:12px" ${S.pick.length<2?'disabled':''}>Bereid →</button>
+    <div class="feedback ${S.msgType}">${S.msg}</div>
+    <div class="shelfLabel">INGREDIËNTEN</div>
+    <div class="shelf">
+      ${shelf.map(e=>`<button class="ing" data-pick="${e.id}"><span class="emoji">${e.icon}</span>${e.name}</button>`).join('')}
+      ${nextTier ? `<div class="ing locked"><span class="emoji">🔒</span>?</div>` : ''}
+    </div>
+  </main>`;
+}
+
+function screenAction(){
+  const options=[
+    {a:'whisk',big:'🌀',label:'Kloppen'}, {a:'stir',big:'🥄',label:'Roeren'},
+    {a:'heat',big:'🔥',label:'Verwarmen'}, {a:'mix',big:'⚡',label:'Mixen'},
+  ];
+  return `
+  <main>
+    <div class="card center">
+      <b>🎲 Welke handeling hoort hierbij?</b>
+      <div class="actiongrid">
+        ${options.map(o=>`<button class="choice" data-action="${o.a}"><span class="big">${o.big}</span>${o.label}</button>`).join('')}
+      </div>
+      <div class="feedback ${S.msgType}">${S.msg}</div>
+    </div>
+  </main>`;
+}
+function screenTool(){
+  const tools=['whisk','stir','heat','mix'];
+  return `
+  <main>
+    <div class="card center">
+      <b>🧰 Welk gereedschap heb je hierbij nodig?</b>
+      <div class="toolgrid">
+        ${tools.map(t=>`<button class="choice" data-tool="${t}">${TOOL_SVG[t]}${TOOL_OF[t].split(' ')[1]}</button>`).join('')}
+      </div>
+      <div class="feedback ${S.msgType}">${S.msg}</div>
+    </div>
+  </main>`;
+}
+function screenDo(){
+  const act=S.current.act;
+  let inner='';
+  if(act==='whisk'||act==='stir'){
+    inner=`<div class="doIcon" id="doIcon">${act==='whisk'?'🌀':'🥄'}</div>
+      <div class="doLabel">↻ Maak cirkels met je vinger in het vlak</div>
+      <div class="doBarWrap"><div class="doBar" id="doBar"></div></div>`;
+  } else if(act==='heat'){
+    inner=`<div class="doIcon" id="doIcon">🔥</div>
+      <div class="doLabel">Houd ingedrukt om te verwarmen — laat op tijd los, niet te vroeg en niet te laat!</div>
+      <div class="doBarWrap"><div class="doBar burnzone" id="doBar"></div></div>`;
+  } else if(act==='mix'){
+    inner=`<div class="doIcon" id="doIcon">⚡</div>
+      <div class="doLabel">Tik zo snel mogelijk op de mixer-knop</div>
+      <div class="doBarWrap"><div class="doBar" id="doBar"></div></div>
+      <div class="tapcount" id="tapCount">0 / 12</div>
+      <button class="btn primary" id="tapBtn" style="margin-top:10px">⚡ Mix!</button>`;
+  }
+  return `
+  <main>
+    <div class="card center">
+      <b>👆 Doe het zelf</b>
+      <div class="doZone" id="doZone">${inner}</div>
+      <div class="feedback ${S.msgType}">${S.msg}</div>
+    </div>
+  </main>`;
+}
+function screenDiscover(){
+  const r=S.current;
+  return `
+  <main>
+    <div class="discover" style="${r.signature?'background:linear-gradient(135deg,#fff0b8,#ffd98a);border:2px solid #d89a48':''}">
+      <div class="bowl">${r.signature?'👑✨':'🥣✨'}</div>
+      ${r.signature?'<div class="fresh" style="background:#7a4a10;margin-bottom:6px">⭐ SIGNATUURGERECHT</div>':''}
+      <h2>${r.emoji} ${r.product}</h2>
+      <p>${r.story}</p>
+      ${S.freshDiscovery?'<span class="fresh">✓ Nieuw in je verzameling</span>':''}
+    </div>
+    <button class="btn primary" id="btnContinue" style="margin-top:14px">Verder ontdekken →</button>
+  </main>`;
+}
+function screenCelebrate(){
+  const u=S.pendingUnlock;
+  const generic=['🍋','🍅','🥕','🌿','🍎','🥦','🫒','⭐','✨','🎉'];
+  const fruit=[u.icon, u.icon, ...generic];
+  let rain='';
+  for(let i=0;i<32;i++){
+    rain+=`<span class="fall" style="left:${(i*31)%100}%;animation-duration:${2.2+(i%5)*.35}s;animation-delay:-${(i%7)*.28}s;font-size:${18+(i%4)*6}px">${fruit[i%fruit.length]}</span>`;
+  }
+  return `
+  <main>
+    <div class="celebrate">
+      ${rain}
+      <div class="celebrateCard">
+        <div class="trophy">🏆</div>
+        <div style="font-weight:950;color:#bd6d16">RONDE VOLTOOID!</div>
+        <h2>${S.products.size} ontdekkingen</h2>
+        <p class="muted">Je bent nu <b>${rank()}</b>.</p>
+        <div class="unlock">🔓 NIEUW INGREDIËNT<br><span>${u.icon}</span>${u.name} toegevoegd aan je keuken</div>
+        <button class="btn primary" id="btnCelebrateContinue">Verder ontdekken →</button>
+      </div>
+    </div>
+  </main>`;
+}
+function screenWin(){
+  return `
+  <main>
+    <div class="celebrate" style="min-height:50vh">
+      <div class="celebrateCard">
+        <div class="trophy">👑</div>
+        <div style="font-weight:950;color:#bd6d16">ALLES ONTDEKT!</div>
+        <h2>${TOTAL_RECIPES()} / ${TOTAL_RECIPES()} recepten</h2>
+        <p class="muted">Je bent <b>Culinair Legende</b> geworden. Bekijk je receptenboek en prestaties, of begin opnieuw voor een nieuwe run.</p>
+        <button class="btn primary" id="btnToBook" style="margin-top:6px">📖 Bekijk receptenboek</button>
+        <button class="btn ghost" id="btnReset2" style="margin-top:8px">🔄 Opnieuw beginnen</button>
+      </div>
+    </div>
+  </main>`;
+}
+function screenBook(){
+  return `
+  <main>
+    ${TIERS.map((t,i)=>{
+      if(i>S.tierIndex) return `<div class="tierBlock"><div class="tierHead"><span class="em">🔒</span> Ronde ${i+1} — nog te ontgrendelen</div></div>`;
+      const label = t.unlock ? `${t.unlock.icon} ${t.unlock.name}` : 'Basisronde';
+      return `<div class="tierBlock">
+        <div class="tierHead"><span class="em">${t.unlock?t.unlock.icon:'🥗'}</span> Ronde ${i+1} — ${label}</div>
+        ${t.recipes.map(r=>{
+          const found=S.products.has(r.product);
+          const sig = r.signature ? ' style="border:2px solid #d89a48;background:#fff8e8"' : '';
+          return found
+            ? `<div class="recipeRow"${sig}><span class="em">${r.emoji}</span><div><b>${r.signature?'⭐ ':''}${r.product}</b><small>${TOOL_OF[r.act]}</small></div></div>`
+            : `<div class="recipeRow locked"${sig}><span class="em">❔</span><div><b>${r.signature?'⭐ Signatuurgerecht':'Nog te ontdekken'}</b><small>${r.ids.length} ingrediënten</small></div></div>`;
+        }).join('')}
+      </div>`;
+    }).join('')}
+  </main>`;
+}
+function screenBadges(){
+  return `
+  <main>
+    <div class="badgeGrid">
+      ${BADGES.map(b=>{
+        const got=b.need(S);
+        return `<div class="badge ${got?'':'locked'}"><span class="em">${b.em}</span><b>${b.name}</b><small>${got?'Behaald':'Nog te behalen'}</small></div>`;
+      }).join('')}
+    </div>
+  </main>`;
+}
+
+function render(){
+  const app=document.getElementById('app');
+  let html='';
+  if(S.phase==='home'){
+    html = screenHome();
+  } else if(S.phase==='celebrate'){
+    html = screenCelebrate();
+  } else if(S.phase==='win'){
+    html = header(false) + screenWin();
+  } else {
+    html = header(true);
+    if(S.phase==='ingredients') html+=screenIngredients();
+    else if(S.phase==='action') html+=screenAction();
+    else if(S.phase==='tool') html+=screenTool();
+    else if(S.phase==='do') html+=screenDo();
+    else if(S.phase==='discover') html+=screenDiscover();
+    else if(S.phase==='book') html+=screenBook();
+    else if(S.phase==='badges') html+=screenBadges();
+  }
+  app.innerHTML=html;
+  wire();
+  if(S.phase==='do') bindDoMechanic();
+}
+
+function wire(){
+  const q=(s)=>document.querySelectorAll(s);
+  const on=(s,fn)=>{ const n=document.getElementById(s); if(n) n.onclick=fn; };
+
+  on('btnStart', ()=>{ S.phase='ingredients'; if(!S.pick) S.pick=[]; render(); });
+  on('btnReset', resetGame);
+  on('btnReset2', resetGame);
+  on('btnToBook', ()=>{ S.phase='book'; render(); });
+  on('btnMute', toggleMute);
+
+  q('[data-nav]').forEach(b=>b.onclick=()=>{ S.phase=b.dataset.nav; if(S.phase==='ingredients'){S.pick=[];S.current=null;S.msg='Kies ingrediënten.';S.msgType='';} render(); });
+
+  q('[data-pick]').forEach(b=>b.onclick=()=>selectIngredient(b.dataset.pick));
+  q('[data-remove]').forEach(b=>b.onclick=()=>removePick(Number(b.dataset.remove)));
+  on('btnPrepare', prepare);
+  on('btnTip', useTip);
+
+  q('[data-action]').forEach(b=>b.onclick=()=>chooseAction(b.dataset.action));
+  q('[data-tool]').forEach(b=>b.onclick=()=>chooseTool(b.dataset.tool));
+
+  on('btnContinue', afterDiscover);
+  on('btnCelebrateContinue', ()=>{ S.pendingUnlock=null; S.phase='ingredients'; S.pick=[]; S.current=null; S.msg='Nieuw ingrediënt beschikbaar. Wat kun je ermee?'; S.msgType=''; save(); render(); });
+}
+
+/* ==========================================================
+   6) INIT
+   ========================================================== */
+if(hasSave()) load();
+render();
+</script>
+</body>
+</html>
