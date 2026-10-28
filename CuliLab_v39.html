@@ -1,0 +1,1802 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CuliLab • FoodRush Link</title>
+<style>
+/* ============================================================
+   CuliLab: Sauzenlab — standalone
+   Eén schone bron. Geen aparte "patch"-scripts meer: alle fixes
+   en uitbreidingen zitten in de hoofdlogica hieronder.
+   ============================================================ */
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+:root{
+  --cream:#f7f0e3; --dark:#20150e; --gold:#f5a019; --orange:#ed7410;
+  --green:#e7f6e6; --red:#fde5df; --ink:#29231e; --paper:#fff;
+}
+body{margin:0;background:#17110d;font-family:Arial,Helvetica,sans-serif;color:var(--ink)}
+.app{max-width:460px;margin:auto;min-height:100vh;background:var(--cream);overflow:hidden;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+
+header{padding:18px 18px 14px;color:#fff;background:linear-gradient(135deg,#21160f,#54351f)}
+.brandrow{display:flex;justify-content:space-between;align-items:flex-start}
+.brand{font-size:26px;font-weight:900}
+.tag{font-size:11px;letter-spacing:1.2px;opacity:.75;margin-top:2px}
+.rank{font-size:11px;font-weight:800;background:#ffffff18;border:1px solid #ffffff2a;border-radius:14px;padding:6px 10px;white-space:nowrap}
+.stats{display:flex;gap:7px;margin-top:12px;flex-wrap:wrap}
+.pill{font-size:12px;font-weight:800;background:#ffffff14;border:1px solid #ffffff22;padding:7px 10px;border-radius:16px}
+.progress{height:7px;background:#ffffff20;border-radius:8px;margin-top:12px;overflow:hidden}
+.progress i{display:block;height:100%;background:#ffc94f;transition:.3s}
+
+nav.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:9px 12px;background:#2a1b12;position:sticky;top:0;z-index:20}
+nav.tabs button{margin:0;padding:9px 3px;background:#ffffff12;border:1px solid #ffffff25;color:#fff;font-size:12px;border-radius:12px;font-weight:800}
+nav.tabs button.active{background:var(--gold);border-color:var(--gold);color:#2a1b12}
+
+main{padding:14px 15px 26px}
+button{font-family:inherit;cursor:pointer}
+.btn{width:100%;border:2px solid #e0d3c1;background:#fff;border-radius:13px;padding:12px 8px;font-size:14px;font-weight:800;color:#60411d;box-shadow:0 2px 0 #d4c2ac}
+.btn.primary{background:linear-gradient(135deg,var(--gold),var(--orange));border:0;color:#fff;font-size:16px;box-shadow:0 4px 0 #a64d08;padding:14px}
+.btn.primary:disabled{opacity:.5;box-shadow:none;filter:grayscale(.3)}
+.btn.ghost{background:transparent;border:2px solid #e0d3c1;color:#60411d;box-shadow:none}
+
+.hero{background:#ffefad;border-radius:17px;padding:18px;text-align:center;margin-bottom:12px}
+.hero h1{margin:6px 0 4px;font-size:22px}
+.hero p{margin:0;font-size:13.5px;line-height:1.4;color:#6b584b}
+.hero small{font-weight:900;letter-spacing:1.2px;color:#8c5b16;font-size:11px}
+
+.card{background:#fff;border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 2px 8px #00000010}
+
+/* ---- combine screen ---- */
+.roundline{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800;color:#8b765e;margin-bottom:8px}
+.combine{position:relative;background:#2f2016;border-radius:18px;min-height:132px;padding:14px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.combine.haspick{background:#3a2717}
+.combineEmpty{color:#e8d3b6;text-align:center;font-size:13px;opacity:.85}
+.combineEmpty span{display:block;font-size:26px;margin-bottom:4px}
+.pick{background:#fff2d2;border-radius:14px;padding:8px 10px;text-align:center;font-weight:800;font-size:12px;color:#5b3c17;position:relative;min-width:56px;cursor:pointer;border:2px solid #ffd98a;transition:.15s}
+.pick:active{transform:scale(.94)}
+.pick .emoji{display:block;font-size:24px;margin-bottom:2px}
+.pick .x{position:absolute;top:-6px;right:-6px;background:#3a2717;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;display:flex;align-items:center;justify-content:center;font-weight:900}
+.pickhint{text-align:center;font-size:11px;color:#c9ac86;margin-top:6px}
+
+.shelfLabel{font-size:11px;font-weight:900;letter-spacing:1px;color:#8b765e;margin:14px 0 8px}
+.shelf{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ing{background:#fff;border:2px solid #e2d2bd;border-radius:14px;padding:12px 4px;text-align:center;font-weight:800;font-size:12px;color:#5a3c1b;min-width:0;width:100%;white-space:normal}
+.ingName{display:block;width:100%;min-width:0;line-height:1.15;white-space:normal;overflow-wrap:anywhere;hyphens:auto}
+.ing .emoji{display:block;font-size:26px;margin-bottom:4px}
+.ing.locked{opacity:.4;filter:grayscale(1);background:#efe6d6}
+
+.feedback{padding:12px;border-radius:14px;text-align:center;background:#efebe5;line-height:1.4;margin-top:10px;font-size:13.5px}
+.feedback.good{background:var(--green)}
+.feedback.bad{background:var(--red)}
+
+.actiongrid,.toolgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}
+.choice{background:#fff;border:2px solid #e2d2bd;border-radius:15px;padding:16px 6px;text-align:center;font-weight:800;color:#5a3c1b;min-height:78px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.choice .big{font-size:28px}
+.choice.wrong{background:#ffe1dc;border-color:#c85a49}
+.choice.active{background:#ffe49a;border-color:#ed9a10;box-shadow:0 0 0 3px #f5a01955}
+.toolSvg{width:44px;height:44px}
+
+/* ---- do-phase mechanics ---- */
+.doZone{background:#2f2016;border-radius:18px;padding:22px 14px;text-align:center;margin:12px 0;position:relative;min-height:170px;display:flex;flex-direction:column;align-items:center;justify-content:center;touch-action:none;user-select:none}
+.doZone .doIcon{font-size:46px;transition:transform .05s linear}
+.doLabel{color:#f3e3c8;font-size:13px;margin-top:10px;font-weight:700}
+.doBarWrap{position:relative;width:100%;height:12px;background:#ffffff22;border-radius:8px;margin-top:14px;overflow:hidden}
+.doBar{position:relative;z-index:1;height:100%;background:linear-gradient(90deg,#ffc94f,#ff8e0a);width:0%;transition:width .05s linear}
+.doBar.burnzone{background:linear-gradient(90deg,#ffc94f,#e03b1f)}
+.doGoodBand{position:absolute;z-index:2;left:0;right:0;top:50%;height:0}
+.doGoodBand i{position:absolute;top:-14px;height:18px;background:#39cf7890;border:1px solid #7bffb5;border-radius:4px;box-shadow:0 0 8px #39cf78}
+.tapcount{font-size:22px;font-weight:900;color:#ffc94f;margin-top:8px}
+
+/* ---- discovery card ---- */
+.discover{background:#fff0b8;border-radius:18px;padding:22px;text-align:center;margin-top:6px}
+.discover .bowl{font-size:46px}
+.discover h2{margin:8px 0 4px;font-size:19px}
+.discover p{margin:0;font-size:13px;color:#6b584b;line-height:1.4}
+.discover .fresh{display:inline-block;margin-top:8px;background:#ff9d12;color:#fff;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:900}
+
+/* ---- celebration ---- */
+.celebrate{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.celebrateCard{position:relative;z-index:2;background:#fff;border-radius:20px;padding:26px 20px;text-align:center;box-shadow:0 10px 30px #0003;max-width:340px}
+.celebrateCard .trophy{font-size:44px}
+.celebrateCard h2{margin:6px 0}
+.celebrateCard .rank{display:inline-block;margin-top:4px}
+.unlock{background:#fff4d7;border:2px solid #f1bf5c;border-radius:16px;padding:14px;margin:14px 0;font-weight:800}
+.unlock span{font-size:36px;display:block;margin:4px 0}
+.fall{position:absolute;top:-10%;font-size:22px;animation:fall linear infinite;opacity:.9}
+@keyframes fall{
+  0%{transform:translateY(-10vh) rotate(0);opacity:.9}
+  90%{opacity:.9}
+  100%{transform:translateY(115vh) rotate(300deg);opacity:0}
+}
+
+/* ---- book & badges ---- */
+.tierBlock{margin-bottom:14px}
+.tierHead{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;color:#6b4a22;margin-bottom:8px}
+.tierHead .em{font-size:20px}
+.recipeRow{background:#fff;border-radius:13px;padding:10px 12px;display:flex;align-items:center;gap:10px;margin-bottom:6px;box-shadow:0 1px 4px #0000000d}
+.recipeRow .em{font-size:22px;width:28px;text-align:center}
+.recipeRow b{font-size:13px;display:block}
+.recipeRow small{color:#8b765e;font-size:11px}
+.recipeRow.locked{opacity:.55}
+
+.badgeGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.badge{background:#fff;border-radius:15px;padding:14px 10px;text-align:center;box-shadow:0 2px 8px #00000010}
+.badge .em{font-size:30px;display:block;margin-bottom:6px}
+.badge b{font-size:12.5px;display:block}
+.badge small{font-size:12px;color:#8b765e}
+.badge.locked{opacity:.38;filter:grayscale(.6)}
+
+.center{text-align:center}
+.muted{color:#786b5d;font-size:12.5px}
+.hidden{display:none!important}
+.tipbtn{position:relative}
+.panicCard{max-width:680px;margin:12px auto;text-align:center}
+.panicCanvas{display:block;width:100%;height:min(64vh,620px);min-height:390px;aspect-ratio:4/5;border-radius:18px;background:#2b1a11;touch-action:none;box-shadow:inset 0 0 0 3px #ffffff18}
+.panicInfo{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-weight:900;color:#65451f;margin:6px 0 10px}
+.panicPill{background:#fff0cf;border:1px solid #e9d3a7;border-radius:999px;padding:8px 12px}
+.panicInfo{justify-content:center}
+.panicSignal{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;gap:10px;width:min(250px,90%);min-height:76px;margin:5px auto 13px;padding:10px 20px;border:4px solid #fff8e8;border-radius:20px;background:radial-gradient(circle at 50% 40%,#fff9 0 3%,var(--signal) 28%,#38251b 130%);color:#fff;font-size:20px;font-weight:1000;letter-spacing:1px;text-shadow:0 2px 3px #0008;box-shadow:0 0 14px 4px var(--signal),0 0 32px 12px var(--signal);animation:signalFlash .75s ease-in-out infinite alternate}
+.panicSignal::before{content:"";position:absolute;inset:-12px;border:3px solid var(--signal);border-radius:25px;opacity:.55;z-index:-1;animation:signalWave 1.1s ease-out infinite}
+.panicSignal .signalFruit{font-size:34px}
+@keyframes signalFlash{from{filter:brightness(.82);transform:scale(.98)}to{filter:brightness(1.25);transform:scale(1.025)}}
+@keyframes signalWave{from{transform:scale(.94);opacity:.65}to{transform:scale(1.14);opacity:0}}
+.panicKeys{font-weight:900;color:#694822}
+.linkGame{max-width:720px;margin:8px auto;text-align:center}
+.linkBoard{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;max-width:570px;margin:12px auto;padding:10px;background:linear-gradient(135deg,#345d3e,#21432c);border-radius:18px;touch-action:manipulation}
+.linkTile{min-width:0;aspect-ratio:1;background:linear-gradient(160deg,#fff,#fff4d8);border:2px solid #e4d5bf;border-radius:13px;padding:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;color:#4e3924;box-shadow:0 2px 0 #bdb09a;transition:transform .16s,opacity .16s,background .16s,border-color .16s}
+.linkTile:active{transform:scale(.91)}
+.linkTile .produce{font-size:clamp(22px,5vw,34px);line-height:1.05}
+.linkTile .produce svg{display:block;width:1em;height:1em}
+.linkTile .produceName{font-size:clamp(8px,1.6vw,11px);font-weight:800;line-height:1.05;overflow-wrap:anywhere}
+.linkTile.guided{outline:3px solid #59ef83;box-shadow:0 0 13px #43ee77}
+.linkTile.selected{background:#ffdf83;border-color:#ef9b23;transform:scale(.94);box-shadow:0 0 0 3px #f5a01955}
+.linkTile.clearing{animation:linkPop .24s ease-in forwards}
+.linkTile.invalid{background:#f8b4a7;border-color:#cd5245;animation:linkShake .2s linear 2}
+.linkTile.special{background:linear-gradient(145deg,#ffeaa0,#f4aa3b);border-color:#d98218;box-shadow:0 0 0 2px #ffcf4d66,0 2px 0 #bd741c}
+.linkTile.dropping{animation:linkDrop .42s cubic-bezier(.2,.8,.2,1)}
+@keyframes linkDrop{from{transform:translateY(-55px);opacity:.5}to{transform:translateY(0);opacity:1}}
+@keyframes linkPop{to{transform:scale(.1) rotate(20deg);opacity:0}}
+@keyframes linkShake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.linkStats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;font-weight:900;color:#65451f}
+.linkStat{background:#fff0cf;border:1px solid #e9d3a7;border-radius:999px;padding:8px 12px}
+.linkRainbowAction{margin:7px auto 4px;background:linear-gradient(135deg,#fff3aa,#f2a7d4,#9ad7f2);color:#533d69;border:2px solid #fff;border-radius:14px;padding:10px 16px;font-weight:950;box-shadow:0 3px 0 #d5a7c9}
+.linkBoard.rainbowArmed .linkTile:not(:disabled){border-color:#e99ed2;box-shadow:0 0 0 2px #f4b5df88,0 2px 0 #bdb09a}
+.linkLevels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.linkLevel{min-height:105px;padding:10px 5px;font-size:12px}
+@media(max-width:420px){.linkBoard{gap:4px;padding:7px}.linkTile{border-radius:9px;padding:2px}.linkLevels{grid-template-columns:1fr}}
+@media(max-width:699px){.panicCanvas{height:58vh;min-height:360px}}
+
+/* ---- tablet and desktop layouts ---- */
+.labWorkspace{display:block}
+.pairingGrid{display:block}
+.knowledgeCards{display:block}
+@media (min-width:700px){
+  .app{max-width:1100px}
+  header{padding:24px 34px 18px}
+  .brand{font-size:32px}
+  .tag{font-size:12px}
+  .stats{gap:10px;margin-top:16px}
+  .pill{font-size:14px;padding:8px 13px}
+  nav.tabs{grid-template-columns:repeat(6,1fr);padding:12px 28px;gap:10px}
+  nav.tabs button{font-size:14px;padding:12px 8px}
+  main{max-width:1060px;margin:0 auto;padding:24px 32px 42px}
+  .hero{padding:25px;margin-bottom:18px}
+  .hero h1{font-size:28px}
+  .hero p{font-size:16px;max-width:760px;margin-left:auto;margin-right:auto}
+  .card{padding:20px;margin:15px 0}
+  .roundline{font-size:14px;margin-bottom:12px}
+  .labWorkspace{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:22px;align-items:start}
+  .labBench,.labPantry{background:#fff;border-radius:18px;padding:18px;box-shadow:0 2px 8px #00000010}
+  .combine{min-height:230px;padding:22px}
+  .pick .emoji{font-size:30px}
+  .shelf{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .ing{font-size:13px;padding:15px 6px;min-height:92px}
+  .ing .emoji{font-size:30px}
+  .actiongrid,.toolgrid{gap:12px;margin:16px 0}
+  .choice{font-size:15px;min-height:100px;padding:18px 10px}
+  .choice .big{font-size:34px}
+  .pairingGrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+  .knowledgeCards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .knowledgeCards .card{margin:0;min-height:145px}
+  .recipeRow{padding:14px 16px}
+  .badgeGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+  .feedback{font-size:15px}
+}
+@media (min-width:1000px){
+  main{padding-left:40px;padding-right:40px}
+  .labWorkspace{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px}
+  .shelf{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ing{font-size:13px}
+  .knowledgeCards{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .badgeGrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   0) VERTAALHULP
+   Elk vertaalbaar stukje tekst is een object {nl:'...', en:'...'}.
+   tr(obj) geeft de tekst in de huidige taal (S.lang), met NL als
+   terugval. t(key, vars) doet hetzelfde voor UI-strings met
+   eenvoudige {naam}-interpolatie.
+   ========================================================== */
+function tr(obj){
+  if(obj==null) return '';
+  if(typeof obj==='string') return obj;
+  return obj[S.lang] || obj.nl || '';
+}
+function t(key, vars){
+  let s = tr(UI[key]);
+  if(vars) Object.keys(vars).forEach(k=>{ s = s.split('{'+k+'}').join(vars[k]); });
+  return s;
+}
+
+/* ==========================================================
+   1) DATA — alle ingrediënten, rondes en recepten op één plek.
+      Nieuwe ronde toevoegen = hier één object toevoegen, verder
+      hoeft er niets aangepast te worden.
+   ========================================================== */
+
+const TIERS = [
+  { unlock:null, recipes:[
+    {ids:['oil','vinegar'], product:{nl:'Vinaigrette',en:'Vinaigrette'}, emoji:'🥗', act:'whisk', category:{nl:'Dressing',en:'Dressing'},
+     story:{nl:'Een klassieke koude emulsie van olie en azijn. Mosterd kan helpen binden, maar hoort niet verplicht in elke basisvinaigrette.',en:'A classic cold emulsion of oil and vinegar. Mustard can help bind it, but is not required in every basic vinaigrette.'},
+     lesson:{nl:{amount:'3 el olie · 1 el wijnazijn · zout en peper naar smaak',tools:'Mengkom, garde, maatlepel',steps:['Doe azijn met zout en peper in de kom.','Klop de olie er geleidelijk door tot de dressing tijdelijk gebonden is.','Proef en stel zuur, zout en olie bij.'],sign:'De dressing glanst en is kort gebonden; olie en azijn kunnen later weer scheiden.',fix:'Te zuur? Klop er wat olie bij. Een beetje mosterd kan helpen de emulsie te stabiliseren.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — sauzen'},en:{amount:'3 tbsp oil · 1 tbsp wine vinegar · salt and pepper to taste',tools:'Mixing bowl, whisk, measuring spoon',steps:['Put the vinegar, salt and pepper in the bowl.','Whisk in the oil gradually until the dressing is temporarily emulsified.','Taste and adjust acid, salt and oil.'],sign:'The dressing looks glossy and briefly emulsified; oil and vinegar may separate later.',fix:'Too sharp? Whisk in a little more oil. A little mustard can help stabilize the emulsion.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — sauces'}}}
+    ,{ids:['oil','vinegar','mustard','honey'],product:{nl:'Honing-mosterdressing',en:'Honey-mustard dressing'},emoji:'🍯',act:'whisk',category:{nl:'Dressing',en:'Dressing'},story:{nl:'Een veelgebruikte zoet-pittige vinaigrette: mosterd en honing worden met azijn en olie tot dressing geklopt.',en:'A common sweet-tangy vinaigrette: mustard and honey are whisked with vinegar and oil into a dressing.'},lesson:{nl:{amount:'3 el olijfolie · 1 el azijn · 1 tl mosterd · 1 tl honing · zout en peper',tools:'Mengkom, garde, maatlepels',steps:['Klop azijn, mosterd, honing, zout en peper glad.','Klop de olie er geleidelijk door tot de dressing gebonden is.','Proef en pas zoet en zuur naar wens aan.'],sign:'Glad, glanzend en zoetzuur; de dressing bedekt licht de blaadjes.',fix:'Te zoet? Voeg beetje bij beetje azijn toe. Te zuur? Voeg wat olie of honing toe.',source:'https://www.cordonbleu.edu/paris/2-day-cuisine-workshop-sauces-and-jus/en',sourceName:'Le Cordon Bleu — vinaigrettes'},en:{amount:'3 tbsp olive oil · 1 tbsp vinegar · 1 tsp mustard · 1 tsp honey · salt and pepper',tools:'Mixing bowl, whisk, measuring spoons',steps:['Whisk vinegar, mustard, honey, salt and pepper until smooth.','Gradually whisk in oil until emulsified.','Taste and adjust sweetness and acidity.'],sign:'Smooth, glossy and sweet-tangy; lightly coats salad leaves.',fix:'Too sweet? Add vinegar gradually. Too sharp? Add a little oil or honey.',source:'https://www.cordonbleu.edu/paris/2-day-cuisine-workshop-sauces-and-jus/en',sourceName:'Le Cordon Bleu — vinaigrettes'}}}
+  ]},
+  { unlock:{id:'egg',icon:'🥚',name:{nl:'Ei',en:'Egg'}}, recipes:[
+    {ids:['egg','oil','vinegar'],product:{nl:'Mayonaise',en:'Mayonnaise'},emoji:'🥣',act:'whisk',
+     story:{nl:'Eidooier en olie vormen al kloppend een koude emulsie; azijn geeft zuur. Mosterd is een mogelijke toevoeging, geen vereiste.',en:'Egg yolk and oil form a cold emulsion as they are whisked; vinegar adds acidity. Mustard is optional, not essential.'},
+     lesson:{nl:{amount:'2 eidooiers · 500 ml neutrale olie · 40 ml wittewijnazijn · snuf zout',tools:'Diepe kom, garde, maatbeker',steps:['Breng ingrediënten op kamertemperatuur; scheid de dooiers.','Klop de dooiers met azijn en zout.','Voeg olie druppel voor druppel toe terwijl je voortdurend klopt.','Als de emulsie dikker wordt, giet je de olie in een dunne straal erbij.'],sign:'De saus wordt dik, licht van kleur en egaal; olie glanst niet los bovenop.',fix:'Geschift? Begin in een schone kom met een theelepel warm water of azijn en klop de geschifte saus er druppelsgewijs door. Werk schoon en koel; gebruik gepasteuriseerde dooier als rauw ei niet geschikt is.',source:'https://www.cordonbleu.edu/news/technique-video-how-to-prepare-mayonnaise/en',sourceName:'Le Cordon Bleu — mayonnaise techniek'},en:{amount:'2 egg yolks · 500 ml neutral oil · 40 ml white wine vinegar · pinch of salt',tools:'Deep bowl, whisk, measuring jug',steps:['Bring ingredients to room temperature; separate the yolks.','Whisk yolks with vinegar and salt.','Add oil drop by drop while whisking continuously.','Once the emulsion thickens, add the oil in a thin steady stream.'],sign:'The sauce becomes thick, pale and even; no oil shines separately on top.',fix:'Split? Start in a clean bowl with a teaspoon of warm water or vinegar and whisk in the split sauce drop by drop. Keep equipment clean and chilled; use pasteurized yolk when raw egg is unsuitable.',source:'https://www.cordonbleu.edu/news/technique-video-how-to-prepare-mayonnaise/en',sourceName:'Le Cordon Bleu — mayonnaise technique'}}}
+  ]},
+  { unlock:{id:'garlic',icon:'🧄',name:{nl:'Knoflook',en:'Garlic'}}, recipes:[
+    {ids:['egg','oil','vinegar','garlic'],product:{nl:'Aïoli (mayonaise-stijl)',en:'Aioli (mayonnaise-style)'},emoji:'🧄',act:'whisk',
+     story:{nl:'Een gangbare moderne aïoli is mayonaise op smaak gebracht met knoflook. Traditionele Provençaalse aïoli wordt met knoflook en olie in een vijzel gemaakt; dit spel leert de moderne emulsieversie.',en:'A common modern aioli is mayonnaise flavored with garlic. Traditional Provençal aioli is made with garlic and oil in a mortar; this game teaches the modern emulsion version.'},
+     lesson:{nl:{amount:'1 eidooier · 1 kleine teen knoflook · 150 ml neutrale of milde olijfolie · 1 tl azijn · zout',tools:'Vijzel of rasp voor knoflook, kom, garde',steps:['Wrijf of rasp de knoflook fijn.','Klop met eidooier, azijn en zout.','Klop de olie eerst druppelsgewijs en daarna in een dun straaltje erdoor.','Proef; laat kort gekoeld rusten zodat de knoflooksmaak zich verdeelt.'],sign:'Lichtgele, dikke en gladde emulsie met duidelijke maar niet scherpe knoflooksmaak.',fix:'Als de saus breekt: opnieuw emulgeren in een schone kom met een klein scheutje water. Rauwe-ei aandacht geldt ook hier.',source:'https://www.cordonbleu.edu/news/technique-video-how-to-prepare-mayonnaise/en',sourceName:'Le Cordon Bleu — mayonnaise en afgeleide sauzen'},en:{amount:'1 egg yolk · 1 small garlic clove · 150 ml neutral or mild olive oil · 1 tsp vinegar · salt',tools:'Mortar or grater for garlic, bowl, whisk',steps:['Crush or grate the garlic finely.','Whisk with egg yolk, vinegar and salt.','Whisk in oil drop by drop, then in a thin stream.','Taste; chill briefly so the garlic flavor spreads.'],sign:'Pale yellow, thick and smooth emulsion with clear but not harsh garlic flavor.',fix:'If it splits, emulsify again in a clean bowl with a small splash of water. Raw-egg handling applies here too.',source:'https://www.cordonbleu.edu/news/technique-video-how-to-prepare-mayonnaise/en',sourceName:'Le Cordon Bleu — mayonnaise and derivative sauces'}}}
+  ]},
+  { unlock:{id:'butter',icon:'🧈',name:{nl:'Boter',en:'Butter'}}, recipes:[
+    {ids:['egg','butter','lemon'],product:{nl:'Hollandaisesaus',en:'Hollandaise'},emoji:'🍋',act:'whisk',
+     story:{nl:'Een warme emulsiesaus: eidooiers worden au bain-marie luchtig geklopt en daarna langzaam met warme boter gebonden.',en:'A warm emulsion: egg yolks are whisked over a bain-marie until airy, then slowly bound with warm butter.'},
+     lesson:{nl:{amount:'3 eidooiers · 225 g boter, gesmolten en warm · 1½ el citroensap · 1 el water · zout',tools:'Kleine pan, hittebestendige kom, garde, pollepel, doek',steps:['Smelt de boter en houd warm. Zet een kom boven zacht pruttelend water; de kom mag het water niet raken.','Klop dooiers met water au bain-marie tot bleek, dik en lintvormig.','Haal van de warmtebron. Klop de warme boter er eerst druppelsgewijs en daarna in dunne straal door.','Breng op smaak met citroen en zout; serveer direct.'],sign:'Glad, luchtig en napperend; de garde laat kort zichtbare sporen achter. Houd warm, nooit heet.',fix:'Te dik? Klop er een theelepel warm water of citroen door. Dreigt de dooier te stollen, haal de kom direct van de pan.',source:'https://www.ciafoodies.com/hollandaise-sauce/',sourceName:'The Culinary Institute of America — Hollandaise'},en:{amount:'3 egg yolks · 225 g butter, melted and warm · 1½ tbsp lemon juice · 1 tbsp water · salt',tools:'Small pan, heatproof bowl, whisk, ladle, towel',steps:['Melt butter and keep warm. Set a bowl over gently simmering water; bowl must not touch water.','Whisk yolks with water over the bain-marie until pale, thick and ribboning.','Remove from heat. Whisk in warm butter drop by drop, then in a thin stream.','Season with lemon and salt; serve promptly.'],sign:'Smooth, airy and coats the back of a spoon; whisk marks briefly remain. Keep warm, never hot.',fix:'Too thick? Whisk in a teaspoon of warm water or lemon. If yolks begin to set, take the bowl off the pan immediately.',source:'https://www.ciafoodies.com/hollandaise-sauce/',sourceName:'The Culinary Institute of America — Hollandaise'}}}
+  ]},
+  { unlock:{id:'tomato',icon:'🍅',name:{nl:'Tomaat',en:'Tomato'}}, recipes:[
+    {ids:['tomato','oil','garlic'],outputIngredient:{id:'tomatoSauce',icon:'🍅',name:{nl:'Tomatensausbasis',en:'Tomato sauce base'}},product:{nl:'Italiaanse tomatensaus',en:'Italian tomato sauce'},emoji:'🍅',act:'heat',category:{nl:'Pastasaus',en:'Pasta sauce'},
+     story:{nl:'Een eenvoudige Italiaanse stijl tomatensaus bouwt smaak op met olijfolie, knoflook en tomaat, en laat de tomaat rustig inkoken.',en:'A simple Italian-style tomato sauce builds flavor with olive oil, garlic and tomato, simmering until concentrated.'},
+     lesson:{nl:{amount:'400 g rijpe tomaten of tomaten uit blik · 1 el olijfolie · 1 teen knoflook · zout; basilicum optioneel',tools:'Snijplank, mes, steelpan, houten lepel',steps:['Snijd of plet de tomaten; hak de knoflook fijn.','Verwarm olie zacht in de pan en laat knoflook geuren zonder te kleuren.','Voeg tomaat en zout toe. Laat zachtjes pruttelen tot de saus indikt; roer af en toe.','Proef en werk eventueel af met basilicum.'],sign:'De saus is geconcentreerd en lepelbaar; olie is niet verbrand en de tomaat smaakt rond.',fix:'Te zuur? Laat verder inkoken en proef opnieuw; voeg niet automatisch suiker toe. Verbrande knoflook geeft bitterheid: begin opnieuw.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — tomatensaus'},en:{amount:'400 g ripe or canned tomatoes · 1 tbsp olive oil · 1 garlic clove · salt; basil optional',tools:'Board, knife, saucepan, wooden spoon',steps:['Chop or crush tomatoes; finely chop garlic.','Warm oil gently and let garlic become fragrant without browning.','Add tomato and salt. Simmer gently until thickened, stirring now and then.','Taste and finish with basil if desired.'],sign:'Concentrated and spoonable; oil is not burnt and tomato flavor tastes rounded.',fix:'Too sharp? Simmer longer and taste again; do not automatically add sugar. Burnt garlic tastes bitter, so start again.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — tomato sauce'}}}
+  ]},
+  { unlock:{id:'flour',icon:'🌾',name:{nl:'Bloem',en:'Flour'}}, recipes:[
+    {ids:['butter','flour'],outputIngredient:{id:'roux',icon:'🥄',name:{nl:'Roux',en:'Roux'}},product:{nl:'Witte roux',en:'White roux'},emoji:'🥄',act:'heat',
+     story:{nl:'Roux is een klassieke bindbasis van gelijke gewichten vet en bloem. De witte roux gaart kort zonder te kleuren en vormt de basis voor béchamel.',en:'Roux is a classic thickening base of equal weights fat and flour. White roux cooks briefly without browning and forms the base for béchamel.'},
+     lesson:{nl:{amount:'30 g boter · 30 g bloem',tools:'Steelpan met dikke bodem, garde of houten lepel, weegschaal',steps:['Smelt boter op laag vuur zonder te bruinen.','Voeg bloem in één keer toe en roer tot een gladde pasta.','Gaar al roerend 2–3 minuten op laag vuur; houd de roux bleek.'],sign:'Glad en licht schuimend, zonder rauwe-bloemgeur en zonder bruine kleur.',fix:'Klontjes? Roer stevig glad vóór je vloeistof toevoegt. Te donker geworden voor een witte saus? Begin opnieuw.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — béchamel en roux'},en:{amount:'30 g butter · 30 g flour',tools:'Heavy-bottomed saucepan, whisk or wooden spoon, scale',steps:['Melt butter over low heat without browning.','Add flour at once and stir to a smooth paste.','Cook while stirring for 2–3 minutes on low; keep the roux pale.'],sign:'Smooth and lightly foaming, with no raw-flour smell and no brown color.',fix:'Lumps? Stir smooth before adding liquid. If it browns and you need white sauce, start again.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — béchamel and roux'}}}
+  ]},
+  { unlock:{id:'milk',icon:'🥛',name:{nl:'Melk',en:'Milk'}}, recipes:[
+    {ids:['roux','milk'],outputIngredient:{id:'bechamel',icon:'🥛',name:{nl:'Béchamel',en:'Béchamel'}},product:{nl:'Béchamelsaus',en:'Béchamel'},emoji:'🥛',act:'heat',
+     story:{nl:'Een van de klassieke Franse moedersauzen: een lichte roux wordt met melk tot een gladde witte saus geklopt en zachtjes gegaard.',en:'One of the classic French mother sauces: a light roux is whisked with milk into a smooth white sauce and gently cooked.'},
+     lesson:{nl:{amount:'30 g boter · 30 g bloem · 500 ml melk · zout, peper en snuf nootmuskaat',tools:'Steelpan, garde, houten lepel, maatbeker',steps:['Verwarm de melk apart. Maak een bleke roux van boter en bloem.','Klop de warme melk geleidelijk door de roux zodat geen klonten ontstaan.','Breng zacht aan de kook en laat al roerend 10–15 minuten zacht garen.','Breng op smaak met zout, peper en nootmuskaat.'],sign:'Glad, romig en zonder bloemsmaak; de saus bedekt de achterkant van een lepel.',fix:'Klontjes? Klop krachtig of passeer door een zeef. Te dik? Voeg warme melk toe. Blijf roeren over de bodem.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — béchamel'},en:{amount:'30 g butter · 30 g flour · 500 ml milk · salt, pepper and pinch of nutmeg',tools:'Saucepan, whisk, wooden spoon, measuring jug',steps:['Warm the milk separately. Make a pale roux with butter and flour.','Gradually whisk warm milk into the roux to avoid lumps.','Bring gently to a simmer and cook while stirring for 10–15 minutes.','Season with salt, pepper and nutmeg.'],sign:'Smooth and creamy with no raw flour taste; coats the back of a spoon.',fix:'Lumpy? Whisk vigorously or pass through a sieve. Too thick? Add warm milk. Keep stirring the bottom.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — béchamel'}}}
+  ]},
+  { unlock:{id:'cheese',icon:'🧀',name:{nl:'Kaas',en:'Cheese'}}, recipes:[
+    {ids:['bechamel','cheese'],product:{nl:'Mornaysaus',en:'Mornay sauce'},emoji:'🧀',act:'stir',
+     story:{nl:'Mornay is een afgeleide van béchamel met kaas. Roer geraspte kaas door de warme saus; laat niet hard koken.',en:'Mornay is a derivative of béchamel with cheese. Stir grated cheese into the warm sauce; do not boil hard.'},
+     lesson:{nl:{amount:'500 ml béchamel · 75–100 g geraspte Gruyère of Emmentaler · eventueel 1 eidooier',tools:'Steelpan, garde, rasp',steps:['Maak eerst béchamel en haal de pan van het vuur.','Roer de kaas beetje bij beetje door de warme saus tot hij smelt.','Proef; voeg desgewenst eidooier toe en verwarm zacht zonder te koken.'],sign:'Glad, glanzend en kaasachtig; geen olieachtige laag of korrelige eiwitklontjes.',fix:'Korrelige saus? Haal van het vuur en klop met een scheut warme melk. Niet laten koken na het toevoegen van kaas.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — béchamel en Mornay'},en:{amount:'500 ml béchamel · 75–100 g grated Gruyère or Emmental · optional 1 egg yolk',tools:'Saucepan, whisk, grater',steps:['Make béchamel first and remove the pan from heat.','Stir in cheese a little at a time until melted.','Taste; optionally add egg yolk and warm gently without boiling.'],sign:'Smooth, glossy and cheesy; no oily layer or grainy egg curds.',fix:'Grainy? Remove from heat and whisk in a splash of warm milk. Do not boil after adding cheese.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — béchamel and Mornay'}}}
+  ]},
+  { unlock:{id:'yogurt',icon:'🫙',name:{nl:'Yoghurt',en:'Yogurt'}}, recipes:[
+    {ids:['yogurt','cucumber','garlic'],product:{nl:'Cacık',en:'Cacık'},emoji:'🥒',act:'stir',
+     story:{nl:'Cacık is een echte Turkse bereiding op basis van yoghurt en komkommer; hij wordt als dip, saus of verdunde koude soep gegeten. Deze versie is dik genoeg als dip.',en:'Cacık is a real Turkish yogurt-and-cucumber preparation, served as a dip, sauce or thinned cold soup. This version is thick enough as a dip.'},
+     lesson:{nl:{amount:'200 g volle yoghurt · ½ komkommer · 1 kleine teen knoflook · zout · munt of dille optioneel',tools:'Kom, rasp, mes, schone doek of zeef, lepel',steps:['Rasp de komkommer, meng met een beetje zout en laat 10 minuten uitlekken.','Knijp het vocht goed uit zodat de saus niet waterig wordt.','Roer yoghurt en fijngewreven knoflook erdoor. Breng op smaak; voeg optioneel munt of dille toe.','Koel kort voor serveren.'],sign:'Fris, romig en dik; er staat geen water onderin de kom.',fix:'Te dun? Laat langer uitlekken of voeg meer dikke yoghurt toe. Voeg kruiden geleidelijk toe; er bestaan regionale varianten.',source:'https://www.ktb.gov.tr/EN-99002/cacik-cucumber---yogurt-salad.html',sourceName:'Turks Ministerie van Cultuur en Toerisme — Cacık'},en:{amount:'200 g thick yogurt · ½ cucumber · 1 small garlic clove · salt · optional mint or dill',tools:'Bowl, grater, knife, clean cloth or sieve, spoon',steps:['Grate cucumber, mix with a little salt and leave to drain for 10 minutes.','Squeeze out moisture well so the sauce is not watery.','Stir in yogurt and finely crushed garlic. Season; add mint or dill if desired.','Chill briefly before serving.'],sign:'Fresh, creamy and thick; no pool of water at the bottom of the bowl.',fix:'Too thin? Drain longer or add thicker yogurt. Add herbs gradually; regional versions vary.',source:'https://www.ktb.gov.tr/EN-99002/cacik-cucumber---yogurt-salad.html',sourceName:'Turkish Ministry of Culture and Tourism — Cacık'}}}
+  ]},
+  { unlock:{id:'stock',icon:'🍲',name:{nl:'Bouillon',en:'Stock'}}, recipes:[
+    {ids:['roux','stock'],outputIngredient:{id:'veloute',icon:'🍲',name:{nl:'Velouté',en:'Velouté'}},product:{nl:'Velouté',en:'Velouté'},emoji:'🍲',act:'heat',story:{nl:'Velouté is een klassieke Franse moedersaus: een lichte roux wordt gebonden met blanke gevogelte- of visfond.',en:'Velouté is a classic French mother sauce: a pale roux thickened with white poultry or fish stock.'},lesson:{nl:{amount:'30 g boter · 30 g bloem · 500 ml warme kippen- of visbouillon',tools:'Steelpan, garde, maatbeker',steps:['Maak een bleke roux van boter en bloem.','Klop de warme bouillon geleidelijk door de roux.','Laat zachtjes koken en roer tot de saus glad en licht gebonden is.'],sign:'Glad, bleek en fluweelachtig; de saus bedekt de lepel.',fix:'Klontjes? Klop stevig of passeer door een fijne zeef.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — de vijf moedersauzen'},en:{amount:'30 g butter · 30 g flour · 500 ml warm chicken or fish stock',tools:'Saucepan, whisk, measuring jug',steps:['Make a pale roux with butter and flour.','Gradually whisk in the warm stock.','Simmer gently, stirring until smooth and lightly thickened.'],sign:'Smooth, pale and velvety; coats the back of a spoon.',fix:'Lumpy? Whisk firmly or pass through a fine sieve.',source:'https://www.cordonbleu.edu/news/what-are-the-mother-sauces-of-french-cooking/en',sourceName:'Le Cordon Bleu — the five mother sauces'}}}
+  ]},
+  { unlock:{id:'onion',icon:'🧅',name:{nl:'Ui',en:'Onion'}}, recipes:[
+    {ids:['bechamel','onion'],product:{nl:'Soubisesaus',en:'Soubise sauce'},emoji:'🧅',act:'heat',story:{nl:'Soubise is een klassieke afgeleide van béchamel met zacht gegaarde ui.',en:'Soubise is a classic béchamel derivative with gently cooked onion.'},lesson:{nl:{amount:'1 ui · 25 g boter · 25 g bloem · 400 ml melk · zout en peper',tools:'Pan, steelpan, garde, staafmixer optioneel',steps:['Snipper de ui en gaar zacht in boter zonder te kleuren.','Voeg bloem toe en roer kort; klop de melk er geleidelijk door.','Laat zacht garen tot de saus glad is. Pureer desgewenst en breng op smaak.'],sign:'Zachte, romige saus met milde uiensmaak; geen bruine ui of rauwe bloemsmaak.',fix:'Te dik? Voeg warme melk toe. Kleurde de ui te donker, dan wordt de saus zoeter en donkerder.',source:'https://www.cordonbleu.edu/malaysia/blog-how-to-make-the-perfect-sauce-mastering-barnaise-bchamel-more/en',sourceName:'Le Cordon Bleu — béchamel en soubise'},en:{amount:'1 onion · 25 g butter · 25 g flour · 400 ml milk · salt and pepper',tools:'Pan, saucepan, whisk, optional stick blender',steps:['Finely dice onion and soften gently in butter without browning.','Add flour and stir briefly; gradually whisk in milk.','Simmer gently until smooth. Blend if desired and season.'],sign:'Soft, creamy sauce with mild onion flavor; no browned onion or raw flour taste.',fix:'Too thick? Add warm milk. Deeply browned onion makes the sauce sweeter and darker.',source:'https://www.cordonbleu.edu/malaysia/blog-how-to-make-the-perfect-sauce-mastering-barnaise-bchamel-more/en',sourceName:'Le Cordon Bleu — béchamel and soubise'}}}
+  ]},
+  { unlock:{id:'tarragon',icon:'🌿',name:{nl:'Dragon',en:'Tarragon'}}, recipes:[
+    {ids:['egg','butter','vinegar','shallot','tarragon'],product:{nl:'Béarnaisesaus',en:'Béarnaise'},emoji:'🌿',act:'whisk',story:{nl:'Béarnaise is familie van Hollandaise. Een reductie van azijn, sjalot en dragon geeft de kenmerkende smaak.',en:'Béarnaise is related to Hollandaise. A reduction of vinegar, shallot and tarragon gives its distinctive flavor.'},lesson:{nl:{amount:'3 eidooiers · 200 g geklaarde boter · 2 el azijn · 1 sjalot · 1 el dragon · peper',tools:'Steelpan, hittebestendige kom, garde, zeef',steps:['Kook azijn met fijngesneden sjalot, dragon en peper in tot een kleine reductie; zeef.','Klop de eidooiers met de reductie au bain-marie tot bleek en luchtig.','Klop de warme geklaarde boter er geleidelijk door tot een gladde emulsie.'],sign:'Luchtig en gebonden, met duidelijke dragon en frisse azijn; niet korrelig.',fix:'Te warm? Haal van het vuur en klop door. Als de saus breekt, klop in een schone kom met een beetje warm water.',source:'https://www.cordonbleu.edu/malaysia/blog-how-to-make-the-perfect-sauce-mastering-barnaise-bchamel-more/en',sourceName:'Le Cordon Bleu — béarnaise techniek'},en:{amount:'3 egg yolks · 200 g clarified butter · 2 tbsp vinegar · 1 shallot · 1 tbsp tarragon · pepper',tools:'Saucepan, heatproof bowl, whisk, sieve',steps:['Reduce vinegar with finely chopped shallot, tarragon and pepper; strain.','Whisk yolks with reduction over a bain-marie until pale and airy.','Gradually whisk in warm clarified butter to make a smooth emulsion.'],sign:'Light and emulsified, with clear tarragon and fresh acidity; not grainy.',fix:'Too hot? Remove from heat and keep whisking. If it splits, whisk in a clean bowl with a little warm water.',source:'https://www.cordonbleu.edu/malaysia/blog-how-to-make-the-perfect-sauce-mastering-barnaise-bchamel-more/en',sourceName:'Le Cordon Bleu — béarnaise technique'}}}
+  ]},
+  { unlock:{id:'cream',icon:'🥛',name:{nl:'Room',en:'Cream'}}, recipes:[
+    {ids:['veloute','cream'],product:{nl:'Saus suprême',en:'Sauce suprême'},emoji:'🥛',act:'heat',story:{nl:'Saus suprême is een klassieke afleiding van gevogeltevelouté, verrijkt met room.',en:'Sauce suprême is a classic derivative of poultry velouté enriched with cream.'},lesson:{nl:{amount:'500 ml kippenvelouté · 100 ml room · citroen en zout naar smaak',tools:'Steelpan, garde, maatbeker',steps:['Maak een lichte velouté met kippenbouillon.','Roer de room erdoor en laat zacht reduceren tot sausdikte.','Breng op smaak met enkele druppels citroen en zout.'],sign:'Glad, licht glanzend en romig, maar nog schenkbaar.',fix:'Te dun? Laat zacht verder inkoken. Te zuur? Voeg room toe en proef opnieuw.',source:'https://www.cordonbleu.edu/malaysia/blog-how-to-make-the-perfect-sauce-mastering-barnaise-bchamel-more/en',sourceName:'Le Cordon Bleu — velouté-afleidingen'},en:{amount:'500 ml chicken velouté · 100 ml cream · lemon and salt to taste',tools:'Saucepan, whisk, measuring jug',steps:['Make a light velouté with chicken stock.','Stir in cream and reduce gently to sauce consistency.','Season with a few drops of lemon and salt.'],sign:'Smooth, lightly glossy and creamy, yet pourable.',fix:'Too thin? Reduce gently. Too sharp? Add cream and taste again.',source:'https://www.cordonbleu.edu/malaysia/blog-how-to-make-the-perfect-sauce-mastering-barnaise-bchamel-more/en',sourceName:'Le Cordon Bleu — velouté derivatives'}}}
+  ]},
+  { unlock:{id:'chili',icon:'🌶️',name:{nl:'Chili',en:'Chili'}}, recipes:[
+    {ids:['tomatoSauce','chili'],product:{nl:'Pasta all’arrabbiata',en:'Pasta all’arrabbiata'},emoji:'🌶️',act:'heat',category:{nl:'Pastasaus',en:'Pasta sauce'},story:{nl:'Een Romeinse pastasaus met tomaat, knoflook, olijfolie en chili. De naam verwijst naar de pittige smaak.',en:'A Roman pasta sauce made with tomato, garlic, olive oil and chili. Its name refers to the fiery flavor.'},lesson:{nl:{amount:'400 g tomaat · 2 tenen knoflook · 2 el olijfolie · chili naar smaak · zout',tools:'Steelpan, mes, snijplank, houten lepel',steps:['Hak de knoflook fijn en snijd de chili.','Verwarm olijfolie zacht; fruit knoflook en chili kort zonder ze te bruinen.','Voeg tomaat en zout toe en laat 15–20 minuten zacht pruttelen.','Meng met pasta en een scheut kookwater.'],sign:'Pittig, tomatig en glanzend; knoflook is geurig maar niet bruin.',fix:'Te heet? Voeg extra tomaat toe. Bittere knoflook is verbrand; begin dan opnieuw.',source:'https://www.lacucinaitaliana.com/italian-food/italian-dishes/penne-allarrabbiata-recipe',sourceName:'La Cucina Italiana — arrabbiata'},en:{amount:'400 g tomatoes · 2 garlic cloves · 2 tbsp olive oil · chili to taste · salt',tools:'Saucepan, knife, board, wooden spoon',steps:['Finely chop garlic and chili.','Warm olive oil gently; briefly cook garlic and chili without browning.','Add tomatoes and salt; simmer gently for 15–20 minutes.','Toss with pasta and a splash of pasta water.'],sign:'Spicy, tomato-rich and glossy; garlic is fragrant but not browned.',fix:'Too hot? Add more tomato. Bitter garlic has burned; start again.',source:'https://www.lacucinaitaliana.com/italian-food/italian-dishes/penne-allarrabbiata-recipe',sourceName:'La Cucina Italiana — arrabbiata'}}}
+  ]},
+  { unlock:{id:'basil',icon:'🌿',name:{nl:'Basilicum',en:'Basil'}}, recipes:[
+    {ids:['basil','garlic','oil','pineNuts','cheese'],product:{nl:'Pesto alla Genovese',en:'Pesto alla Genovese'},emoji:'🌿',act:'mix',category:{nl:'Pastasaus',en:'Pasta sauce'},story:{nl:'De Genovese pesto wordt traditioneel in een vijzel gemaakt met basilicum, pijnboompitten, knoflook, kaas en olijfolie.',en:'Genoese pesto is traditionally made in a mortar with basil, pine nuts, garlic, cheese and olive oil.'},lesson:{nl:{amount:'50 g basilicum · 30 g pijnboompitten · 30 g Parmezaan · 1 teen knoflook · 80 ml olijfolie',tools:'Vijzel en stamper (of keukenmachine), rasp, kom',steps:['Rooster pijnboompitten heel licht en laat afkoelen.','Wrijf knoflook met een snuf zout fijn; voeg basilicum in porties toe en stamp.','Stamp pijnboompitten en kaas erdoor.','Roer olijfolie er geleidelijk door; meng met pasta en wat kookwater.'],sign:'Groen en geurig, met een grove maar samenhangende structuur; niet warm koken.',fix:'Wordt pesto bruin? Beperk warmte en maak hem vlak voor gebruik. Te dik? Verdun met pasta-kookwater.',source:'https://www.pestochampionship.it/pesto-genovese-recipe/',sourceName:'Consorzio del Pesto Genovese'},en:{amount:'50 g basil · 30 g pine nuts · 30 g Parmesan · 1 garlic clove · 80 ml olive oil',tools:'Mortar and pestle (or food processor), grater, bowl',steps:['Lightly toast pine nuts and cool.','Crush garlic with a pinch of salt; add basil in batches and pound.','Pound in pine nuts and cheese.','Gradually stir in olive oil; toss with pasta and a little pasta water.'],sign:'Green and fragrant with a coarse but cohesive texture; do not cook it over heat.',fix:'If pesto browns, limit heat and make it just before serving. Too thick? Loosen with pasta water.',source:'https://www.pestochampionship.it/pesto-genovese-recipe/',sourceName:'Consorzio del Pesto Genovese'}}}
+  ]},
+];
+
+/* Elk recept krijgt een stabiele, taal-onafhankelijke id (gebaseerd op de
+   ingrediënten), zodat ontdekte recepten herkenbaar blijven ongeacht de
+   ingestelde taal. */
+TIERS.forEach(t=>t.recipes.forEach(r=>{ r.id=[...r.ids].sort().join('_'); }));
+
+const START_INGREDIENTS = [
+  {id:'oil',icon:'🫗',name:{nl:'Olie',en:'Oil'}}, {id:'vinegar',icon:'🍶',name:{nl:'Azijn',en:'Vinegar'}},
+  {id:'lemon',icon:'🍋',name:{nl:'Citroen',en:'Lemon'}}, {id:'mustard',icon:'🟡',name:{nl:'Mosterd',en:'Mustard'}},
+  {id:'cucumber',icon:'🥒',name:{nl:'Komkommer',en:'Cucumber'}},
+  {id:'shallot',icon:'🧅',name:{nl:'Sjalot',en:'Shallot'}},
+  {id:'pineNuts',icon:'🌰',name:{nl:'Pijnboompitten',en:'Pine nuts'}},
+  {id:'honey',icon:'🍯',name:{nl:'Honing',en:'Honey'}},
+];
+
+const TOOL_OF = {
+  whisk:{nl:'🌀 Garde',en:'🌀 Whisk'}, stir:{nl:'🥄 Lepel',en:'🥄 Spoon'},
+  heat:{nl:'🔥 Pan',en:'🔥 Pan'}, mix:{nl:'⚡ Mixer',en:'⚡ Mixer'},
+};
+const TOOL_LABEL = {
+  whisk:{nl:'Garde',en:'Whisk'}, stir:{nl:'Lepel',en:'Spoon'},
+  heat:{nl:'Pan',en:'Pan'}, mix:{nl:'Mixer',en:'Mixer'},
+};
+const TOOL_SVG = {
+  whisk:`<svg class="toolSvg" viewBox="0 0 80 80"><g fill="none" stroke="#39434a" stroke-width="3" stroke-linecap="round"><path d="M40 55L40 74" stroke-width="7"/><path d="M40 56C15 42 20 10 40 8C60 10 65 42 40 56Z"/><path d="M40 56C28 40 29 15 40 8C51 15 52 40 40 56Z"/><path d="M40 56C35 38 35 17 40 8C45 17 45 38 40 56Z"/></g></svg>`,
+  stir:`<svg class="toolSvg" viewBox="0 0 80 80"><g stroke="#39434a" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="40" cy="18" rx="8.5" ry="12.5" fill="#d9e0e4" stroke-width="2.2"/><path d="M40 30.5 L40 70" fill="none" stroke-width="5.5"/><path d="M36.5 69.5 Q40 74 43.5 69.5" fill="none" stroke-width="2"/></g></svg>`,
+  heat:`<svg class="toolSvg" viewBox="0 0 80 80"><ellipse cx="40" cy="55" rx="28" ry="10" fill="#d9e0e4" stroke="#39434a" stroke-width="3"/><path d="M18 55 L12 55" stroke="#39434a" stroke-width="5" stroke-linecap="round"/><path d="M40 40C34 30 44 24 38 12C48 18 52 30 44 38C50 36 52 30 50 26C56 32 54 44 40 40Z" fill="#ff9d12"/></svg>`,
+  mix:`<svg class="toolSvg" viewBox="0 0 80 80"><rect x="34" y="10" width="12" height="34" rx="5" fill="#c9d2d7" stroke="#39434a" stroke-width="2"/><path d="M40 44 L28 70 M40 44 L52 70" stroke="#39434a" stroke-width="4" stroke-linecap="round"/><circle cx="28" cy="70" r="3" fill="#39434a"/><circle cx="52" cy="70" r="3" fill="#39434a"/></g></svg>`,
+};
+
+const RANKS = [
+  {min:0, name:{nl:'Keukenhulp',en:'Kitchen Hand'}}, {min:2,name:{nl:'Kok in opleiding',en:'Cook in Training'}},
+  {min:4,name:{nl:'Sauzenkok',en:'Sauce cook'}}, {min:6,name:{nl:'Sous-chef',en:'Sous Chef'}},
+  {min:8,name:{nl:'Sausmeester',en:'Sauce master'}},
+];
+
+const SIGNATURE_RECIPE_IDS = TIERS.flatMap(t=>t.recipes).filter(r=>r.signature).map(r=>r.id);
+const BADGES = [
+  {id:'first',  em:'✨', name:{nl:'Eerste ontdekking',en:'First Discovery'}, need:s=>s.products.size>=1},
+  {id:'tier0',  em:'🥗', name:{nl:'Basis beheerst',en:'Basics Mastered'},     need:s=>TIERS[0].recipes.every(r=>s.products.has(r.id))},
+  {id:'half',   em:'🌗', name:{nl:'Halverwege',en:'Halfway There'},          need:s=>s.products.size>=Math.round(TOTAL_RECIPES()/2)},
+  {id:'all',    em:'🏆', name:{nl:'Alles ontdekt',en:'Everything Discovered'},       need:s=>s.products.size>=TOTAL_RECIPES()},
+  {id:'streak5',em:'🔥', name:{nl:'5 op rij zonder fout',en:'5 in a Row, No Mistakes'},need:s=>s.bestStreak>=5},
+  {id:'notip',  em:'🧠', name:{nl:'5x zonder tip',en:'5x Without a Hint'},       need:s=>s.bestNoTipStreak>=5},
+  {id:'heat3',  em:'🍯', name:{nl:'Warmte onder controle',en:'Heat Under Control'},need:s=>s.heatSuccesses>=3},
+  {id:'fast',   em:'⚡', name:{nl:'Snelle handen',en:'Fast Hands'},        need:s=>s.fastestDo!=null&&s.fastestDo<2200},
+];
+
+function TOTAL_RECIPES(){ return TIERS.reduce((n,t)=>n+t.recipes.length,0); }
+
+/* ==========================================================
+   1b) UI-TEKSTEN
+   ========================================================== */
+const UI = {
+  brand:{nl:'🧪 CuliLab', en:'🧪 CuliLab'},
+  tagline:{nl:'ECHT KOKEN • ECHTE COMBINATIES', en:'REAL COOKING • REAL COMBINATIONS'},
+  navLab:{nl:'🧪 Lab', en:'🧪 Lab'},
+  navPair:{nl:'🍽️ Gerecht', en:'🍽️ Dish'},
+  navKnowledge:{nl:'📚 Kennis', en:'📚 Skills'},
+  navTaste:{nl:'👅 Smaaklab', en:'👅 Taste Lab'},
+  navBook:{nl:'📖 Recepten', en:'📖 Recipes'},
+  navBadges:{nl:'🏅 Prestaties', en:'🏅 Achievements'},
+  streak:{nl:'🔥 streak {n}', en:'🔥 streak {n}'},
+
+  homePresents:{nl:'CULILAB PRESENTEERT', en:'CULILAB PRESENTS'},
+  homeIntro:{nl:'CuliLab begint met het Sauzenlab: ontdek echte sauzen, bouw ze stap voor stap op of zoek de saus die bij een gerecht past.',
+             en:'CuliLab starts with the Sauce Lab: discover real sauces, build them step by step, or find the sauce that fits a dish.'},
+  homeSummary:{nl:'{total} echte bereidingen in {tiers} rondes. Ontgrendel stap voor stap nieuwe ingrediënten en technieken.',
+               en:'{total} real preparations in {tiers} rounds. Unlock ingredients and techniques step by step.'},
+  btnPlay:{nl:'🎮 Speel & ontdek',en:'🎮 Play & discover'},
+  btnLearn:{nl:'👩‍🍳 Leer het hele proces',en:'👩‍🍳 Learn the full process'},
+  lessonOpen:{nl:'✓ Proces staat open',en:'✓ Process is open'},
+  lessonClose:{nl:'Verberg het proces',en:'Hide the process'},
+  btnResume:{nl:'▶️ Verdergaan', en:'▶️ Continue'},
+  btnStartGame:{nl:'🚀 Start Sauzenlab', en:'🚀 Start Sauce Lab'},
+  btnResetHome:{nl:'🔄 Opnieuw beginnen', en:'🔄 Start Over'},
+
+  roundLabel:{nl:'RONDE {n} / {total}', en:'ROUND {n} / {total}'},
+  tipButton:{nl:'Tip {left}/3', en:'Hint {left}/3'},
+  combineEmpty:{nl:'Kies hieronder je eerste ingrediënt', en:'Choose your first ingredient below'},
+  pickHint:{nl:'Tik op een ingrediënt om het terug te leggen.', en:'Tap an ingredient to put it back.'},
+  btnPrepare:{nl:'Bereid →', en:'Prepare →'},
+  shelfLabel:{nl:'INGREDIËNTEN', en:'INGREDIENTS'},
+
+  chooseIngredientsFirst:{nl:'Kies eerst minstens twee ingrediënten.', en:'Choose at least two ingredients first.'},
+  partialHint:{nl:'🤔 Interessant begin! Deze combinatie heeft nog {n} nodig om iets te worden.',
+               en:'🤔 Interesting start! This combination still needs {n} to become something.'},
+  ingredientSingular:{nl:'ingrediënt', en:'ingredient'},
+  ingredientPlural:{nl:'ingrediënten', en:'ingredients'},
+  noKnownCombo:{nl:'Nog geen bekende combinatie. Probeer iets anders.', en:'Not a known combination yet. Try something else.'},
+  tryAgainMsg:{nl:'Kies opnieuw en ontdek wat wél samenwerkt.', en:'Choose again and discover what does work.'},
+  alreadyDiscovered:{nl:'✓ Al ontdekt: {name}. Terug te vinden in je receptenboek.', en:'✓ Already discovered: {name}. You can find it in your recipe book.'},
+  comboFound:{nl:'✨ Combinatie gevonden! Welke handeling hoort hierbij?', en:'✨ Combination found! Which action goes with this?'},
+
+  actionWrong:{nl:'↩️ Die handeling past minder goed. {why} Nog één misser en deze combinatie mislukt.', en:'↩️ That action is less suitable. {why} One more miss and this combination fails.'},
+  failedAttempt:{nl:'❌ Tweede misser — de combinatie is mislukt. Begin opnieuw.', en:'❌ Second miss — the combination failed. Start over.'},
+  actionGood:{nl:'✓ Goed gekozen! Voer de handeling uit.',en:'✓ Good choice! Now perform the action.'},
+  burnt:{nl:'🔥 Verbrand! Je ingrediënten zijn onbruikbaar geworden — begin opnieuw.', en:'🔥 Burnt! Your ingredients are ruined — start over.'},
+  notWarmEnough:{nl:'Nog niet warm genoeg — hou iets langer vast.', en:'Not warm enough yet — hold a little longer.'},
+
+  freshDiscoveryMsg:{nl:'✨ Nieuw product toegevoegd aan je verzameling!', en:'✨ New product added to your collection!'},
+  repeatDiscoveryMsg:{nl:'🔁 Deze ken je al — goed uitgevoerd.', en:'🔁 You already know this one — well done.'},
+  whatNext:{nl:'Wat kun je nog ontdekken?', en:'What else can you discover?'},
+
+  tip1:{nl:'Begin met twee ingrediënten die je nog niet samen probeerde.', en:'Start with two ingredients you haven\'t tried together yet.'},
+  tip2:{nl:'Een zuur ingrediënt (azijn of citroen) combineert vaak met olie of mosterd.', en:'An acidic ingredient (vinegar or lemon) often combines with oil or mustard.'},
+  tip3:{nl:'Sommige combinaties hebben drie of vier ingrediënten nodig — kijk wat je nog niet probeerde.', en:'Some combinations need three or four ingredients — check what you haven\'t tried yet.'},
+  tipPrefix:{nl:'🧪 Tip {n}/3: {text}', en:'🧪 Hint {n}/3: {text}'},
+
+  chooseIngredients:{nl:'Kies je ingrediënten.', en:'Choose your ingredients.'},
+  chooseOneMore:{nl:'Kies nog een ingrediënt, of tik op Bereid wanneer je klaar bent.', en:'Choose one more ingredient, or tap Prepare when ready.'},
+  readyPrepare:{nl:'Klaar? Tik op Bereid.', en:'Ready? Tap Prepare.'},
+  adjustOrPrepare:{nl:'Pas je combinatie aan of tik op Bereid.', en:'Adjust your combination or tap Prepare.'},
+
+  actionQuestion:{nl:'🎲 Welke handeling hoort hierbij?', en:'🎲 Which action goes with this?'},
+  actWhisk:{nl:'Kloppen', en:'Whisk'}, actStir:{nl:'Roeren', en:'Stir'},
+  actHeat:{nl:'Verwarmen', en:'Heat'}, actMix:{nl:'Mixen', en:'Mix'},
+
+  doYourself:{nl:'👆 Doe het zelf', en:'👆 Do it yourself'},
+  gestureLabel:{nl:'↻ Maak cirkels met je vinger in het vlak', en:'↻ Make circles with your finger in the area'},
+  heatLabel:{nl:'Houd ingedrukt om te verwarmen — laat op tijd los, niet te vroeg en niet te laat!',
+             en:'Hold down to heat — release at the right time, not too early and not too late!'},
+  mixLabel:{nl:'Tik zo snel mogelijk op de mixer-knop', en:'Tap the mixer button as fast as you can'},
+  btnMix:{nl:'⚡ Mix!', en:'⚡ Mix!'},
+
+  signatureBadgeLabel:{nl:'⭐ SIGNATUURGERECHT', en:'⭐ SIGNATURE DISH'},
+  freshBadge:{nl:'✓ Nieuw in je verzameling', en:'✓ New in your collection'},
+  btnContinueDiscover:{nl:'Verder ontdekken →', en:'Keep discovering →'},
+
+  roundComplete:{nl:'RONDE VOLTOOID!', en:'ROUND COMPLETE!'},
+  discoveriesCount:{nl:'{n} ontdekkingen', en:'{n} discoveries'},
+  youAreNow:{nl:'Je bent nu {rank}.', en:'You are now {rank}.'},
+  newIngredientUnlocked:{nl:'🔓 NIEUW INGREDIËNT', en:'🔓 NEW INGREDIENT'},
+  addedToKitchen:{nl:'{name} toegevoegd aan je keuken', en:'{name} added to your kitchen'},
+  newIngredientAvailable:{nl:'Nieuw ingrediënt beschikbaar. Wat kun je ermee?', en:'New ingredient available. What can you do with it?'},
+
+  allDiscovered:{nl:'ALLES ONTDEKT!', en:'EVERYTHING DISCOVERED!'},
+  recipesOfTotal:{nl:'{total} / {total} recepten', en:'{total} / {total} recipes'},
+  winText:{nl:'Je bent {rank} geworden. Bekijk je receptenboek en prestaties, of begin opnieuw voor een nieuwe run.',
+           en:'You\'ve become {rank}. Check your recipe book and achievements, or start over for a new run.'},
+  btnViewBook:{nl:'📖 Bekijk receptenboek', en:'📖 View recipe book'},
+
+  lockedRound:{nl:'🔒 Ronde {n} — nog te ontgrendelen', en:'🔒 Round {n} — not yet unlocked'},
+  basisRound:{nl:'Basisronde', en:'Basic Round'},
+  roundHeading:{nl:'Ronde {n} — {label}', en:'Round {n} — {label}'},
+  toDiscover:{nl:'Nog te ontdekken', en:'Yet to discover'},
+  signatureDish:{nl:'⭐ Signatuurgerecht', en:'⭐ Signature Dish'},
+  ingredientsCount:{nl:'{n} ingrediënten', en:'{n} ingredients'},
+
+  achieved:{nl:'Behaald', en:'Achieved'},
+  notYetAchieved:{nl:'Nog te behalen', en:'Not yet achieved'},
+};
+
+/* ==========================================================
+   2) STATE
+   ========================================================== */
+const SAVE_KEY = 'culilab_sauslab_save_v5';
+
+/* Vingerafdruk van de huidige receptendata. Verandert automatisch zodra ik
+   rondes/recepten toevoeg of wijzig — zo herkent het spel een save die niet
+   meer bij de huidige inhoud past, en start het dan schoon op in plaats van
+   vast te lopen op een mismatch tussen oude voortgang en nieuwe data. */
+function currentDataVersion(){
+  return TOTAL_RECIPES()+':'+TIERS.map(t=>t.recipes.length).join(',');
+}
+
+function freshState(){
+  return {
+    phase:'home',           // home | ingredients | spices | action | do | discover | pairing | celebrate | book | badges | win
+    lang:'nl',               // 'nl' | 'en'
+    learning:false, lessonOpen:false, spicePick:[], optionOrders:{},
+    pairingIndex:0, pairingScore:0, pairingAnswered:false, pairingFeedback:'', pairingCorrect:false,
+    knowledgeTopic:'materials', knowledgeQuizIndex:0, knowledgeAnswered:false, knowledgeChoice:'', knowledgeDone:[], knowledgeScore:0,
+    tasteMode:'detective', tasteIndex:0, tastePicked:[], tasteAnswered:false, tasteScore:0, tasteSample:'lemon', tasteRatings:{sweet:0,sour:0,salty:0,bitter:0,umami:0}, tasteRatingsBySample:{},
+    pick:[],                // gekozen ingrediënten (objecten)
+    current:null,            // huidig recept tijdens action/tool/do/discover
+    msg:'',
+    msgType:'',
+    tierIndex:0,             // hoogste ontgrendelde tier-index
+    products:new Set(),      // ontdekte recept-id's
+    tipCount:0,
+    streak:0, bestStreak:0,
+    tipStreak:0, bestNoTipStreak:0,
+    heatSuccesses:0,
+    fastestDo:null,
+    pendingUnlock:null,
+    mistakesThisAttempt:0,
+    muted:false,
+  };
+}
+let S = freshState();
+S.msg = t('chooseIngredients');
+
+function serialize(){
+  return JSON.stringify({...S, products:[...S.products], dataVersion:currentDataVersion()});
+}
+function loadRaw(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    // Vul velden aan die in nieuwere spelversies zijn toegevoegd.
+    // Zo blijven oudere saves bruikbaar wanneer er een nieuwe spelmodus bijkomt.
+    const defaults = freshState();
+    for(const [key,value] of Object.entries(defaults)){
+      if(d[key]===undefined) d[key]=value;
+    }
+    d.tasteRatings = {...defaults.tasteRatings, ...(d.tasteRatings||{})};
+    d.tasteRatingsBySample = d.tasteRatingsBySample || {};
+    if(d.tasteSample && d.tasteRatings && !d.tasteRatingsBySample[d.tasteSample]) d.tasteRatingsBySample[d.tasteSample] = d.tasteRatings;
+    if(!['detective','balance','tasting'].includes(d.tasteMode)) d.tasteMode='detective';
+    const knownIds = new Set(TIERS.flatMap(t=>t.recipes).map(r=>r.id));
+    d.products = new Set((d.products||[]).filter(id=>knownIds.has(id)));
+    if(!d.lang) d.lang='nl';
+    d.learning=!!d.learning;
+    d.lessonOpen=false;
+    d.tierIndex=0;
+    // Eén nieuwe bereiding uit een ronde ontgrendelt de volgende stap.
+    // Zo blokkeren bonusrecepten de voortgang niet; bestaande saves tellen mee.
+    for(let i=0;i<TIERS.length-1;i++){
+      if(TIERS[i].recipes.some(r=>d.products.has(r.id))) d.tierIndex=i+1;
+      else break;
+    }
+    if(d.phase==='foodrushLink') d.phase='home';
+    if(d.phase==='celebrate'||d.phase==='action'||d.phase==='tool'||d.phase==='do'||d.phase==='spices'||d.phase==='discover'){
+      d.phase='ingredients'; d.pick=[]; d.current=null;
+    }
+    return d;
+  }catch(e){ return null; }
+}
+function save(){ try{ localStorage.setItem(SAVE_KEY, serialize()); }catch(e){} }
+function hasSave(){ return loadRaw()!==null; }
+function load(){ const d=loadRaw(); S = d || freshState(); }
+
+/* ==========================================================
+   2b) GELUID — gesynthetiseerd met de Web Audio API, geen
+       externe bestanden nodig. Alles faalt stil als de
+       browser geen AudioContext ondersteunt.
+   ========================================================== */
+let audioCtx = null;
+function getAudioCtx(){
+  if(S.muted) return null;
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+    return audioCtx;
+  }catch(e){ return null; }
+}
+function tone(freq, start, dur, type, gain){
+  const ctx = getAudioCtx(); if(!ctx) return;
+  const osc = ctx.createOscillator(); const g = ctx.createGain();
+  osc.type = type||'sine'; osc.frequency.value = freq;
+  osc.connect(g); g.connect(ctx.destination);
+  const t0 = ctx.currentTime + start;
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(gain||0.15, t0+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, t0+dur);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function sndClick(){ tone(520,0,0.08,'sine',0.06); }
+function sndSuccess(){ tone(523,0,0.14,'sine',0.12); tone(659,0.08,0.16,'sine',0.12); tone(784,0.16,0.22,'sine',0.14); }
+function sndSignature(){ tone(523,0,0.12,'triangle',0.12); tone(659,0.1,0.12,'triangle',0.12); tone(784,0.2,0.12,'triangle',0.12); tone(1047,0.3,0.3,'triangle',0.16); }
+function sndFail(){ tone(300,0,0.12,'sawtooth',0.08); tone(220,0.1,0.2,'sawtooth',0.08); }
+function sndFanfare(){
+  const notes=[523,659,784,1047,784,1047];
+  notes.forEach((f,i)=> tone(f, i*0.13, 0.22, 'triangle', 0.14));
+}
+function toggleMute(){ S.muted=!S.muted; save(); render(); }
+function setLang(lang){ if(S.lang===lang) return; S.lang=lang; document.documentElement.lang=lang; save(); render(); }
+
+/* ==========================================================
+   3) SPELLOGICA
+   ========================================================== */
+function availableIngredients(){
+  const list=[...START_INGREDIENTS];
+  for(let i=0;i<S.tierIndex;i++){ if(TIERS[i+1] && TIERS[i+1].unlock) list.push(TIERS[i+1].unlock); }
+  for(const r of TIERS.flatMap(t=>t.recipes)) if(r.outputIngredient && S.products.has(r.id)) list.push(r.outputIngredient);
+  return list;
+}
+function visibleRecipes(){
+  let list=[];
+  for(let i=0;i<=S.tierIndex;i++) list = list.concat(TIERS[i].recipes);
+  return list;
+}
+function findExactRecipe(ids){
+  const key=[...ids].sort().join('|');
+  return visibleRecipes().find(r=>[...r.ids].sort().join('|')===key) || null;
+}
+function findPartialRecipe(ids){
+  // Zoekt een recept waar de huidige keuze een deel van is (maar nog niet compleet) —
+  // gebruikt om een bemoedigende hint te geven in plaats van "fout".
+  return visibleRecipes().find(r=>r.ids.length>ids.length && ids.every(id=>r.ids.includes(id))) || null;
+}
+function rank(){
+  let cur=RANKS[0];
+  for(const r of RANKS){ if(S.products.size>=r.min) cur=r; }
+  return tr(cur.name);
+}
+function maxPick(){ return 6; }
+
+/* Een mislukte poging: ingrediënten kwijt, streak weg, terug naar start.
+   Dit maakt fouten echt kostbaar in plaats van gratis herkansen. */
+function failAttempt(msg){
+  S.streak=0;
+  S.pick=[]; S.current=null; S.phase='ingredients';
+  S.msg=msg; S.msgType='bad';
+  S.mistakesThisAttempt=0;
+  sndFail();
+  save();
+  render();
+}
+
+function selectIngredient(id){
+  const e = availableIngredients().find(x=>x.id===id);
+  if(!e) return;
+  const ix = S.pick.findIndex(x=>x.id===id);
+  if(ix>=0){ S.pick.splice(ix,1); S.msg=t('chooseIngredients'); S.msgType=''; render(); return; }
+  if(S.pick.length>=maxPick()) S.pick.shift();
+  S.pick.push(e);
+  S.msg = S.pick.length===1 ? t('chooseOneMore') : t('readyPrepare');
+  S.msgType='';
+  render();
+}
+function removePick(idx){
+  S.pick.splice(idx,1);
+  S.msg = S.pick.length ? t('adjustOrPrepare') : t('chooseIngredients');
+  render();
+}
+function prepare(){
+  if(S.pick.length<2){ S.msg=t('chooseIngredientsFirst'); S.msgType='bad'; render(); return; }
+  const ids = S.pick.map(x=>x.id);
+  const r = findExactRecipe(ids);
+  if(!r){
+    const partial = findPartialRecipe(ids);
+    if(partial){
+      const missing = partial.ids.length - ids.length;
+      const unit = missing===1 ? t('ingredientSingular') : t('ingredientPlural');
+      S.msg = t('partialHint', {n: missing+' '+unit});
+      S.msgType=''; render();
+      return;
+    }
+    S.msg=t('noKnownCombo'); S.msgType='bad'; render();
+    setTimeout(()=>{ S.pick=[]; S.msg=t('tryAgainMsg'); S.msgType=''; render(); }, 1000);
+    return;
+  }
+  S.current=r; S.spicePick=[]; S.phase='spices'; S.msg=''; S.msgType='';
+  S.mistakesThisAttempt=0;
+  render();
+}
+function chooseAction(a){
+  if(a!==S.current.act){
+    S.mistakesThisAttempt++;
+    if(S.mistakesThisAttempt>=2){
+      failAttempt(t('failedAttempt'));
+      return;
+    }
+    S.streak=0;
+    const why={whisk:{nl:'Kloppen bindt de ingrediënten geleidelijk tot een emulsie.',en:'Whisking gradually binds the ingredients into an emulsion.'},stir:{nl:'Rustig roeren mengt de ingrediënten zonder extra lucht in te slaan.',en:'Gentle stirring combines ingredients without adding extra air.'},heat:{nl:'Verwarmen laat smaken ontwikkelen of een saus binden; let goed op de temperatuur.',en:'Heating develops flavor or thickens a sauce; watch the temperature.'},mix:{nl:'Mixen of stampen verdeelt vaste ingrediënten fijn door de saus.',en:'Blending or pounding breaks solid ingredients down into the sauce.'}}[S.current.act];
+    const actLabel=tr(UI[{whisk:'actWhisk',stir:'actStir',heat:'actHeat',mix:'actMix'}[S.current.act]]);
+    const explanation=S.lang==='nl'?`De juiste handeling is ${actLabel}: ${tr(why)}`:`The right action is ${actLabel}: ${tr(why)}`;
+    S.msg=t('actionWrong',{why:explanation}); S.msgType='bad'; render();
+    return;
+  }
+  S.phase='do'; S.msg=t('actionGood'); S.msgType='good'; S.doStart=performance.now(); render();
+}
+const SPICE_BANK={
+  pepper:{icon:'⚫',name:{nl:'Zwarte peper',en:'Black pepper'}}, nutmeg:{icon:'🌰',name:{nl:'Nootmuskaat',en:'Nutmeg'}},
+  basil:{icon:'🌿',name:{nl:'Basilicum',en:'Basil'}}, oregano:{icon:'🌿',name:{nl:'Oregano',en:'Oregano'}},
+  chili:{icon:'🌶️',name:{nl:'Chili',en:'Chili'}}, tarragon:{icon:'🌿',name:{nl:'Dragon',en:'Tarragon'}},
+  cumin:{icon:'🟤',name:{nl:'Komijn',en:'Cumin'}}, mint:{icon:'🌱',name:{nl:'Munt',en:'Mint'}}, dill:{icon:'🌿',name:{nl:'Dille',en:'Dill'}}, chervil:{icon:'🌿',name:{nl:'Kervel',en:'Chervil'}}, whitePepper:{icon:'⚪',name:{nl:'Witte peper',en:'White pepper'}}, mustardPowder:{icon:'🟡',name:{nl:'Mosterdpoeder',en:'Mustard powder'}}, parsley:{icon:'🌿',name:{nl:'Peterselie',en:'Parsley'}}, cayenne:{icon:'🌶️',name:{nl:'Cayennepeper',en:'Cayenne pepper'}}, thyme:{icon:'🌿',name:{nl:'Tijm',en:'Thyme'}},
+};
+const SPICE_RECIPE_MAP={
+  'oil_vinegar':['pepper','chervil'],
+  'honey_mustard':['pepper','dill'],
+  'egg_oil_vinegar':['whitePepper','mustardPowder'],
+  'garlic_oil':['parsley','pepper'],
+  'butter_egg_lemon':['whitePepper','cayenne'],
+  'garlic_lemon_oil':['parsley','pepper'],
+  'butter_flour':['whitePepper'],
+  'flour_milk':['nutmeg','whitePepper'],
+  'cheese_flour_milk':['nutmeg','whitePepper'],
+  'cucumber_garlic_yogurt':['dill','mint'],
+  'onion_butter':['thyme','whitePepper'],
+  'chili_garlic_oil_tomato':['chili','oregano'],
+  'basil_cheese_garlic_oil_pineNuts':['basil','pepper'],
+  'egg_shallot_tarragon_vinegar_butter':['tarragon','whitePepper'],
+};
+function spiceChoices(r){
+  const name=(r.product?.nl||'').toLowerCase();
+  let right=SPICE_RECIPE_MAP[r.id];
+  if(name.includes('vinaigrette')) right=['pepper','chervil'];
+  else if(name.includes('honing-mosterd')) right=['pepper','dill'];
+  else if(name.includes('mayonaise')) right=['whitePepper','mustardPowder'];
+  else if(name.includes('aïoli')) right=['parsley','pepper'];
+  else if(name.includes('witte roux')) right=['pepper'];
+  else if(name.includes('hollandaise')) right=['whitePepper','cayenne'];
+  else if(name.includes('tomatensaus')) right=['basil','oregano'];
+  else if(name.includes('béchamel')) right=['nutmeg','whitePepper'];
+  else if(name.includes('mornay')) right=['nutmeg','whitePepper'];
+  else if(name.includes('cacık')) right=['dill','mint'];
+  else if(name.includes('soubise')) right=['thyme','whitePepper'];
+  else if(name.includes('arrabbiata')) right=['chili','oregano'];
+  else if(name.includes('pesto')) right=['basil','pepper'];
+  else if(name.includes('béarnaise')) right=['tarragon','whitePepper','chervil'];
+  if(!right) right=['pepper'];
+  const pool=Object.keys(SPICE_BANK).filter(id=>!right.includes(id));
+  const wrong=pool.slice((r.id.length*3)%Math.max(1,pool.length)).concat(pool).slice(0,2);
+  return [...right,...wrong].map(id=>({id,...SPICE_BANK[id],correct:right.includes(id)}));
+}
+function toggleSpice(id){
+  S.spicePick=S.spicePick||[];
+  S.spicePick=S.spicePick.includes(id)?S.spicePick.filter(x=>x!==id):[...S.spicePick,id];
+  render();
+}
+function submitSpices(){
+  const opts=spiceChoices(S.current), right=opts.filter(x=>x.correct).map(x=>x.id);
+  if(right.length===S.spicePick.length && right.every(x=>S.spicePick.includes(x))){S.phase='action';S.msg=t('actionQuestion');S.msgType='good';}
+  else {S.msg=S.lang==='nl'?`Bij dit recept passen ${right.length} specerij(en). Kijk nog eens naar de ingrediënten.`:`${right.length} spice(s) fit this recipe. Check the ingredients again.`;S.msgType='bad';S.spicePick=[];}
+  render();
+}
+function completeDo(){
+  const elapsed = performance.now()-(S.doStart??performance.now());
+  if(S.fastestDo==null || elapsed<S.fastestDo) S.fastestDo=elapsed;
+  const r=S.current;
+  const fresh = !S.products.has(r.id);
+  S.products.add(r.id);
+  S.streak++; if(S.streak>S.bestStreak) S.bestStreak=S.streak;
+  if(S.tipCount===0){ S.tipStreak++; if(S.tipStreak>S.bestNoTipStreak) S.bestNoTipStreak=S.tipStreak; } else S.tipStreak=0;
+  if(r.act==='heat') S.heatSuccesses++;
+  S.tipCount=0;
+  S.phase='discover';
+  S.lessonOpen=!!S.learning;
+  S.msg = fresh ? t('freshDiscoveryMsg') : t('repeatDiscoveryMsg');
+  S.freshDiscovery=fresh;
+  if(r.signature) sndSignature(); else if(fresh) sndSuccess(); else sndClick();
+  save();
+  render();
+}
+function afterDiscover(){
+  S.lessonOpen=false;
+  const nextTier = TIERS[S.tierIndex+1];
+  const cameFromActiveTier = TIERS[S.tierIndex].recipes.some(recipe=>recipe.id===S.current?.id);
+  if(nextTier && cameFromActiveTier){
+    S.pendingUnlock = nextTier.unlock;
+    S.tierIndex++;
+    S.phase='celebrate';
+    sndFanfare();
+    render();
+    return;
+  }
+  if(S.products.size>=TOTAL_RECIPES()){
+    S.phase='win'; sndFanfare(); render(); return;
+  }
+  S.phase='ingredients'; S.pick=[]; S.current=null; S.msg=t('whatNext'); S.msgType='';
+  render();
+}
+function useTip(){
+  if(S.tipCount>=3) return;
+  S.tipCount++;
+  const r=TIERS[S.tierIndex].recipes.find(x=>!S.products.has(x.id))||TIERS[S.tierIndex].recipes[0];
+  const clues={
+    oil_vinegar:{nl:['Denk aan een koude dressing met een vet en een zuur.','Een tijdelijke binding maakt de dressing egaal.','Voeg de olie beetje bij beetje toe terwijl je klopt.'],en:['Think of a cold dressing with a fat and an acid.','A temporary emulsion makes the dressing even.','Add the oil gradually while whisking.']},
+  };
+  const act={whisk:{nl:'De ingrediënten moeten geleidelijk binden.',en:'The ingredients need to bind gradually.'},stir:{nl:'Een rustige mengbeweging past hierbij.',en:'A gentle mixing motion fits here.'},heat:{nl:'Temperatuur en timing zijn belangrijk.',en:'Temperature and timing matter.'},mix:{nl:'De vaste ingrediënten moeten fijn verdeeld worden.',en:'The solid ingredients need to be broken down.'}}[r.act];
+  const clue=clues[r.id];
+  const hint=clue?clue[S.lang][S.tipCount-1]:(S.tipCount===1?(S.lang==='nl'?'Denk aan het soort saus: koud, warm, romig of fris.':'Think about the kind of sauce: cold, warm, creamy, or fresh.') : S.tipCount===2?`${S.lang==='nl'?'Deze bereiding draait om':'This preparation centers on'} ${r.category?.[S.lang]|| (S.lang==='nl'?'een saus':'a sauce')}.`:act);
+  S.msg=t('tipPrefix', {n:S.tipCount, text:hint}); S.msgType=''; render();
+}
+function resetGame(){
+  const warning=S.lang==='nl'
+    ? '⚠️ Weet je zeker dat je opnieuw wilt beginnen?\n\nAlle ontdekkingen, recepten, ontgrendelde ingrediënten, scores en kennischeckpunten worden gewist. Dit kan niet ongedaan worden gemaakt.'
+    : '⚠️ Are you sure you want to start over?\n\nAll discoveries, recipes, unlocked ingredients, scores, and knowledge-check points will be erased. This cannot be undone.';
+  if(!window.confirm(warning)) return;
+  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  const lang = S.lang;
+  S = freshState();
+  S.lang = lang;
+  S.msg = t('chooseIngredients');
+  render();
+}
+
+/* ==========================================================
+   4) DO-FASE MECHANIEK (per actietype)
+   ========================================================== */
+let gesture = {active:false,lastAngle:0,travel:0};
+let holdRaf = null, holdVal=0, holdDir=1;
+let tapCount = 0;
+
+function bindDoMechanic(){
+  const act = S.current.act;
+  if(act==='whisk' || act==='stir') bindGesture(act);
+  else if(act==='heat') bindHold();
+  else if(act==='mix') bindTap();
+}
+function bindGesture(act){
+  const zone = document.getElementById('doZone');
+  if(!zone) return;
+  const required = act==='stir' ? Math.PI*13 : Math.PI*9;
+  gesture = {active:false,lastAngle:0,travel:0};
+  const angle=(p,r)=>Math.atan2(p.clientY-(r.top+r.height/2), p.clientX-(r.left+r.width/2));
+  const start=e=>{
+    e.preventDefault();
+    const r=zone.getBoundingClientRect();
+    const p=e.touches?e.touches[0]:e;
+    gesture.active=true; gesture.lastAngle=angle(p,r);
+  };
+  const move=e=>{
+    if(!gesture.active) return;
+    e.preventDefault();
+    const r=zone.getBoundingClientRect();
+    const p=e.touches?e.touches[0]:e;
+    const a=angle(p,r);
+    let d=a-gesture.lastAngle;
+    if(d>Math.PI) d-=Math.PI*2; if(d<-Math.PI) d+=Math.PI*2;
+    gesture.travel+=Math.abs(d); gesture.lastAngle=a;
+    const pct=Math.min(100,(gesture.travel/required)*100);
+    const bar=document.getElementById('doBar'); if(bar) bar.style.width=pct+'%';
+    const icon=document.getElementById('doIcon'); if(icon) icon.style.transform=`rotate(${gesture.travel*57.2958}deg)`;
+    if(pct>=100){ gesture.active=false; completeDo(); }
+  };
+  const end=()=>{ gesture.active=false; };
+  zone.addEventListener('pointerdown',start); zone.addEventListener('pointermove',move);
+  zone.addEventListener('pointerup',end); zone.addEventListener('pointercancel',end);
+  zone.addEventListener('lostpointercapture',end);
+}
+function bindHold(){
+  const zone=document.getElementById('doZone');
+  if(!zone) return;
+  let holding=false, startedAt=0, burnt=false;
+  const GOOD_MIN=61, BURN_AT=100, BURN_MS=2000;
+  const step=()=>{
+    if(!holding) return;
+    holdVal=Math.min(100,((performance.now()-startedAt)/BURN_MS)*100);
+    const bar=document.getElementById('doBar');
+    if(bar) bar.style.width=holdVal+'%';
+    if(holdVal>=BURN_AT && !burnt){
+      burnt=true; holding=false;
+      holdVal=0;
+      failAttempt(t('burnt'));
+      return;
+    }
+    holdRaf=requestAnimationFrame(step);
+  };
+  const start=e=>{ e.preventDefault(); if(holding)return; holding=true; burnt=false; holdVal=0; startedAt=performance.now(); zone.setPointerCapture?.(e.pointerId); holdRaf=requestAnimationFrame(step); };
+  const stop=e=>{
+    e && e.preventDefault();
+    if(!holding) return;
+    holdVal=Math.min(100,((performance.now()-startedAt)/BURN_MS)*100);
+    holding=false; cancelAnimationFrame(holdRaf);
+    if(burnt) return;
+    if(holdVal>=BURN_AT){ failAttempt(t('burnt')); return; }
+    if(holdVal>=GOOD_MIN && holdVal<BURN_AT){ completeDo(); }
+    else { S.msg=t('notWarmEnough'); S.msgType='bad'; holdVal=0; render(); }
+  };
+  zone.addEventListener('pointerdown',start); zone.addEventListener('pointerup',stop);
+  zone.addEventListener('pointercancel',stop); zone.addEventListener('lostpointercapture',stop);
+}
+function bindTap(){
+  tapCount=0;
+  const NEEDED=12;
+  const btn=document.getElementById('tapBtn');
+  if(!btn) return;
+  const onTap=e=>{
+    e.preventDefault();
+    tapCount++;
+    const bar=document.getElementById('doBar'); if(bar) bar.style.width=Math.min(100,(tapCount/NEEDED)*100)+'%';
+    const label=document.getElementById('tapCount'); if(label) label.textContent=tapCount+' / '+NEEDED;
+    const icon=document.getElementById('doIcon'); if(icon){ icon.style.transform=`rotate(${tapCount*35}deg)`; }
+    if(tapCount>=NEEDED) completeDo();
+  };
+  btn.addEventListener('pointerdown',onTap);
+}
+
+/* ==========================================================
+   5) RENDER
+   ========================================================== */
+function el(html){ const d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+function langSwitcher(){
+  return `<div style="display:flex;gap:4px">
+    <button data-lang="nl" class="${S.lang==='nl'?'active':''}" style="border:0;border-radius:10px;padding:6px 8px;font-size:11px;font-weight:900;background:${S.lang==='nl'?'#f5a019':'#ffffff18'};color:${S.lang==='nl'?'#2a1b12':'#fff'}" type="button">NL</button>
+    <button data-lang="en" class="${S.lang==='en'?'active':''}" style="border:0;border-radius:10px;padding:6px 8px;font-size:11px;font-weight:900;background:${S.lang==='en'?'#f5a019':'#ffffff18'};color:${S.lang==='en'?'#2a1b12':'#fff'}" type="button">EN</button>
+  </div>`;
+}
+function header(showBack){
+  const total=TOTAL_RECIPES();
+  return `
+  <header>
+    <div class="brandrow">
+      <div><div class="brand">${t('brand')}</div><div class="tag">${t('tagline')}</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        ${langSwitcher()}
+        ${showBack?`<button id="btnResetHeader" title="${S.lang==='nl'?'Opnieuw beginnen':'Start over'}" aria-label="${S.lang==='nl'?'Opnieuw beginnen':'Start over'}" style="border:0;background:#ffffff18;color:#fff;border-radius:12px;width:34px;height:34px;font-size:15px" type="button">🔄</button>`:''}
+        <button id="btnMute" title="${S.lang==='nl'?'Geluid aan/uit':'Toggle sound'}" aria-label="${S.lang==='nl'?'Geluid aan/uit':'Toggle sound'}" style="border:0;background:#ffffff18;color:#fff;border-radius:12px;width:34px;height:34px;font-size:15px" type="button">${S.muted?'🔇':'🔊'}</button>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="pill">🔬 ${S.products.size}/${total}</div>
+      <div class="pill">${t('streak',{n:S.streak})}</div>
+      <div class="pill">${rank()}</div>
+    </div>
+    <div class="progress"><i style="width:${(S.products.size/total*100).toFixed(1)}%"></i></div>
+  </header>
+  ${showBack?`<nav class="tabs">
+    <button data-nav="ingredients" class="${S.phase==='ingredients'?'active':''}" ${['spices','action','tool','do'].includes(S.phase)?'disabled':''}>${t('navLab')}</button>
+    <button data-nav="pairing" class="${S.phase==='pairing'?'active':''}" ${['spices','action','tool','do'].includes(S.phase)?'disabled':''}>${t('navPair')}</button>
+    <button data-nav="knowledge" class="${S.phase==='knowledge'?'active':''}" ${['spices','action','tool','do'].includes(S.phase)?'disabled':''}>${t('navKnowledge')}</button>
+    <button data-nav="taste" class="${S.phase==='taste'?'active':''}" ${['spices','action','tool','do'].includes(S.phase)?'disabled':''}>${t('navTaste')}</button>
+    <button data-nav="book" ${['spices','action','tool','do'].includes(S.phase)?'disabled':''}>${t('navBook')}</button>
+    <button data-nav="badges" ${['spices','action','tool','do'].includes(S.phase)?'disabled':''}>${t('navBadges')}</button>
+  </nav>`:''}
+  `;
+}
+
+const DISH_CHALLENGES = [
+  {dish:{nl:'Gegrilde steak met friet',en:'Grilled steak and fries'}, clue:{nl:'Gegrild rundvlees is stevig en vol van smaak. Welke saus brengt daar frisheid en kruidigheid bij?',en:'Grilled beef is hearty and full-flavored. Which sauce adds freshness and herbal notes?'}, answer:'Béarnaisesaus', sauce:{nl:'Béarnaisesaus',en:'Béarnaise'}, options:[['Béarnaisesaus','🌿'],['Vinaigrette','🥗'],['Cacık','🥒']], why:{nl:'Béarnaise past klassiek bij gegrild rundvlees. Dragon en azijn geven frisheid aan de rijke boter-emulsie.',en:'Béarnaise is a classic with grilled beef. Tarragon and vinegar bring freshness to the rich butter emulsion.'}},
+  {dish:{nl:'Witte asperges',en:'White asparagus'}, clue:{nl:'Witte asperges hebben een zachte smaak. Welke klassieke saus geeft rijkdom zonder die te overheersen?',en:'White asparagus has a delicate flavor. Which classic sauce adds richness without overpowering it?'}, answer:'Hollandaisesaus', sauce:{nl:'Hollandaisesaus',en:'Hollandaise'}, options:[['Hollandaisesaus','🍋'],['Pasta all’arrabbiata','🌶️'],['Aïoli (mayonaise-stijl)','🧄']], why:{nl:'Hollandaise met citroen is een klassieke partner voor asperges; de frisse zuren houden de botersaus in balans.',en:'Lemon hollandaise is a classic partner for asparagus; its acidity balances the buttery sauce.'}},
+  {dish:{nl:'Pasta met tomaat en knoflook',en:'Pasta with tomato and garlic'}, clue:{nl:'De pasta vraagt om een eenvoudige warme saus waarin de tomaat de hoofdrol houdt.',en:'The pasta calls for a simple warm sauce that lets tomato take the lead.'}, answer:'Italiaanse tomatensaus', sauce:{nl:'Italiaanse tomatensaus',en:'Italian tomato sauce'}, options:[['Italiaanse tomatensaus','🍅'],['Béchamelsaus','🥛'],['Béarnaisesaus','🌿']], why:{nl:'De tomatensausbasis wordt gemaakt van tomaat, olijfolie en knoflook en is een veelgebruikte pastasaus.',en:'Tomato sauce made with tomato, olive oil and garlic is a common pasta sauce.'}},
+  {dish:{nl:'Penne met chili en tomaat',en:'Penne with chili and tomato'}, clue:{nl:'Je kiest voor penne met een uitgesproken pittige, tomatige stijl.',en:'You are choosing penne with a distinctly spicy, tomato-forward style.'}, answer:'Pasta all’arrabbiata', sauce:{nl:'Pasta all’arrabbiata',en:'Pasta all’arrabbiata'}, options:[['Pasta all’arrabbiata','🌶️'],['Pesto alla Genovese','🌿'],['Hollandaisesaus','🍋']], why:{nl:'Arrabbiata combineert tomaat, knoflook, olijfolie en chili. De naam verwijst naar het pittige karakter.',en:'Arrabbiata combines tomato, garlic, olive oil and chili. Its name refers to the spicy character.'}},
+  {dish:{nl:'Macaroni uit de oven met kaas',en:'Baked macaroni with cheese'}, clue:{nl:'Voor macaroni uit de oven zoek je een romige saus die goed kan gratineren.',en:'For baked macaroni, look for a creamy sauce that gratinates well.'}, answer:'Mornaysaus', sauce:{nl:'Mornaysaus',en:'Mornay sauce'}, options:[['Mornaysaus','🧀'],['Vinaigrette','🥗'],['Aïoli (mayonaise-stijl)','🧄']], why:{nl:'Mornay is béchamel verrijkt met kaas en wordt gebruikt voor onder meer macaroni en gratins.',en:'Mornay is béchamel enriched with cheese and is used for dishes such as macaroni and gratins.'}},
+  {dish:{nl:'Koude groene salade',en:'Cold green salad'}, clue:{nl:'Bij een frisse groene salade past een lichte, koude dressing vlak voor het serveren.',en:'A fresh green salad pairs well with a light, cold dressing just before serving.'}, answer:'Vinaigrette', sauce:{nl:'Vinaigrette',en:'Vinaigrette'}, options:[['Vinaigrette','🥗'],['Saus suprême','🥛'],['Pasta all’arrabbiata','🌶️']], why:{nl:'Een vinaigrette is een koude dressing van olie en een zuur, zoals azijn. Meng of klop vlak voor gebruik.',en:'A vinaigrette is a cold dressing of oil and an acid such as vinegar. Mix or whisk just before serving.'}},
+  {dish:{nl:'Geroosterde groenten met basilicum',en:'Roasted vegetables with basil'}, clue:{nl:'Geroosterde groenten krijgen graag een groene, kruidige saus die niet wordt meegekookt.',en:'Roasted vegetables pair well with a green, herbal sauce that is not cooked along with them.'}, answer:'Pesto alla Genovese', sauce:{nl:'Pesto alla Genovese',en:'Pesto alla Genovese'}, options:[['Pesto alla Genovese','🌿'],['Béchamelsaus','🥛'],['Hollandaisesaus','🍋']], why:{nl:'Pesto alla Genovese wordt traditioneel koud bereid en past bij pasta, maar ook als smaakmaker bij groenten.',en:'Pesto alla Genovese is traditionally made without cooking and works with pasta as well as a flavoring for vegetables.'}},
+  {dish:{nl:'Gebakken aardappelen met knoflook',en:'Roast potatoes with garlic'}, clue:{nl:'Gebakken aardappelen kunnen een koude, romige saus met duidelijke knoflooksmaak gebruiken.',en:'Roast potatoes can use a cold, creamy sauce with a clear garlic flavor.'}, answer:'Aïoli (mayonaise-stijl)', sauce:{nl:'Aïoli (mayonaise-stijl)',en:'Aioli (mayonnaise-style)'}, options:[['Aïoli (mayonaise-stijl)','🧄'],['Hollandaisesaus','🍋'],['Italiaanse tomatensaus','🍅']], why:{nl:'Deze spelversie van aïoli is mayonaise op smaak gebracht met knoflook. Ze past goed bij aardappelen.',en:'This game’s aioli is mayonnaise flavored with garlic. It pairs well with potatoes.'}},
+];
+function translateDishName(value){const en={'Béarnaisesaus':'Béarnaise','Vinaigrette':'Vinaigrette','Cacık':'Cacık','Hollandaisesaus':'Hollandaise','Pasta all’arrabbiata':'Pasta all’arrabbiata','Aïoli (mayonaise-stijl)':'Aioli (mayonnaise-style)','Italiaanse tomatensaus':'Italian tomato sauce','Béchamelsaus':'Béchamel','Mornaysaus':'Mornay sauce','Saus suprême':'Suprême sauce','Pesto alla Genovese':'Pesto alla Genovese'}; return S.lang==='en'?(en[value]||value):value;}
+function pairingChallenge(){ return DISH_CHALLENGES[S.pairingIndex % DISH_CHALLENGES.length]; }
+function answerPairing(id){
+  if(S.pairingAnswered) return;
+  const d=pairingChallenge();
+  S.pairingAnswered=true; S.pairingCorrect=id===d.answer;
+  if(S.pairingCorrect) S.pairingScore++;
+  S.pairingFeedback=tr(d.why);
+  S.msg=S.pairingCorrect?(S.lang==='nl'?'Goed gekozen!':'Correct!'):(S.lang==='nl'?`Bij dit gerecht past ${tr(d.sauce)}.`:`${tr(d.sauce)} fits this dish.`);
+  S.msgType=S.pairingCorrect?'good':'bad'; save(); render();
+}
+function revealPairing(){
+  if(S.pairingAnswered) return;
+  const d=pairingChallenge(); S.pairingAnswered=true; S.pairingCorrect=false;
+  S.pairingFeedback=(S.lang==='nl'?'Leerstand — ':'Learning mode — ')+tr(d.why);
+  S.msg=(S.lang==='nl'?'Passende saus: ':'Matching sauce: ')+tr(d.sauce); S.msgType='good'; render();
+}
+function nextPairing(){
+  S.pairingIndex=(S.pairingIndex+1)%DISH_CHALLENGES.length;
+  S.pairingAnswered=false; S.pairingCorrect=false; S.pairingFeedback=''; S.msg=''; S.msgType=''; save(); render();
+}
+function screenPairing(){
+  const d=pairingChallenge();
+  return `<main>
+    <div class="roundline"><span>${S.lang==='nl'?'Welke saus past?':'Which sauce fits?'}</span><span>⭐ ${S.pairingScore}</span></div>
+    <div class="pairingGrid">
+      <div class="card center pairingDish" style="background:#fff0c7"><div style="font-size:42px">🍽️</div><h2 style="margin:6px 0">${tr(d.dish)}</h2><p class="muted">${tr(d.clue)}</p></div>
+      <div class="card pairingChoices"><b>${S.lang==='nl'?'Kies de saus':'Choose the sauce'}</b><div class="actiongrid">${shuffleStable(`pair:${S.pairingIndex}`,d.options,x=>x[0]).map(([id,icon])=>`<button class="choice ${S.pairingAnswered&&id===d.answer?'active':''}" data-pair="${id}" ${S.pairingAnswered?'disabled':''}><span class="big">${icon}</span>${translateDishName(id)}</button>`).join('')}</div>
+      ${S.pairingAnswered?`<div class="feedback ${S.msgType}"><b>${S.msg}</b><br>${S.pairingFeedback}</div><button class="btn primary" id="btnNextPair" style="margin-top:12px">${S.lang==='nl'?'Volgend gerecht →':'Next dish →'}</button>`:`<button class="btn ghost" id="btnPairLearn">${S.lang==='nl'?'🎓 Toon uitleg (leerstand)':'🎓 Show explanation (learning mode)'}</button>`}
+      <button class="btn ghost" id="btnPairHome" style="margin-top:8px">${S.lang==='nl'?'Terug naar start':'Back to start'}</button></div>
+    </div>
+  </main>`;
+}
+
+const KNOWLEDGE = {
+  materials:{
+    title:{nl:'Materialen & gereedschap',en:'Equipment & tools'},
+    intro:{nl:'Kies gereedschap dat past bij de techniek. Goed materiaal helpt je nauwkeurig en veilig werken.',en:'Choose tools to match the technique. The right equipment helps you work accurately and safely.'},
+    cards:[
+      {icon:'⚖️',title:{nl:'Weegschaal en maatlepels',en:'Scale and measuring spoons'},text:{nl:'Weeg vaste ingrediënten voor een herhaalbaar recept. Gebruik maatlepels voor kleine hoeveelheden en let op gram, milliliter en eetlepel.',en:'Weigh solid ingredients for repeatable results. Use measuring spoons for small amounts and distinguish grams, milliliters, and tablespoons.'}},
+      {icon:'🥣',title:{nl:'Kom en garde',en:'Bowl and whisk'},text:{nl:'Een garde mengt en klopt lucht in een mengsel. Bij vinaigrette helpt krachtig kloppen olie en azijn tijdelijk te verdelen.',en:'A whisk mixes and incorporates air. For vinaigrette, whisking helps disperse oil and vinegar temporarily.'}},
+      {icon:'🍳',title:{nl:'Pan en spatel',en:'Pan and spatula'},text:{nl:'Kies een pan die past bij de hoeveelheid. Roer met een hittebestendige spatel en schraap rustig over de bodem zodat saus niet vastzet.',en:'Choose a pan sized for the amount. Stir with a heatproof spatula and scrape the base gently so sauce does not catch.'}},
+      {icon:'🌡️',title:{nl:'Thermometer',en:'Thermometer'},text:{nl:'Een voedselthermometer meet de kerntemperatuur. Dat is betrouwbaarder dan alleen kleur of baktijd beoordelen.',en:'A food thermometer measures internal temperature. This is more reliable than judging only by color or cooking time.'}},
+      {icon:'🔪',title:{nl:'Mes en snijplank',en:'Knife and cutting board'},text:{nl:'Werk met een stabiele snijplank en een scherp, schoon mes. Houd rauwe producten gescheiden van bereide producten en was plank en mes tussendoor af.',en:'Use a stable board and a sharp, clean knife. Keep raw foods separate from cooked foods and wash the board and knife between tasks.'}},
+    ],
+    quiz:{question:{nl:'Waarmee klop je olie en azijn tot een tijdelijke vinaigrette?',en:'Which tool do you use to whisk oil and vinegar into a temporary vinaigrette?'},options:[['Garde','🥣'],['Zeef','🕸️'],['Dunschiller','🥕']],answer:'Garde',why:{nl:'Een garde verdeelt de druppels tijdens het kloppen; de dressing kan later weer scheiden.',en:'A whisk disperses the droplets while mixing; the dressing may separate again later.'}}
+  },
+  mise:{
+    title:{nl:'Mise-en-place',en:'Mise en place'},
+    intro:{nl:'Mise-en-place betekent: alles klaarzetten en voorbereiden vóór je gaat koken. Zo werk je rustiger, sneller en met minder fouten.',en:'Mise en place means setting up and preparing everything before cooking. It helps you work calmly, efficiently, and with fewer mistakes.'},
+    cards:[
+      {icon:'📖',title:{nl:'1. Lees eerst',en:'1. Read first'},text:{nl:'Lees het recept helemaal door. Let op hoeveelheden, volgorde, rust- of kooktijd en welke stappen tegelijk kunnen lopen.',en:'Read the full recipe. Check quantities, order, resting or cooking time, and which steps can happen at the same time.'}},
+      {icon:'🧰',title:{nl:'2. Zet spullen klaar',en:'2. Set out equipment'},text:{nl:'Kies pan, kom, mes, snijplank, garde en maatmateriaal voordat je begint. Controleer of alles schoon en heel is.',en:'Set out the pan, bowl, knife, board, whisk, and measuring tools before you start. Check that everything is clean and in good condition.'}},
+      {icon:'🥕',title:{nl:'3. Was, snijd en meet af',en:'3. Wash, cut, and measure'},text:{nl:'Bereid ingrediënten in de benodigde vorm en portioneer ze. Was groente waar nodig; houd rauwe producten apart van eten dat al klaar is.',en:'Prepare ingredients in the required form and portion them. Wash produce as needed; keep raw foods separate from ready-to-eat food.'}},
+      {icon:'🧊',title:{nl:'4. Houd koud wat koud moet blijven',en:'4. Keep chilled food chilled'},text:{nl:'Zet bederfelijke ingrediënten terug in de koelkast tot je ze nodig hebt. Werk schoon en ruim morsen meteen op.',en:'Return perishable ingredients to the refrigerator until needed. Work cleanly and wipe spills promptly.'}},
+      {icon:'🧹',title:{nl:'5. Werk op volgorde',en:'5. Work in order'},text:{nl:'Leg spullen logisch neer, begin met stappen die langer duren en maak tussendoor schoon. Zo blijft je werkplek overzichtelijk.',en:'Arrange items logically, start with steps that take longest, and clean as you go. This keeps your station organized.'}},
+    ],
+    checklist:[
+      {nl:'Recept gelezen en werkvolgorde bepaald',en:'Recipe read and work order planned'},
+      {nl:'Gereedschap schoon en klaar',en:'Equipment clean and ready'},
+      {nl:'Ingrediënten gewassen, gesneden en afgewogen',en:'Ingredients washed, cut, and measured'},
+      {nl:'Rauwe en bereide producten gescheiden',en:'Raw and cooked foods kept separate'},
+      {nl:'Bederfelijke ingrediënten teruggekoeld',en:'Perishable ingredients returned to the fridge'},
+    ],
+    quiz:{question:{nl:'Wat doe je als eerste bij mise-en-place?',en:'What is the first step in mise en place?'},options:[['Recept lezen en volgorde bepalen','📖'],['Alles tegelijk in de pan doen','🍳'],['Pas tijdens het koken gereedschap zoeken','🔎']],answer:'Recept lezen en volgorde bepalen',why:{nl:'Als je eerst het recept leest, weet je welke hoeveelheden, materialen en timing nodig zijn.',en:'Reading the recipe first tells you which quantities, tools, and timing you need.'}}
+  },
+  fridge:{
+    title:{nl:'Koelkast & bewaren',en:'Fridge & storage'},
+    intro:{nl:'Veilig bewaren helpt voedsel langer goed te houden en voorkomt dat rauwe producten bereide producten besmetten.',en:'Safe storage helps food stay good longer and prevents raw foods from contaminating cooked foods.'},
+    cards:[
+      {icon:'🌡️',title:{nl:'Stel de koelkast in op 4 °C',en:'Set the fridge to 4°C'},text:{nl:'Gebruik zo mogelijk een koelkastthermometer. Zet producten die gekoeld moeten blijven na gebruik snel terug.',en:'Use a fridge thermometer if possible. Return chilled products promptly after use.'}},
+      {icon:'🥩',title:{nl:'Rauw vlees en vis onderin',en:'Raw meat and fish on the bottom shelf'},text:{nl:'Bewaar rauw vlees, kip en vis goed afgesloten onderin. Zo kan er geen vocht op andere producten druppelen.',en:'Keep raw meat, poultry, and fish sealed on the bottom shelf so liquid cannot drip onto other foods.'}},
+      {icon:'🍲',title:{nl:'Bereide gerechten apart en afgedekt',en:'Cooked food separate and covered'},text:{nl:'Bewaar bereide gerechten en restjes in schone, afsluitbare bakjes, gescheiden van rauwe producten. Zet restjes binnen 2 uur gekoeld weg en eet ze binnen 2 dagen op.',en:'Store cooked food and leftovers in clean, sealed containers, separate from raw foods. Refrigerate leftovers within 2 hours and eat within 2 days.'}},
+      {icon:'🥬',title:{nl:'Gebruik de groentelade',en:'Use the crisper drawer'},text:{nl:'De groentelade is bedoeld voor groente en helpt uitdroging en beschadiging door kou te beperken. Volg bij verpakte producten ook het bewaaradvies op het etiket.',en:'The crisper drawer is intended for vegetables and helps limit drying and cold damage. Also follow the storage instructions on packaged foods.'}},
+      {icon:'🧊',title:{nl:'Ontdooien zonder lekvocht',en:'Thaw without drips'},text:{nl:'Laat bevroren vlees, kip of vis afgedekt op een bord of schaal in de koelkast ontdooien. Houd het lekvocht weg van andere producten.',en:'Thaw frozen meat, poultry, or fish covered on a plate or tray in the refrigerator. Keep any drips away from other foods.'}},
+    ],
+    quiz:{question:{nl:'Waar bewaar je rauwe kip in de koelkast?',en:'Where should raw chicken be stored in the fridge?'},options:[['Afgesloten onderin','⬇️'],['Open boven een schaal salade','🥗'],['In de deur naast drinken','🚪']],answer:'Afgesloten onderin',why:{nl:'Rauw vlees hoort goed afgesloten onderin, zodat lekvocht niet op andere etenswaren kan komen. Houd de koelkast op 4 °C.',en:'Raw meat should be sealed on the bottom shelf so drips cannot reach other food. Keep the fridge at 4°C.'}}
+  }
+};
+const KNOWLEDGE_QUIZZES = {
+  materials:[
+    KNOWLEDGE.materials.quiz,
+    {question:{nl:'Waarom gebruik je een weegschaal bij een recept?',en:'Why use a scale for a recipe?'},options:[['Voor nauwkeurige, herhaalbare hoeveelheden','⚖️'],['Om ingrediënten sneller te laten garen','🔥'],['Om de pan schoon te maken','🧽']],answer:'Voor nauwkeurige, herhaalbare hoeveelheden',why:{nl:'Wegen helpt om hoeveelheden precies te herhalen, vooral bij bloem, boter en andere vaste ingrediënten.',en:'Weighing helps you repeat quantities accurately, especially for flour, butter, and other solid ingredients.'}},
+    {question:{nl:'Welk materiaal gebruik je om de bodem van een hete pan af te schrapen?',en:'Which tool can scrape the bottom of a hot pan?'},options:[['Hittebestendige spatel','🥄'],['Plastic liniaal','📏'],['Papieren servet','🧻']],answer:'Hittebestendige spatel',why:{nl:'Een hittebestendige spatel is gemaakt om warm eten te roeren en de panbodem schoon te houden. Gebruik geen materiaal dat kan smelten.',en:'A heatproof spatula is made for stirring hot food and keeping the pan base clear. Avoid tools that may melt.'}},
+    {question:{nl:'Wat helpt kruisbesmetting tijdens het snijden voorkomen?',en:'What helps prevent cross-contamination while cutting?'},options:[['Rauw en bereid voedsel gescheiden houden en tussendoor schoonmaken','🧼'],['Alles op dezelfde plank snijden zonder schoonmaken','🔪'],['Het mes alleen aan een schort afvegen','👕']],answer:'Rauw en bereid voedsel gescheiden houden en tussendoor schoonmaken',why:{nl:'Houd rauwe producten apart van eten dat al klaar is en was plank en mes voordat je ander voedsel snijdt.',en:'Keep raw products separate from ready-to-eat food and wash the board and knife before cutting other foods.'}},
+    {question:{nl:'Waarvoor gebruik je een voedselthermometer?',en:'What is a food thermometer used for?'},options:[['De temperatuur binnenin het gerecht meten','🌡️'],['De hoeveelheid zout wegen','🧂'],['De pan roeren','🥘']],answer:'De temperatuur binnenin het gerecht meten',why:{nl:'Een voedselthermometer meet de kerntemperatuur; zo hoef je niet alleen op kleur of tijd af te gaan.',en:'A food thermometer measures internal temperature, so you do not have to rely only on color or time.'}}
+  ],
+  mise:[
+    KNOWLEDGE.mise.quiz,
+    {question:{nl:'Wat hoort bij een goede mise-en-place?',en:'What belongs in good mise en place?'},options:[['Gereedschap en afgemeten ingrediënten klaarzetten','🧰'],['Tijdens het bakken nog snel messen zoeken','🔎'],['Het recept pas na afloop lezen','📖']],answer:'Gereedschap en afgemeten ingrediënten klaarzetten',why:{nl:'Je zet vooraf de benodigde materialen en porties klaar. Dan kun je de stappen rustig in de juiste volgorde uitvoeren.',en:'Set out the needed tools and measured portions beforehand, then follow the steps in order.'}},
+    {question:{nl:'Wat doe je met een bederfelijk ingrediënt dat je nog niet nodig hebt?',en:'What should you do with a perishable ingredient you do not need yet?'},options:[['Terugzetten in de koelkast','🧊'],['De hele les op het werkblad laten liggen','☀️'],['Bij de oven laten staan','🔥']],answer:'Terugzetten in de koelkast',why:{nl:'Houd gekoelde producten koud en haal ze pas uit de koelkast wanneer je ze nodig hebt.',en:'Keep chilled foods cold and take them out only when needed.'}},
+    {question:{nl:'Waarom bepaal je vooraf de volgorde van de stappen?',en:'Why plan the order of steps beforehand?'},options:[['Om tijd en handelingen goed op elkaar af te stemmen','⏱️'],['Zodat je alle ingrediënten tegelijk verhit','🍳'],['Omdat je dan niet hoeft op te ruimen','🧹']],answer:'Om tijd en handelingen goed op elkaar af te stemmen',why:{nl:'Een planning helpt lange kook- of rusttijden op tijd te starten en voorkomt onnodig wachten.',en:'A plan helps you start longer cooking or resting times promptly and avoids unnecessary waiting.'}},
+    {question:{nl:'Wat doe je met je werkplek tijdens het koken?',en:'What should you do with your workstation while cooking?'},options:[['Schoon en overzichtelijk houden','✨'],['Gebruikte messen onder andere spullen verstoppen','🔪'],['Morsingen laten liggen tot het einde','💧']],answer:'Schoon en overzichtelijk houden',why:{nl:'Werk schoon, ruim veilig op en houd je materialen overzichtelijk. Dat maakt koken prettiger en veiliger.',en:'Work cleanly, put items away safely, and keep tools organized. This makes cooking easier and safer.'}}
+  ],
+  fridge:[
+    KNOWLEDGE.fridge.quiz,
+    {question:{nl:'Op welke temperatuur stel je de koelkast bij voorkeur in?',en:'What temperature should a refrigerator ideally be set to?'},options:[['4 °C','🌡️'],['12 °C','☀️'],['Kamertemperatuur','🏠']],answer:'4 °C',why:{nl:'Het Voedingscentrum adviseert de koelkast op 4 °C in te stellen.',en:'The Netherlands Nutrition Centre recommends setting the refrigerator to 4°C.'}},
+    {question:{nl:'Hoe bewaar je restjes veilig?',en:'How do you store leftovers safely?'},options:[['Afgedekt, apart van rauw eten en binnen 2 uur gekoeld','🍲'],['Open naast rauwe kip','🥩'],['De hele nacht op het aanrecht','🌙']],answer:'Afgedekt, apart van rauw eten en binnen 2 uur gekoeld',why:{nl:'Bewaar restjes afgesloten en gescheiden van rauwe producten. Zet ze binnen 2 uur in de koelkast en eet ze binnen 2 dagen op.',en:'Keep leftovers sealed and separate from raw foods. Refrigerate within 2 hours and eat within 2 days.'}},
+    {question:{nl:'Waar laat je bevroren kip ontdooien?',en:'Where should frozen chicken be thawed?'},options:[['Afgedekt op een bord in de koelkast','🧊'],['Open op het aanrecht','🪟'],['Boven een bak met bereide salade','🥗']],answer:'Afgedekt op een bord in de koelkast',why:{nl:'Ontdooi afgedekt in de koelkast op een bord of schaal, zodat lekvocht niet op andere producten komt.',en:'Thaw it covered on a plate or tray in the refrigerator so drips do not reach other foods.'}},
+    {question:{nl:'Waarom zet je rauw vlees goed afgesloten onderin?',en:'Why store raw meat sealed on the bottom shelf?'},options:[['Om te voorkomen dat lekvocht op ander eten druppelt','⬇️'],['Omdat daar de koelkastdeur open blijft','🚪'],['Om het vlees sneller te laten ontdooien','⏩']],answer:'Om te voorkomen dat lekvocht op ander eten druppelt',why:{nl:'Afgesloten onderin voorkomt dat lekvocht op andere producten terechtkomt.',en:'Sealed on the bottom shelf, it prevents drips from reaching other food.'}}
+  ]
+};
+
+function knowledgeText(value){ return tr(value); }
+const OPTION_TRANSLATIONS={'Recept lezen en volgorde bepalen':'Read the recipe and plan the order','Alles tegelijk in de pan doen':'Put everything in the pan at once','Pas tijdens het koken gereedschap zoeken':'Look for tools while cooking','Afgedekt, apart van rauw eten en binnen 2 uur gekoeld':'Covered, separate from raw food, and refrigerated within 2 hours','Open naast rauwe kip':'Uncovered next to raw chicken','De hele nacht op het aanrecht':'On the counter all night','Afgedekt op een bord in de koelkast':'Covered on a plate in the refrigerator','Open op het aanrecht':'Uncovered on the counter','Boven een bak met bereide salade':'Above prepared salad','Om te voorkomen dat lekvocht op ander eten druppelt':'To stop drips reaching other food','Omdat daar de koelkastdeur open blijft':'Because the refrigerator door stays open there','Om het vlees sneller te laten ontdooien':'To thaw the meat faster','Voor nauwkeurige, herhaalbare hoeveelheden':'For accurate, repeatable quantities','Om ingrediënten sneller te laten garen':'To cook ingredients faster','Om de pan schoon te maken':'To clean the pan','Hittebestendige spatel':'Heatproof spatula','Plastic liniaal':'Plastic ruler','Papieren servet':'Paper napkin','Rauw en bereid voedsel gescheiden houden en tussendoor schoonmaken':'Keep raw and cooked foods separate and clean between tasks','Alles op dezelfde plank snijden zonder schoonmaken':'Cut everything on the same board without cleaning','Het mes alleen aan een schort afvegen':'Wipe the knife on an apron','De temperatuur binnenin het gerecht meten':'Measure the temperature inside the dish','De hoeveelheid zout wegen':'Weigh the salt','De pan roeren':'Stir the pan','Gereedschap en afgemeten ingrediënten klaarzetten':'Set out tools and measured ingredients','Tijdens het bakken nog snel messen zoeken':'Look for knives while cooking','Het recept pas na afloop lezen':'Read the recipe only after cooking','Terugzetten in de koelkast':'Put it back in the refrigerator','De hele les op het werkblad laten liggen':'Leave it on the work surface for the whole lesson','Bij de oven laten staan':'Leave it by the oven','Om tijd en handelingen goed op elkaar af te stemmen':'To coordinate timing and steps','Zodat je alle ingrediënten tegelijk verhit':'So you heat all ingredients at once','Omdat je dan niet hoeft op te ruimen':'So you do not have to tidy up','Schoon en overzichtelijk houden':'Keep it clean and organized','Gebruikte messen onder andere spullen verstoppen':'Hide used knives under other items','Morsingen laten liggen tot het einde':'Leave spills until the end','4 °C':'4°C','12 °C':'12°C','Kamertemperatuur':'Room temperature','Alleen als het helemaal rijp is':'Only when fully ripe','Tot de kleur verdwijnt':'Until the color disappears','Direct op hoog vuur':'Immediately over high heat','Grove stukken in een blender':'Large pieces in a blender','Fijn raspen of snijden':'Grate or chop finely','Hele ingrediënten laten':'Leave ingredients whole','Kloppen met een garde':'Whisk with a whisk','Roeren met een lepel':'Stir with a spoon','Mixen met een mixer':'Blend with a mixer','Een pan met dikke bodem':'A heavy-bottomed pan','Een plastic kom':'A plastic bowl','Een papieren bord':'A paper plate','Koud bewaren':'Keep chilled','Warm op het aanrecht':'Keep warm on the counter','In direct zonlicht':'In direct sunlight','Voor nauwkeurige, herhaalbare hoeveelheden':'For accurate, repeatable quantities','Om ingrediënten sneller te laten garen':'To cook ingredients faster','Om de pan schoon te maken':'To clean the pan','Afgedekt, apart van rauw eten en binnen 2 uur gekoeld':'Covered, separate from raw food, and refrigerated within 2 hours','Open naast rauwe kip':'Uncovered next to raw chicken','De hele nacht op het aanrecht':'On the counter all night','Afgedekt op een bord in de koelkast':'Covered on a plate in the refrigerator','Open op het aanrecht':'Uncovered on the counter','Boven een bak met bereide salade':'Above prepared salad','Om te voorkomen dat lekvocht op ander eten druppelt':'To stop drips reaching other food','Omdat daar de koelkastdeur open blijft':'Because the refrigerator door stays open there','Om het vlees sneller te laten ontdooien':'To thaw the meat faster','Waarvoor gebruik je een voedselthermometer?':'What is a food thermometer used for?','Wat helpt kruisbesmetting tijdens het snijden voorkomen?':'What helps prevent cross-contamination while cutting?','Gereedschap en afgemeten ingrediënten klaarzetten':'Set out tools and measured ingredients','Tijdens het bakken nog snel messen zoeken':'Look for knives while cooking','Het recept pas na afloop lezen':'Read the recipe only after cooking','4 °C':'4°C','12 °C':'12°C','Welk materiaal gebruik je om de bodem van een hete pan af te schrapen?':'Which tool can scrape the bottom of a hot pan?'};
+Object.assign(OPTION_TRANSLATIONS,{
+  'Afgesloten onderin':'Sealed on the bottom shelf',
+  'Open boven een schaal salade':'Uncovered above a bowl of salad',
+  'In de deur naast drinken':'In the door next to drinks',
+  'Garde':'Whisk','Zeef':'Sieve','Dunschiller':'Peeler',
+  'Mornaysaus':'Mornay sauce'
+});
+function translateOption(value){return S.lang==='en'?(OPTION_TRANSLATIONS[value]||value):value;}
+function shuffleStable(key,items,idFn=x=>x.id){
+  S.optionOrders=S.optionOrders||{}; const ids=items.map(idFn), old=S.optionOrders[key];
+  if(!Array.isArray(old)||old.length!==ids.length||ids.some(id=>!old.includes(id))){
+    const shuffled=[...ids]; for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
+    S.optionOrders[key]=shuffled; save();
+  }
+  return S.optionOrders[key].map(id=>items.find(x=>idFn(x)===id)).filter(Boolean);
+}
+function chooseKnowledgeTopic(topic){
+  S.knowledgeTopic=topic; S.knowledgeQuizIndex=0; S.knowledgeAnswered=false; S.knowledgeChoice=''; S.msg=''; S.msgType=''; save(); render();
+}
+function chooseKnowledgeAnswer(choice){
+  const list=KNOWLEDGE_QUIZZES[S.knowledgeTopic];
+  const q=list[(S.knowledgeQuizIndex||0)%list.length];
+  if(S.knowledgeAnswered) return;
+  S.knowledgeChoice=choice; S.knowledgeAnswered=true;
+  const right=choice===q.answer;
+  if(right) S.knowledgeScore=(S.knowledgeScore||0)+1;
+  const answerLabel=translateOption(q.answer);
+  S.msg=right?(S.lang==='nl'?'Goed gedaan!':'Correct!'):(S.lang==='nl'?`Het juiste antwoord is: ${answerLabel}.`:`The correct answer is: ${answerLabel}.`);
+  S.msgType=right?'good':'bad'; save(); render();
+}
+function nextKnowledgeQuiz(){
+  const list=KNOWLEDGE_QUIZZES[S.knowledgeTopic];
+  S.knowledgeQuizIndex=((S.knowledgeQuizIndex||0)+1)%list.length;
+  S.knowledgeAnswered=false; S.knowledgeChoice=''; S.msg=''; S.msgType=''; save(); render();
+}
+function toggleMiseStep(index){
+  const list=new Set(S.knowledgeDone||[]);
+  list.has(index)?list.delete(index):list.add(index);
+  S.knowledgeDone=[...list]; save(); render();
+}
+function screenKnowledge(){
+  const topic=KNOWLEDGE[S.knowledgeTopic]||KNOWLEDGE.materials;
+  const quizList=KNOWLEDGE_QUIZZES[S.knowledgeTopic]||KNOWLEDGE_QUIZZES.materials;
+  const quiz=quizList[(S.knowledgeQuizIndex||0)%quizList.length];
+  const tabs=[['materials','🧰',S.lang==='nl'?'Materialen':'Tools'],['mise','📋','Mise-en-place'],['fridge','🧊',S.lang==='nl'?'Koelkast':'Fridge']];
+  return `<main>
+    <div class="hero"><small>${S.lang==='nl'?'KEUKENKENNIS':'KITCHEN KNOW-HOW'}</small><h1>${knowledgeText(topic.title)}</h1><p>${knowledgeText(topic.intro)}</p></div>
+    <div class="actiongrid" style="grid-template-columns:repeat(3,1fr);gap:6px">${tabs.map(([id,icon,label])=>`<button class="choice ${S.knowledgeTopic===id?'active':''}" data-ktopic="${id}" style="min-height:58px;padding:8px 3px"><span class="big" style="font-size:22px">${icon}</span><span style="font-size:11px">${label}</span></button>`).join('')}</div>
+    <div class="knowledgeCards">${topic.cards.map(c=>`<article class="card"><div style="display:flex;gap:11px;align-items:flex-start"><span style="font-size:28px">${c.icon}</span><div><b>${knowledgeText(c.title)}</b><p class="muted" style="margin:5px 0 0;line-height:1.5">${knowledgeText(c.text)}</p></div></div></article>`).join('')}</div>
+    ${topic.checklist?`<section class="card"><h3 style="margin:0 0 8px">✅ ${S.lang==='nl'?'Mijn mise-en-place':'My mise en place'}</h3><p class="muted">${S.lang==='nl'?`${(S.knowledgeDone||[]).length} van ${topic.checklist.length} stappen klaar`:`${(S.knowledgeDone||[]).length} of ${topic.checklist.length} steps ready`}</p>${topic.checklist.map((item,i)=>`<label style="display:flex;gap:9px;align-items:center;padding:9px 0;border-top:1px solid #eee;color:#4b3a2b;font-size:13px"><input type="checkbox" data-mise="${i}" ${(S.knowledgeDone||[]).includes(i)?'checked':''}>${knowledgeText(item)}</label>`).join('')}</section>`:''}
+    <section class="card"><h3 style="margin:0 0 6px">🎯 ${S.lang==='nl'?'Kennischeck':'Knowledge check'} · ${S.lang==='nl'?`vraag ${(S.knowledgeQuizIndex||0)+1} van ${quizList.length}`:`question ${(S.knowledgeQuizIndex||0)+1} of ${quizList.length}`}</h3><p>${knowledgeText(quiz.question)}</p><div class="actiongrid">${shuffleStable(`knowledge:${S.knowledgeTopic}:${S.knowledgeQuizIndex}`,quiz.options,x=>x[0]).map(([label,icon])=>`<button class="choice ${S.knowledgeAnswered&&label===quiz.answer?'active':''}" data-kanswer="${label}" ${S.knowledgeAnswered?'disabled':''}><span class="big">${icon}</span><span>${translateOption(label)}</span></button>`).join('')}</div>${S.knowledgeAnswered?`<div class="feedback ${S.msgType}"><b>${S.msg}</b><br>${knowledgeText(quiz.why)}</div><button class="btn primary" id="btnNextKnowledge" style="margin-top:10px">${(S.knowledgeQuizIndex||0)===quizList.length-1?(S.lang==='nl'?'Rondje opnieuw ↻':'Start round again ↻'):(S.lang==='nl'?'Volgende vraag →':'Next question →')}</button>`:''}<div class="muted" style="margin-top:8px">${S.lang==='nl'?'Kennischecks goed':'Knowledge checks correct'}: ${S.knowledgeScore||0}</div></section>
+    <p class="muted" style="text-align:center">${S.lang==='nl'?'Bronnen: Voedingscentrum en SVH':'Sources: Netherlands Nutrition Centre and SVH'} · <a href="https://www.voedingscentrum.nl/nl/veilig-eten-voedselinfectie-voorkomen/veilig-bewaren.aspx" target="_blank" rel="noopener">${S.lang==='nl'?'Veilig bewaren':'Safe storage'}</a> · <a href="https://www.voedingscentrum.nl/nl/veilig-eten-voedselinfectie-voorkomen/scheiden.aspx" target="_blank" rel="noopener">${S.lang==='nl'?'Scheiden':'Separating foods'}</a> · <a href="https://www.svh.nl/userfiles/QS6kQOB7S4ol7g9J/200930-Eindtermen-SVH-Kok-1-okt-2018.pdf" target="_blank" rel="noopener">SVH</a></p>
+  </main>`;
+}
+
+const TASTE_NAMES={
+  sweet:{nl:'Zoet',en:'Sweet',icon:'🍯'}, sour:{nl:'Zuur',en:'Sour',icon:'🍋'},
+  salty:{nl:'Zout',en:'Salty',icon:'🧂'}, bitter:{nl:'Bitter',en:'Bitter',icon:'☕'},
+  umami:{nl:'Umami / hartig',en:'Umami / savory',icon:'🍄'}, spicy:{nl:'Pittig / prikkel',en:'Hot / tingling',icon:'🌶️'}
+};
+const TASTE_PROFILES=[
+  {item:{nl:'Citroensap',en:'Lemon juice'},icon:'🍋',prompt:{nl:'Welke smaak herken je vooral in citroensap?',en:'Which taste stands out most in lemon juice?'},right:['sour'],wrong:['sweet','bitter'],why:{nl:'Citroensap smaakt vooral zuur. De geur is citrusachtig; geur en smaak zijn niet hetzelfde.',en:'Lemon juice tastes mainly sour. Its aroma is citrus-like; aroma and taste are not the same.'}},
+  {item:{nl:'Honing',en:'Honey'},icon:'🍯',prompt:{nl:'Welke smaak herken je vooral in honing?',en:'Which taste stands out most in honey?'},right:['sweet'],wrong:['salty','sour'],why:{nl:'Honing is vooral zoet. De bloemen waarvan bijen nectar verzamelen kunnen de geur en bijsmaak beïnvloeden.',en:'Honey is mainly sweet. The flowers bees gather nectar from can affect its aroma and notes.'}},
+  {item:{nl:'Parmezaanse kaas',en:'Parmesan cheese'},icon:'🧀',prompt:{nl:'Welke twee smaken passen duidelijk bij gerijpte Parmezaanse kaas?',en:'Which two tastes are prominent in aged Parmesan?'},right:['salty','umami'],wrong:['sweet','bitter'],why:{nl:'Gerijpte Parmezaan is zout en rijk aan umami, de hartige basissmaak.',en:'Aged Parmesan is salty and rich in umami, the savory basic taste.'}},
+  {item:{nl:'Rijpe tomatensaus zonder toegevoegd zout',en:'Ripe tomato sauce without added salt'},icon:'🍅',prompt:{nl:'Welke smaken herken je vaak in rijpe tomatensaus zonder toegevoegd zout?',en:'Which tastes are often found in ripe tomato sauce without added salt?'},right:['sweet','sour','umami'],wrong:['bitter','spicy'],why:{nl:'Rijpe tomaat kan zoet en zuur smaken en bevat umami. De balans verschilt per tomaat en bereiding.',en:'Ripe tomato can taste sweet and sour and contains umami. The balance varies by tomato and preparation.'}},
+  {item:{nl:'Ongezette zwarte koffie',en:'Black coffee without sugar'},icon:'☕',prompt:{nl:'Welke smaak valt vaak als eerste op in zwarte koffie?',en:'Which taste is often most noticeable in black coffee?'},right:['bitter'],wrong:['sweet','salty'],why:{nl:'Zwarte koffie wordt vaak als bitter ervaren. De geur en smaak kunnen per boon en zetwijze verschillen.',en:'Black coffee is often perceived as bitter. Aroma and taste vary with the beans and brewing method.'}},
+  {item:{nl:'Sojasaus',en:'Soy sauce'},icon:'🫘',prompt:{nl:'Welke twee smaken zijn kenmerkend voor sojasaus?',en:'Which two tastes are characteristic of soy sauce?'},right:['salty','umami'],wrong:['sweet','sour'],why:{nl:'Sojasaus is zout en hartig door umami. Controleer bij echte proeverijen altijd de ingrediënten en allergenen.',en:'Soy sauce is salty and savory from umami. Always check ingredients and allergens before a real tasting.'}},
+  {item:{nl:'Chilipeper',en:'Chili pepper'},icon:'🌶️',prompt:{nl:'Wat voel je vooral bij chilipeper?',en:'What do you mainly feel with chili pepper?'},right:['spicy'],wrong:['sweet','salty'],why:{nl:'Pittig is een prikkel of warmtegevoel in je mond, geen van de vijf basissmaken.',en:'Spiciness is a tingling or heat sensation in your mouth, not one of the five basic tastes.'}},
+  {item:{nl:'Rijpe aardbei',en:'Ripe strawberry'},icon:'🍓',prompt:{nl:'Welke smaken kun je in een rijpe aardbei herkennen?',en:'Which tastes can you notice in a ripe strawberry?'},right:['sweet','sour'],wrong:['bitter','salty'],why:{nl:'Een rijpe aardbei is vaak zoet met een frisse zure toon. De verhouding hangt af van de aardbei.',en:'A ripe strawberry is often sweet with a fresh sour note. The balance depends on the berry.'}},
+  {item:{nl:'Ongezouten paddenstoelenbouillon',en:'Unsalted mushroom broth'},icon:'🍄',prompt:{nl:'Welke smaak valt op in bouillon van paddenstoelen zonder zout?',en:'Which taste stands out in broth made from mushrooms without salt?'},right:['umami'],wrong:['salty','sweet'],why:{nl:'Paddenstoelen kunnen van nature umami geven. Zonder toegevoegd zout hoeft bouillon niet zout te smaken.',en:'Mushrooms can naturally add umami. Without added salt, broth does not have to taste salty.'}},
+  {item:{nl:'Grapefruit',en:'Grapefruit'},icon:'🍊',prompt:{nl:'Welke twee smaken vallen vaak op bij grapefruit?',en:'Which two tastes often stand out in grapefruit?'},right:['sour','bitter'],wrong:['salty','umami'],why:{nl:'Grapefruit heeft vaak zowel zuur als bitter. Rijpheid en soort beïnvloeden de smaak.',en:'Grapefruit is often both sour and bitter. Ripeness and variety affect its taste.'}},
+  {item:{nl:'Rijpe banaan',en:'Ripe banana'},icon:'🍌',prompt:{nl:'Welke smaak herken je vooral in een rijpe banaan?',en:'Which taste stands out most in a ripe banana?'},right:['sweet'],wrong:['sour','bitter'],why:{nl:'Tijdens het rijpen wordt banaan zoeter. De geur draagt ook sterk bij aan hoe rijp hij smaakt.',en:'As a banana ripens, it becomes sweeter. Its aroma also strongly shapes how ripe it tastes.'}},
+  {item:{nl:'Miso',en:'Miso'},icon:'🥣',prompt:{nl:'Welke twee smaken zijn kenmerkend voor miso?',en:'Which two tastes are characteristic of miso?'},right:['salty','umami'],wrong:['sour','bitter'],why:{nl:'Miso is meestal zout en hartig door umami. Miso bevat vaak soja; controleer allergenen op het etiket.',en:'Miso is usually salty and savory from umami. It often contains soy; check the label for allergens.'}},
+  {item:{nl:'Naturelyoghurt zonder suiker',en:'Unsweetened plain yogurt'},icon:'🥛',prompt:{nl:'Welke smaak valt vaak op in naturel yoghurt?',en:'Which taste often stands out in plain yogurt?'},right:['sour'],wrong:['salty','bitter'],why:{nl:'De frisse zure smaak ontstaat door fermentatie. Merken en soorten yoghurt verschillen.',en:'Its fresh sour taste comes from fermentation. Yogurt varieties and brands differ.'}},
+  {item:{nl:'Sinaasappelsap',en:'Orange juice'},icon:'🍊',prompt:{nl:'Welke smaken herken je vaak in sinaasappelsap?',en:'Which tastes do you often notice in orange juice?'},right:['sweet','sour'],wrong:['salty','bitter'],why:{nl:'Sinaasappelsap smaakt vaak zoetzuur. Perssinaasappel, rijpheid en bewaren beïnvloeden de balans.',en:'Orange juice often tastes sweet and sour. Variety, ripeness, and storage affect the balance.'}},
+  {item:{nl:'Groene olijf uit pekel',en:'Green olive in brine'},icon:'🫒',prompt:{nl:'Welke smaken vallen vaak op bij een groene olijf uit pekel?',en:'Which tastes often stand out in a green olive in brine?'},right:['salty','bitter'],wrong:['sweet','sour'],why:{nl:'Pekel maakt olijven zout; groene olijven kunnen ook een bittere toon hebben. Olijven zijn niet allemaal even zout.',en:'Brine makes olives salty; green olives can also have a bitter note. Olives vary in saltiness.'}}
+];
+const TASTE_BALANCE=[
+  {scene:{nl:'Je vinaigrette smaakt te zuur.',en:'Your vinaigrette tastes too sour.'},options:[
+    {id:'oil',icon:'🫒',label:{nl:'Klop beetje bij beetje extra olie erdoor',en:'Whisk in a little more oil gradually'},ok:true},
+    {id:'vinegar',icon:'🍶',label:{nl:'Voeg extra azijn toe',en:'Add more vinegar'},ok:false},
+    {id:'lemon',icon:'🍋',label:{nl:'Voeg extra citroensap toe',en:'Add more lemon juice'},ok:false}],why:{nl:'Extra olie kan het zure aandeel milder maken. Voeg kleine beetjes toe, klop en proef opnieuw.',en:'More oil can soften the acidity. Add a little, whisk, and taste again.'}},
+  {scene:{nl:'Je béchamelsaus is te dik.',en:'Your béchamel is too thick.'},options:[
+    {id:'milk',icon:'🥛',label:{nl:'Klop er geleidelijk warme melk door',en:'Gradually whisk in warm milk'},ok:true},
+    {id:'flour',icon:'🌾',label:{nl:'Voeg droge bloem toe',en:'Add dry flour'},ok:false},
+    {id:'boil',icon:'🔥',label:{nl:'Laat hard doorkoken',en:'Boil it hard'},ok:false}],why:{nl:'Warme melk maakt de saus dunner zonder een koude schok. Voeg beetje bij beetje toe en blijf kloppen.',en:'Warm milk loosens the sauce without cooling it suddenly. Add it gradually while whisking.'}},
+  {scene:{nl:'Je ongezouten tomatensaus is te dun.',en:'Your unsalted tomato sauce is too thin.'},options:[
+    {id:'simmer',icon:'🍅',label:{nl:'Laat zachtjes zonder deksel inkoken',en:'Simmer gently uncovered to reduce'},ok:true},
+    {id:'water',icon:'💧',label:{nl:'Voeg water toe',en:'Add water'},ok:false},
+    {id:'oil',icon:'🫒',label:{nl:'Voeg veel olie toe',en:'Add lots of oil'},ok:false}],why:{nl:'Door zachtjes in te koken verdampt vocht en wordt de saus dikker. Roer af en toe zodat hij niet aanzet.',en:'Gentle reduction evaporates moisture and thickens the sauce. Stir now and then so it does not catch.'}},
+  {scene:{nl:'Je saus is per ongeluk te zout.',en:'Your sauce has become too salty.'},options:[
+    {id:'base',icon:'🥣',label:{nl:'Voeg meer ongezouten saus of basis toe',en:'Add more unsalted sauce or base'},ok:true},
+    {id:'salt',icon:'🧂',label:{nl:'Voeg nog meer zout toe',en:'Add more salt'},ok:false},
+    {id:'reduce',icon:'🔥',label:{nl:'Laat verder inkoken',en:'Reduce it further'},ok:false}],why:{nl:'Een grotere hoeveelheid ongezouten basis verdunt het zout. Proef opnieuw voordat je verder op smaak brengt.',en:'More unsalted base dilutes the salt. Taste again before adjusting further.'}},
+  {scene:{nl:'Je ongezouten tomatensaus smaakt vlak.',en:'Your unsalted tomato sauce tastes flat.'},options:[
+    {id:'salt',icon:'🧂',label:{nl:'Voeg een klein beetje zout toe en proef opnieuw',en:'Add a little salt and taste again'},ok:true},
+    {id:'sugar',icon:'🍬',label:{nl:'Voeg meteen veel suiker toe',en:'Add lots of sugar straight away'},ok:false},
+    {id:'water',icon:'💧',label:{nl:'Verdun de saus met water',en:'Dilute the sauce with water'},ok:false}],why:{nl:'Een klein beetje zout kan smaken beter laten uitkomen. Werk stap voor stap en proef tussendoor.',en:'A small amount of salt can bring out flavors. Adjust gradually and taste as you go.'}},
+  {scene:{nl:'Je vinaigrette is gescheiden en je wilt hem meteen serveren.',en:'Your vinaigrette has separated and you want to serve it now.'},options:[
+    {id:'whisk',icon:'🥣',label:{nl:'Klop hem vlak voor het serveren opnieuw',en:'Whisk it again just before serving'},ok:true},
+    {id:'water',icon:'💧',label:{nl:'Voeg een groot glas water toe',en:'Add a large glass of water'},ok:false},
+    {id:'heat',icon:'🔥',label:{nl:'Verwarm hem hard in een pan',en:'Heat it hard in a pan'},ok:false}],why:{nl:'Olie en azijn scheiden na verloop van tijd. Klop de dressing opnieuw vlak voor gebruik; mosterd kan de tijdelijke binding helpen stabiliseren.',en:'Oil and vinegar separate over time. Whisk the dressing again just before use; mustard can help stabilize the temporary emulsion.'}},
+  {scene:{nl:'Je mayonaise is geschift tijdens het maken.',en:'Your mayonnaise split while you were making it.'},options:[
+    {id:'newyolk',icon:'🥚',label:{nl:'Klop een eidooier met een theelepel water glad en klop de geschifte mayo er druppelsgewijs door',en:'Whisk an egg yolk with a teaspoon of water, then slowly whisk in the split mayo'},ok:true},
+    {id:'boil',icon:'🔥',label:{nl:'Laat de mayonaise koken',en:'Boil the mayonnaise'},ok:false},
+    {id:'flour',icon:'🌾',label:{nl:'Roer er droge bloem door',en:'Stir in dry flour'},ok:false}],why:{nl:'Een nieuwe eidooier kan een verse emulsie starten. Klop de geschifte mayonaise er langzaam door. Werk hygiënisch en koel producten met rauw ei.',en:'A fresh egg yolk can start a new emulsion. Whisk in the split mayonnaise slowly. Handle raw egg hygienically and keep it chilled.'}},
+  {scene:{nl:'Je roomsaus is te dik geworden.',en:'Your cream sauce has become too thick.'},options:[
+    {id:'warmcream',icon:'🥛',label:{nl:'Roer er beetje bij beetje warme melk of room door',en:'Stir in warm milk or cream a little at a time'},ok:true},
+    {id:'flour',icon:'🌾',label:{nl:'Voeg droge bloem toe',en:'Add dry flour'},ok:false},
+    {id:'reduce',icon:'🔥',label:{nl:'Laat hem nog verder inkoken',en:'Reduce it even further'},ok:false}],why:{nl:'Warme melk of room maakt de saus geleidelijk dunner. Voeg kleine hoeveelheden toe en proef tussendoor.',en:'Warm milk or cream loosens the sauce gradually. Add small amounts and taste as you go.'}},
+  {scene:{nl:'Je yoghurtdip is te pittig geworden.',en:'Your yogurt dip has become too spicy.'},options:[
+    {id:'yogurt',icon:'🥣',label:{nl:'Voeg extra ongezoete yoghurt toe',en:'Add more plain unsweetened yogurt'},ok:true},
+    {id:'chili',icon:'🌶️',label:{nl:'Voeg extra chili toe',en:'Add more chili'},ok:false},
+    {id:'water',icon:'💧',label:{nl:'Voeg alleen water toe',en:'Add only water'},ok:false}],why:{nl:'Meer yoghurt verdunt de chili en maakt de dip romiger. Proef opnieuw en voeg zo nodig meer ongekruide basis toe.',en:'More yogurt dilutes the chili and makes the dip creamier. Taste again and add more unseasoned base if needed.'}},
+  {scene:{nl:'Je jus is te dik.',en:'Your gravy is too thick.'},options:[
+    {id:'stock',icon:'🥣',label:{nl:'Klop er geleidelijk warme, ongezouten bouillon door',en:'Gradually whisk in warm, unsalted stock'},ok:true},
+    {id:'flour',icon:'🌾',label:{nl:'Voeg extra bloem toe',en:'Add more flour'},ok:false},
+    {id:'reduce',icon:'🔥',label:{nl:'Laat de jus verder inkoken',en:'Reduce the gravy further'},ok:false}],why:{nl:'Warme ongezouten bouillon maakt jus dunner en voegt smaak toe zonder meteen extra zout te geven.',en:'Warm unsalted stock loosens gravy and adds flavor without immediately adding more salt.'}}
+];
+function currentTasteQuestion(){
+  const list=S.tasteMode==='balance'?TASTE_BALANCE:TASTE_PROFILES;
+  return list[(S.tasteIndex||0)%list.length];
+}
+function setTasteMode(mode){S.tasteMode=mode;S.tasteIndex=0;S.tastePicked=[];S.tasteAnswered=false;S.msg='';S.msgType='';save();render();}
+function toggleTasteAnswer(id){if(S.tasteAnswered)return;S.tastePicked=S.tastePicked.includes(id)?S.tastePicked.filter(x=>x!==id):[...S.tastePicked,id];render();}
+function checkTasteProfile(){
+  const q=currentTasteQuestion(), right=new Set(q.right), picked=new Set(S.tastePicked);
+  const ok=right.size===picked.size&&[...right].every(id=>picked.has(id));
+  S.tasteAnswered=true; if(ok)S.tasteScore=(S.tasteScore||0)+1;
+  S.msg=ok?(S.lang==='nl'?'Goed geproefd!':'Well tasted!'):(S.lang==='nl'?'Kijk naar de uitleg en probeer de volgende smaak.':'Check the explanation and try the next taste.');
+  S.msgType=ok?'good':'bad'; save();render();
+}
+function answerTasteBalance(id){
+  if(S.tasteAnswered)return;
+  const q=currentTasteQuestion(),option=q.options.find(o=>o.id===id);
+  S.tasteAnswered=true;S.tastePicked=[id];
+  if(option?.ok)S.tasteScore=(S.tasteScore||0)+1;
+  S.msg=option?.ok?(S.lang==='nl'?'Goed bijgestuurd!':'Good adjustment!'):(S.lang==='nl'?'Dat helpt hier niet. Bekijk de uitleg.':'That will not help here. Check the explanation.');
+  S.msgType=option?.ok?'good':'bad';save();render();
+}
+function nextTasteQuestion(){
+  const list=S.tasteMode==='balance'?TASTE_BALANCE:TASTE_PROFILES;
+  S.tasteIndex=((S.tasteIndex||0)+1)%list.length;S.tastePicked=[];S.tasteAnswered=false;S.msg='';S.msgType='';save();render();
+}
+function updateTasteRating(input){
+  S.tasteRatingsBySample=S.tasteRatingsBySample||{};
+  const sample=S.tasteSample||'lemon';
+  S.tasteRatingsBySample[sample]=S.tasteRatingsBySample[sample]||{sweet:0,sour:0,salty:0,bitter:0,umami:0};
+  S.tasteRatingsBySample[sample][input.dataset.rating]=Number(input.value);
+  const output=document.querySelector(`[data-rating-value="${input.dataset.rating}"]`);if(output)output.textContent=input.value;
+  save();
+}
+function setTasteSample(value){S.tasteSample=value;save();render();}
+function screenTaste(){
+  const labels=S.lang==='nl'?{detective:'Smaak raden',balance:'Saus balanceren',tasting:'Proefkaart'}:{detective:'Taste detective',balance:'Balance a sauce',tasting:'Tasting card'};
+  const tabs=['detective','balance','tasting'];
+  const tabHtml=`<div class="actiongrid" style="grid-template-columns:repeat(3,1fr);gap:6px">${tabs.map(m=>`<button class="choice ${S.tasteMode===m?'active':''}" data-taste-mode="${m}" style="min-height:64px;padding:8px 3px"><span class="big" style="font-size:22px">${m==='detective'?'🕵️':m==='balance'?'⚖️':'👅'}</span><span style="font-size:11px">${labels[m]}</span></button>`).join('')}</div>`;
+  if(S.tasteMode==='tasting'){
+    const sampleOptions=[['lemon','Citroensap','Lemon juice'],['honey','Honing','Honey'],['tomato','Ongezouten tomatensaus','Unsalted tomato sauce'],['yogurt','Naturelyoghurt','Plain yogurt'],['coffee','Zwarte koffie','Black coffee'],['parmesan','Parmezaan','Parmesan'],['strawberry','Rijpe aardbei','Ripe strawberry'],['mushroom','Ongezouten paddenstoelenbouillon','Unsalted mushroom broth'],['grapefruit','Grapefruit','Grapefruit'],['banana','Rijpe banaan','Ripe banana'],['miso','Miso','Miso'],['orange','Sinaasappelsap','Orange juice'],['olive','Groene olijf uit pekel','Green olive in brine'],['chili','Chilipeper (alleen ruiken of bekijken)','Chili pepper (smell or observe only)']];
+    const ratings=S.tasteRatingsBySample?.[S.tasteSample]||S.tasteRatings||{};
+    const tasteIds=['sweet','sour','salty','bitter','umami'];
+    return `<main><div class="hero"><small>${S.lang==='nl'?'OPTIONEEL — ECHT OF DIGITAAL':'OPTIONAL — REAL OR DIGITAL'}</small><h1>👅 ${labels.tasting}</h1><p>${S.lang==='nl'?'Kies uit 14 proefmonsters en geef aan hoe sterk je elke smaak ervaart. Je kunt dit ook als denkspel invullen, zonder echt te proeven.':'Choose from 14 samples and rate how strongly you notice each taste. You can also use this as a thinking exercise without tasting anything.'}</p></div>${tabHtml}<section class="card"><label for="tasteSample"><b>${S.lang==='nl'?'Proefmonster':'Sample'}</b></label><select id="tasteSample" style="display:block;width:100%;margin-top:8px;padding:12px;border:2px solid #e2d2bd;border-radius:12px;font:inherit">${sampleOptions.map(([id,nl,en])=>`<option value="${id}" ${S.tasteSample===id?'selected':''}>${S.lang==='nl'?nl:en}</option>`).join('')}</select><p class="muted">${S.lang==='nl'?'Geef elke basissmaak een score van 0 (niet merkbaar) tot 5 (heel sterk). Er is geen goed of fout: mensen proeven verschillend.':'Rate each basic taste from 0 (not noticeable) to 5 (very strong). There is no right or wrong: people experience taste differently.'}</p>${tasteIds.map(id=>`<label style="display:grid;grid-template-columns:120px 1fr 24px;gap:8px;align-items:center;padding:8px 0;border-top:1px solid #eee;font-size:13px"><span>${TASTE_NAMES[id][S.lang]}</span><input type="range" min="0" max="5" step="1" value="${ratings[id]??0}" data-rating="${id}" aria-label="${TASTE_NAMES[id][S.lang]}"><b data-rating-value="${id}">${ratings[id]??0}</b></label>`).join('')}</section><section class="card"><b>${S.lang==='nl'?'Vergeet niet':'Remember'}</b><p class="muted">${S.lang==='nl'?'Ruik eerst. Proef alleen als je wilt en let op allergenen. Gebruik schoon proefmateriaal. Bij chili: niet proeven, alleen ruiken of bekijken.':'Smell first. Taste only if you wish and check allergens. Use clean utensils. For chili: do not taste it; smell or observe only.'}</p></section></main>`;
+  }
+  const q=currentTasteQuestion(),list=S.tasteMode==='balance'?TASTE_BALANCE:TASTE_PROFILES,index=(S.tasteIndex||0)%list.length;
+  const profileMode=S.tasteMode==='detective';
+  const options=shuffleStable(`taste:${S.tasteMode}:${index}`,profileMode?q.right.concat(q.wrong).map(id=>({id,icon:TASTE_NAMES[id].icon,label:{nl:TASTE_NAMES[id].nl,en:TASTE_NAMES[id].en},ok:q.right.includes(id)})):q.options);
+  return `<main><div class="hero"><small>${S.lang==='nl'?'SMAAK EN PROEVEN':'TASTE AND TASTING'}</small><h1>👅 ${labels[S.tasteMode]}</h1><p>${S.lang==='nl'?'Ontdek smaken en leer een saus stap voor stap bij te sturen. Kies, controleer en bekijk de uitleg.':'Explore tastes and learn to adjust a sauce step by step. Choose, check, and read the explanation.'}</p></div>${tabHtml}<div class="roundline"><span>${S.lang==='nl'?`Vraag ${index+1} van ${list.length}`:`Question ${index+1} of ${list.length}`}</span><span>⭐ ${S.tasteScore||0}</span></div><section class="card center"><div style="font-size:42px">${profileMode?q.icon:'🥣'}</div><h2>${profileMode?tr(q.item):tr(q.scene)}</h2><p>${tr(profileMode?q.prompt:{nl:'Wat is een goede eerste stap?',en:'What is a good first step?'})}</p><div class="actiongrid">${options.map(o=>`<button class="choice ${S.tastePicked?.includes(o.id)?'active':''} ${S.tasteAnswered&&o.ok?'active':''}" data-taste-answer="${o.id}" ${S.tasteAnswered?'disabled':''}><span class="big">${o.icon}</span><span>${tr(o.label)}</span></button>`).join('')}</div>${profileMode&&!S.tasteAnswered?`<button class="btn primary" id="btnCheckTaste">${S.lang==='nl'?'Controleer smaak':'Check taste'}</button>`:''}${S.tasteAnswered?`<div class="feedback ${S.msgType}"><b>${S.msg}</b><br>${tr(q.why)}</div><button class="btn primary" id="btnNextTaste" style="margin-top:10px">${(S.tasteIndex||0)===list.length-1?(S.lang==='nl'?'Opnieuw ↻':'Play again ↻'):(S.lang==='nl'?'Volgende →':'Next →')}</button>`:''}</section></main>`;
+}
+
+function screenHome(){
+  const resumable = S.products.size>0;
+  return `
+  <main>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:8px">${langSwitcherDark()}</div>
+    <div class="hero">
+      <small>${t('homePresents')}</small>
+      <h1>${t('brand')}</h1>
+      <p>${t('homeIntro')}</p>
+    </div>
+    <div class="card">
+      <p class="muted" style="margin-top:0">${t('homeSummary',{total:TOTAL_RECIPES(), tiers:TIERS.length})}</p>
+      <button class="btn primary" id="btnStart">${resumable?t('btnResume'):t('btnPlay')}</button>
+      <button class="btn primary" id="btnPairStart" style="margin-top:9px;background:linear-gradient(135deg,#3f8554,#28603a);box-shadow:0 4px 0 #19472a">🍽️ ${S.lang==='nl'?'Welke saus past bij dit gerecht?':'Which sauce fits this dish?'}</button>
+      <button class="btn primary" id="btnKitchenPanic" style="margin-top:9px;background:linear-gradient(135deg,#e74e36,#b92724);box-shadow:0 4px 0 #791b19">🍳 Kitchen Panic!</button>
+      <button class="btn primary" id="btnFoodRushLink" style="margin-top:9px;background:linear-gradient(135deg,#52a15b,#2f733e);box-shadow:0 4px 0 #235731">🧩 FoodRush Link!</button>
+      <button class="btn ghost" id="btnLearn" style="margin-top:8px">${S.learning?(S.lang==='nl'?'👩‍🍳 Leerstand uitzetten':'👩‍🍳 Turn learning mode off'):t('btnLearn')}</button>
+      ${resumable?`<button class="btn ghost" id="btnReset" style="margin-top:8px">${t('btnResetHome')}</button>`:''}
+    </div>
+  </main>`;
+}
+
+// Kitchen Panic is a standalone arcade game. Its score and controls never
+// touch CuliLab's recipe, lesson, or progression state.
+const PANIC_COLORS=[
+  {id:'red',nl:'ROOD',en:'RED',hex:'#ed5146',fruit:'🍎'},
+  {id:'yellow',nl:'GEEL',en:'YELLOW',hex:'#f4c542',fruit:'🍋'},
+  {id:'green',nl:'GROEN',en:'GREEN',hex:'#64b95b',fruit:'🍐'},
+  {id:'purple',nl:'PAARS',en:'PURPLE',hex:'#a77ad1',fruit:'🍇'},
+];
+const PANIC_POWERUPS=[
+  {id:'slow',emoji:'🐢',nl:'Slow motion',en:'Slow motion'},
+  {id:'wide',emoji:'🥘',nl:'Grote pan',en:'Wide pan'},
+  {id:'magnet',emoji:'🧲',nl:'Magneet',en:'Magnet'},
+];
+const PANIC={mode:'ready',score:0,best:0,combo:0,target:0,items:[],startedAt:0,lastAt:0,nextSpawn:0,nextTarget:0,panX:180,slowUntil:0,wideUntil:0,magnetUntil:0,duration:35000,raf:0,keys:{left:false,right:false},keyDown:null,keyUp:null};
+function panicBest(){try{return Number(localStorage.getItem('culilab_kitchen_panic_best_v1')||0)}catch(e){return 0}}
+function startKitchenPanic(){
+  PANIC.mode='run'; PANIC.score=0; PANIC.combo=0; PANIC.target=Math.floor(Math.random()*PANIC_COLORS.length); PANIC.items=[];
+  PANIC.startedAt=performance.now(); PANIC.lastAt=PANIC.startedAt; PANIC.nextSpawn=PANIC.startedAt+280; PANIC.nextTarget=PANIC.startedAt+5000;
+  PANIC.slowUntil=0; PANIC.wideUntil=0; PANIC.magnetUntil=0; PANIC.best=panicBest();
+  S.phase='panic'; render();
+}
+function removePanicKeys(){if(PANIC.keyDown)window.removeEventListener('keydown',PANIC.keyDown);if(PANIC.keyUp)window.removeEventListener('keyup',PANIC.keyUp);PANIC.keyDown=null;PANIC.keyUp=null;PANIC.keys.left=false;PANIC.keys.right=false;}
+function exitKitchenPanic(){cancelAnimationFrame(PANIC.raf);removePanicKeys();PANIC.mode='ready';S.phase='home';render();}
+function panicText(nl,en){return S.lang==='nl'?nl:en}
+function screenKitchenPanic(){
+  const canvas=PANIC.mode==='run'?'<canvas id="panicCanvas" class="panicCanvas" aria-label="Kitchen Panic: move the pan to catch fruit matching the requested color"></canvas>':'';
+  const best=PANIC.mode==='run'?PANIC.best:panicBest();
+  return `<main><div style="display:flex;justify-content:flex-end;margin-bottom:8px">${langSwitcherDark()}</div><section class="card panicCard"><div class="hero"><small>ARCADE · ${panicText('LOS VAN HET LEERPROCES','SEPARATE ARCADE GAME')}</small><h1>🍳 Kitchen Panic!</h1><p>${panicText('Vang alleen de kleur die bovenin staat. Sleep de pan heen en weer. Pak power-ups voor tijdelijke hulp!','Catch only the color shown at the top. Drag the pan left and right. Grab power-ups for a temporary boost!')}</p></div>
+    ${PANIC.mode==='ready'?`<div class="card"><div style="font-size:46px">🍎 🍋 🍐 🍇</div><p>${panicText('De kleur wisselt tijdens het spel. Power-ups geven je tijdelijk een grotere pan, een magneet of slow motion.','The target color changes during play. Power-ups briefly give you a wider pan, a magnet, or slow motion.')}</p><p class="muted">🏆 ${panicText('Beste score','Best score')}: ${best}</p><button class="btn primary" id="btnPanicStart">${panicText('Start Kitchen Panic!','Start Kitchen Panic!')}</button></div>`:
+    PANIC.mode==='run'?`<div class="panicInfo"><span class="panicPill" id="panicScore">⭐ 0</span><span class="panicPill" id="panicTime">⏱️ 35</span></div><div class="panicSignal" id="panicSignal" style="--signal:${PANIC_COLORS[PANIC.target].hex}" role="status" aria-live="polite" aria-label="${panicText('Vang deze kleur:','Catch this color:')} ${PANIC_COLORS[PANIC.target][S.lang]}"><span class="signalFruit">${PANIC_COLORS[PANIC.target].fruit}</span><span>${PANIC_COLORS[PANIC.target][S.lang]}</span></div>${canvas}<p class="muted">${panicText('Sleep met je vinger over het speelveld of gebruik de pijltjestoetsen.','Drag your finger across the play area or use the arrow keys.')}<br><span class="panicKeys">← →</span></p>`:
+    `<div class="card"><div style="font-size:48px">${PANIC.score>=PANIC.best?'🏆':'🎉'}</div><h2>${panicText('Tijd!','Time!')}</h2><p style="font-size:22px;font-weight:900">⭐ ${PANIC.score}</p><p class="muted">🏆 ${panicText('Beste score','Best score')}: ${Math.max(PANIC.best,PANIC.score)}</p><button class="btn primary" id="btnPanicAgain">${panicText('Nog een potje ↻','Play again ↻')}</button></div>`}
+    <button class="btn ghost" id="btnPanicExit" style="margin-top:10px">${panicText('Terug naar CuliLab','Back to CuliLab')}</button></section></main>`;
+}
+function bindKitchenPanic(){
+  const canvas=document.getElementById('panicCanvas'); if(!canvas||PANIC.mode!=='run')return;
+  const ctx=canvas.getContext('2d'); let W=0,H=0,dpr=1;
+  const resize=()=>{const r=canvas.getBoundingClientRect();dpr=Math.min(window.devicePixelRatio||1,2);W=r.width;H=r.height;if(!W||!H)return;canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);};
+  resize(); PANIC.panX=W/2; PANIC.keys.left=false;PANIC.keys.right=false;
+  PANIC.keyDown=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();PANIC.keys[e.key==='ArrowLeft'?'left':'right']=true;}};
+  PANIC.keyUp=e=>{if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();PANIC.keys[e.key==='ArrowLeft'?'left':'right']=false;}};
+  window.addEventListener('keydown',PANIC.keyDown);window.addEventListener('keyup',PANIC.keyUp);
+  const move=e=>{const r=canvas.getBoundingClientRect();PANIC.panX=Math.max(42,Math.min(W-42,e.clientX-r.left));};
+  canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture?.(e.pointerId);move(e)});
+  canvas.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')move(e)});
+  const draw=(now)=>{
+    if(PANIC.mode!=='run')return;
+    const rect=canvas.getBoundingClientRect(); if(rect.width!==W||rect.height!==H)resize();
+    const dt=Math.min(45,now-PANIC.lastAt);PANIC.lastAt=now;
+    const elapsed=now-PANIC.startedAt,remaining=Math.max(0,PANIC.duration-elapsed);
+    if(remaining<=0){finishKitchenPanic();return;}
+    if(now>=PANIC.nextTarget){let next=PANIC.target;while(next===PANIC.target)next=Math.floor(Math.random()*PANIC_COLORS.length);PANIC.target=next;PANIC.nextTarget=now+5000;const signal=document.getElementById('panicSignal');if(signal){signal.style.setProperty('--signal',PANIC_COLORS[next].hex);signal.setAttribute('aria-label',`${panicText('Vang deze kleur:','Catch this color:')} ${PANIC_COLORS[next][S.lang]}`);signal.innerHTML=`<span class="signalFruit">${PANIC_COLORS[next].fruit}</span><span>${PANIC_COLORS[next][S.lang]}</span>`;}}
+    if(now>=PANIC.nextSpawn){
+      const power=Math.random()<.13;
+      if(power){const p=PANIC_POWERUPS[Math.floor(Math.random()*PANIC_POWERUPS.length)];PANIC.items.push({kind:'power',id:p.id,emoji:p.emoji,x:28+Math.random()*(W-56),y:-24,speed:150+Math.random()*50});}
+      else {const c=PANIC_COLORS[Math.floor(Math.random()*PANIC_COLORS.length)];PANIC.items.push({kind:'fruit',color:c.id,emoji:c.fruit,x:24+Math.random()*(W-48),y:-24,speed:170+Math.random()*80+elapsed/500});}
+      PANIC.nextSpawn=now+Math.max(260,640-elapsed/100);
+    }
+    const slow=now<PANIC.slowUntil?0.48:1;
+    const panY=H-56,panW=now<PANIC.wideUntil?132:86,catchW=now<PANIC.magnetUntil?panW*1.6:panW;
+    if(PANIC.keys.left!==PANIC.keys.right)PANIC.panX+=(PANIC.keys.right?1:-1)*420*dt/1000;
+    PANIC.panX=Math.max(panW/2,Math.min(W-panW/2,PANIC.panX));
+    for(const item of PANIC.items){item.y+=item.speed*slow*dt/1000;if(now<PANIC.magnetUntil&&item.kind==='fruit'&&item.color===PANIC_COLORS[PANIC.target].id&&item.y>H*.55)item.x+=(PANIC.panX-item.x)*Math.min(.08,dt/180);}
+    for(let i=PANIC.items.length-1;i>=0;i--){const item=PANIC.items[i];if(item.y>=panY-18&&item.y<=panY+20&&Math.abs(item.x-PANIC.panX)<catchW/2){
+        if(item.kind==='power'){if(item.id==='slow')PANIC.slowUntil=now+5500;else if(item.id==='wide')PANIC.wideUntil=now+7000;else PANIC.magnetUntil=now+6500;PANIC.score+=5;}
+        else if(item.color===PANIC_COLORS[PANIC.target].id){PANIC.combo++;PANIC.score+=10+Math.min(PANIC.combo,10)*2;}else PANIC.combo=0;
+        PANIC.items.splice(i,1);
+      }else if(item.y>H+28)PANIC.items.splice(i,1);}
+    ctx.clearRect(0,0,W,H);
+    const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#3a2418');bg.addColorStop(1,'#21140e');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#ffffff0c';for(let y=38;y<H;y+=70){ctx.beginPath();ctx.arc((y*31)%W,y,18,0,Math.PI*2);ctx.fill();}
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    for(const item of PANIC.items){ctx.font=item.kind==='power'?'34px system-ui':'32px system-ui';ctx.fillText(item.emoji,item.x,item.y);}
+    ctx.fillStyle=now<PANIC.wideUntil?'#f4bf4a':'#ed8f34';ctx.fillRect(PANIC.panX-panW/2,panY,panW,25);ctx.fillStyle='#a95a21';ctx.fillRect(PANIC.panX-panW/2+8,panY+20,panW-16,5);
+    const scoreEl=document.getElementById('panicScore');if(scoreEl)scoreEl.textContent=`⭐ ${PANIC.score}${PANIC.combo>1?' · 🔥 '+PANIC.combo:''}`;
+    const timeEl=document.getElementById('panicTime');if(timeEl)timeEl.textContent=`⏱️ ${Math.ceil(remaining/1000)}`;
+    PANIC.raf=requestAnimationFrame(draw);
+  };
+  PANIC.raf=requestAnimationFrame(draw);
+}
+function finishKitchenPanic(){
+  cancelAnimationFrame(PANIC.raf);removePanicKeys();
+  PANIC.mode='over';PANIC.best=panicBest();
+  if(PANIC.score>PANIC.best){PANIC.best=PANIC.score;try{localStorage.setItem('culilab_kitchen_panic_best_v1',String(PANIC.best))}catch(e){}}
+  render();
+}
+
+// FoodRush Link: an endless rising-stack puzzle with culinary connections.
+const LINK_CUSTOM_ICONS={
+  sprouts:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 61V15" fill="none" stroke="#477b35" stroke-width="5" stroke-linecap="round"/><g stroke="#477b35" stroke-width="2"><circle cx="23" cy="25" r="6.5" fill="#91c950"/><circle cx="41" cy="31" r="6.5" fill="#7dbb43"/><circle cx="23" cy="38" r="6.5" fill="#7eb943"/><circle cx="41" cy="44" r="6.5" fill="#9acb52"/><circle cx="24" cy="51" r="6" fill="#8bc34a"/></g><g fill="none" stroke="#c8e894" stroke-width="1.6" stroke-linecap="round"><path d="M19 24q4 3 8 0M37 30q4 3 8 0M19 37q4 3 8 0M37 43q4 3 8 0M20 50q4 3 8 0"/></g><path d="M32 17C21 16 16 10 17 5c8 0 13 3 15 9C34 7 40 4 48 5c0 7-6 12-16 12Z" fill="#65a744" stroke="#477b35" stroke-width="2.5"/><path d="M32 16 23 8m9 8 10-8" fill="none" stroke="#c5e48b" stroke-width="2" stroke-linecap="round"/></svg>',
+  lettuce:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 58C22 53 10 47 10 34c0-7 5-12 11-12 1-9 8-14 15-10 7-7 17-2 16 7 9 2 12 11 7 18-1 10-12 17-27 21Z" fill="#73b842" stroke="#477b34" stroke-width="3"/><path d="M32 55C23 46 19 35 22 24m10 31c-2-14 1-28 8-38m-8 38c7-8 13-17 16-29M31 43c-8-3-13-7-17-13m18 16c8-4 14-8 19-15" fill="none" stroke="#c8e88c" stroke-width="3" stroke-linecap="round"/><path d="M24 54q8 5 16 0" fill="none" stroke="#477b34" stroke-width="3"/></svg>',
+  redcabbage:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 7C18 7 9 17 9 31c0 16 10 26 23 26s23-10 23-26C55 17 46 7 32 7Z" fill="#8b4b9f" stroke="#58346d" stroke-width="3"/><path d="M32 10c-8 7-13 13-13 22s5 16 13 22m0-44c8 7 13 13 13 22s-5 16-13 22M12 30c8-5 14-7 20-7s12 2 20 7M13 38c8 5 13 7 19 7s13-2 19-7" fill="none" stroke="#d6a6da" stroke-width="3" stroke-linecap="round"/><path d="M29 8q3-4 6 0" fill="none" stroke="#57843b" stroke-width="4" stroke-linecap="round"/></svg>',
+  spinach:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M31 56C12 47 8 30 15 14c11 0 19 7 20 18C40 19 49 13 57 14c1 18-7 34-25 42Z" fill="#4e9b45" stroke="#326a35" stroke-width="3"/><path d="M31 56c1-16 2-27 4-37M31 47 18 27m13 13 17-19m-18 9-8-10m11 31 15-16" fill="none" stroke="#b5dc79" stroke-width="2.5" stroke-linecap="round"/><path d="M29 55q3 4 6 0" fill="none" stroke="#326a35" stroke-width="3"/></svg>',
+  kale:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M31 58C18 54 8 46 9 34c-5-9 1-18 10-18 4-9 15-10 20-3 9-4 18 3 15 12 8 7 5 18-4 21-4 9-12 13-19 12Z" fill="#43843d" stroke="#2d6132" stroke-width="3"/><path d="M31 55c-8-8-13-18-12-30m12 30c-1-14 4-27 13-37m-13 37c7-7 13-15 17-25M29 43 13 37m19 6 20-9m-21 1-12-14m15 21 12 11" fill="none" stroke="#a8d66c" stroke-width="3" stroke-linecap="round"/><circle cx="17" cy="25" r="3" fill="#cce894"/><circle cx="43" cy="16" r="3" fill="#cce894"/><circle cx="51" cy="37" r="3" fill="#cce894"/></svg>',
+  redpepper:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M30 19c-7-7-17-3-21 7-5 12 2 26 15 33 5 3 11 3 16 0 13-7 20-21 15-33-4-10-14-14-21-7-1 1-3 1-4 0Z" fill="#e94b3c" stroke="#a8332d" stroke-width="3"/><path d="M31 20c1-7 4-12 11-14 1 6-1 11-7 15" fill="#4f913b" stroke="#356b32" stroke-width="2.5" stroke-linecap="round"/><path d="M30 22c-3 8-3 22 0 34m4-34c4 8 5 20 1 34" fill="none" stroke="#ff9b75" stroke-width="2.5" stroke-linecap="round"/><path d="M16 28c-3 8 0 17 5 22" fill="none" stroke="#ffb29a" stroke-width="3" stroke-linecap="round"/></svg>',
+  yellowpepper:'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M30 19c-7-7-17-3-21 7-5 12 2 26 15 33 5 3 11 3 16 0 13-7 20-21 15-33-4-10-14-14-21-7-1 1-3 1-4 0Z" fill="#f4c631" stroke="#b9861c" stroke-width="3"/><path d="M31 20c1-7 4-12 11-14 1 6-1 11-7 15" fill="#4f913b" stroke="#356b32" stroke-width="2.5" stroke-linecap="round"/><path d="M30 22c-3 8-3 22 0 34m4-34c4 8 5 20 1 34" fill="none" stroke="#ffe68a" stroke-width="2.5" stroke-linecap="round"/><path d="M16 28c-3 8 0 17 5 22" fill="none" stroke="#fff0a8" stroke-width="3" stroke-linecap="round"/></svg>'
+};
+const LINK_ITEMS=[
+  {id:'pan',icon:'🍳',name:{nl:'Jokerpan',en:'Wild pan'},tags:['joker:pan'],special:true},
+  {id:'orange',icon:'🍊',name:{nl:'Sinaasappel',en:'Orange'},tags:['color:orange','shape:round','vitamin:c']},
+  {id:'carrot',icon:'🥕',name:{nl:'Wortel',en:'Carrot'},tags:['color:orange','shape:long','vitamin:proA']},
+  {id:'pumpkin',icon:'🎃',name:{nl:'Pompoen',en:'Pumpkin'},tags:['color:orange','shape:round']},
+  {id:'sweetpotato',icon:'🍠',name:{nl:'Zoete aardappel',en:'Sweet potato'},tags:['color:orange','shape:long']},
+  {id:'redpepper',icon:LINK_CUSTOM_ICONS.redpepper,name:{nl:'Rode paprika',en:'Red pepper'},tags:['color:red','shape:round','vitamin:c']},
+  {id:'tomato',icon:'🍅',name:{nl:'Tomaat',en:'Tomato'},tags:['color:red','shape:round']},
+  {id:'strawberry',icon:'🍓',name:{nl:'Aardbei',en:'Strawberry'},tags:['color:red','vitamin:c']},
+  {id:'redapple',icon:'🍎',name:{nl:'Rode appel',en:'Red apple'},tags:['color:red','shape:round']},
+  {id:'banana',icon:'🍌',name:{nl:'Banaan',en:'Banana'},tags:['color:yellow','shape:long']},
+  {id:'lemon',icon:'🍋',name:{nl:'Citroen',en:'Lemon'},tags:['color:yellow','shape:oval','vitamin:c']},
+  {id:'corn',icon:'🌽',name:{nl:'Maïs',en:'Corn'},tags:['color:yellow','shape:long']},
+  {id:'yellowpepper',icon:LINK_CUSTOM_ICONS.yellowpepper,name:{nl:'Gele paprika',en:'Yellow pepper'},tags:['color:yellow','shape:round','vitamin:c']},
+  {id:'kiwi',icon:'🥝',name:{nl:'Kiwi',en:'Kiwi'},tags:['color:green','shape:oval','vitamin:c']},
+  {id:'cucumber',icon:'🥒',name:{nl:'Komkommer',en:'Cucumber'},tags:['color:green','shape:long']},
+  {id:'broccoli',icon:'🥦',name:{nl:'Broccoli',en:'Broccoli'},tags:['color:green']},
+  {id:'spinach',icon:LINK_CUSTOM_ICONS.spinach,name:{nl:'Spinazie',en:'Spinach'},tags:['color:green','shape:leafy','vitamin:proA']},
+  {id:'sprouts',icon:LINK_CUSTOM_ICONS.sprouts,name:{nl:'Spruitjes',en:'Brussels sprouts'},tags:['color:green','shape:round','vitamin:c']},
+  {id:'zucchini',icon:'🥒',name:{nl:'Courgette',en:'Zucchini'},tags:['color:green','shape:long']},
+  {id:'blackcurrant',icon:'🫐',name:{nl:'Zwarte bes',en:'Blackcurrant'},tags:['color:purple','shape:round','vitamin:c']},
+  {id:'grapes',icon:'🍇',name:{nl:'Druiven',en:'Grapes'},tags:['color:purple','shape:round']},
+  {id:'redcabbage',icon:LINK_CUSTOM_ICONS.redcabbage,name:{nl:'Rodekool',en:'Red cabbage'},tags:['color:purple','color:red','shape:round']},
+  {id:'onion',icon:'🧅',name:{nl:'Ui',en:'Onion'},tags:['color:brown','shape:round']},
+  {id:'kale',icon:LINK_CUSTOM_ICONS.kale,name:{nl:'Boerenkool',en:'Kale'},tags:['color:green','shape:leafy','vitamin:proA']},
+  {id:'lettuce',icon:LINK_CUSTOM_ICONS.lettuce,name:{nl:'Sla',en:'Lettuce'},tags:['color:green','shape:leafy']},
+  {id:'potato',icon:'🥔',name:{nl:'Aardappel',en:'Potato'},tags:['color:brown','shape:round']},
+  {id:'pear',icon:'🍐',name:{nl:'Peer',en:'Pear'},tags:['color:green','shape:oval']},
+  {id:'olive',icon:'🫒',name:{nl:'Olijven',en:'Olives'},tags:['color:green','shape:oval','food:mediterranean']},
+  {id:'oliveoil',icon:'🫗',name:{nl:'Olijfolie',en:'Olive oil'},tags:['food:mediterranean']},
+  {id:'oregano',icon:'🌿',name:{nl:'Oregano',en:'Oregano'},tags:['food:mediterranean']},
+  {id:'peanut',icon:'🥜',name:{nl:'Pinda’s',en:'Peanuts'},tags:['food:peanut']},
+  {id:'peanutbutter',icon:'🥜',name:{nl:'Pindakaas',en:'Peanut butter'},tags:['food:peanut']},
+  {id:'peanutoil',icon:'🫗',name:{nl:'Pindaolie',en:'Peanut oil'},tags:['food:peanut']},
+];
+const LINK_ITEM_BY_ID=Object.fromEntries(LINK_ITEMS.map(x=>[x.id,x]));
+const LINK_LABELS={
+  'color:red':{nl:'kleur: rood',en:'color: red'},'color:orange':{nl:'kleur: oranje',en:'color: orange'},'color:yellow':{nl:'kleur: geel',en:'color: yellow'},'color:green':{nl:'kleur: groen',en:'color: green'},'color:purple':{nl:'kleur: paars',en:'color: purple'},'color:brown':{nl:'kleur: bruin',en:'color: brown'},
+  'shape:round':{nl:'vorm: rond',en:'shape: round'},'shape:long':{nl:'vorm: lang',en:'shape: long'},'shape:oval':{nl:'vorm: ovaal',en:'shape: oval'},'shape:leafy':{nl:'soort: bladgroente',en:'type: leafy green'},'vitamin:c':{nl:'veel vitamine C',en:'high in vitamin C'},'vitamin:proA':{nl:'provitamine A',en:'provitamin A'},'food:mediterranean':{nl:'past bij de mediterrane keuken',en:'Mediterranean kitchen match'},'food:peanut':{nl:'gemaakt van pinda',en:'made from peanuts'},'joker:pan':{nl:'jokerpan: past bij alles',en:'wild pan: matches anything'}
+};
+const LINK_LESSONS=[
+ {name:'Ronde producten',text:'Zoek drie verschillende ronde producten. Je hebt extra tijd om te kijken.',test:t=>t==='shape:round'},
+ {name:'Dezelfde kleur',text:'Zoek drie verschillende producten met dezelfde kleur.',test:t=>t.startsWith('color:')},
+ {name:'Bladgroenten',text:'Sla, spinazie en boerenkool delen de eigenschap bladgroente.',test:t=>t==='shape:leafy'},
+ {name:'Vitamine C',text:'Kiwi, paprika en aardbei zijn voorbeelden uit onze vitamine C-groep. Niet elk product bevat evenveel.',test:t=>t==='vitamin:c'},
+ {name:'Culinaire verbanden',text:'Olijven, olijfolie en oregano passen bij de mediterrane keuken. Pinda, pindakaas en pindaolie delen hun grondstof.',test:t=>t.startsWith('food:')}
+];
+function guideLinkMove(){
+ for(let i=0;i<36;i++)for(const j of [i%6<5?i+1:-1,i<30?i+6:-1])if(j>=0&&LINK_GAME.board[i]&&LINK_GAME.board[j]){
+ const b=[...LINK_GAME.board];[b[i],b[j]]=[b[j],b[i]];const m=findLinkMatches(b);if(m.groups)return {pair:[i,j],cells:[...m.cells.keys()].map(k=>k===i?j:k===j?i:k)};
+ }return null;
+}
+const LINK_GAME={mode:'ready',tutorial:false,lesson:0,lessonWins:0,mistakes:0,guide:[],board:[],selected:[],clearing:[],dropping:[],invalid:[],busy:false,score:0,waves:0,rainbowProgress:0,rainbowReady:false,rainbowSelecting:false,feedback:'',dropTimer:0,clockTimer:0,actionTimer:0,nextDropAt:0,dropMs:15000};
+function commonLinkTags(ids){
+  if(ids.length!==3||new Set(ids).size!==3)return [];
+  if(ids.includes('pan'))return LINK_GAME.tutorial?[]:['joker:pan'];
+  const first=LINK_ITEM_BY_ID[ids[0]];if(!first)return [];
+  const shared=first.tags.filter(tag=>ids.slice(1).every(id=>LINK_ITEM_BY_ID[id]?.tags.includes(tag)));
+  const rule=LINK_LESSONS[LINK_GAME.lesson];return rule?shared.filter(rule.test):shared;
+}
+function findLinkMatches(board){
+  const cells=new Map(),tags=new Set();let groups=0;
+  const addLine=indices=>{const ids=indices.map(i=>board[i]);if(ids.some(id=>!id))return;const shared=commonLinkTags(ids);if(!shared.length)return;groups++;shared.forEach(x=>tags.add(x));indices.forEach(i=>{if(!cells.has(i))cells.set(i,new Set());shared.forEach(x=>cells.get(i).add(x));});};
+  for(let r=0;r<6;r++)for(let c=0;c<6;c++){if(c<=3)addLine([r*6+c,r*6+c+1,r*6+c+2]);if(r<=3)addLine([r*6+c,(r+1)*6+c,(r+2)*6+c]);}
+  return {cells,tags:[...tags],groups};
+}
+function canPlaceLink(board,r,c,id){
+  if(!id||id==='pan')return true;
+  if(c>=2&&board[r*6+c-1]&&board[r*6+c-2]&&commonLinkTags([board[r*6+c-2],board[r*6+c-1],id]).length)return false;
+  if(r>=2&&board[(r-1)*6+c]&&board[(r-2)*6+c]&&commonLinkTags([board[(r-2)*6+c],board[(r-1)*6+c],id]).length)return false;
+  return true;
+}
+function hasLinkMove(board){
+  for(let i=0;i<36;i++)for(const j of [i%6<5?i+1:-1,i<30?i+6:-1])if(j>=0&&board[i]&&board[j]){[board[i],board[j]]=[board[j],board[i]];const yes=findLinkMatches(board).groups>0;[board[i],board[j]]=[board[j],board[i]];if(yes)return true;}
+  return false;
+}
+function countLinkMoves(board){
+  let count=0;
+  for(let i=0;i<36;i++)for(const j of [i%6<5?i+1:-1,i<30?i+6:-1])if(j>=0&&board[i]&&board[j]){[board[i],board[j]]=[board[j],board[i]];if(findLinkMatches(board).groups>0)count++;[board[i],board[j]]=[board[j],board[i]];}
+  return count;
+}
+function makeLinkBoard(){
+  const ids=LINK_ITEMS.filter(x=>!x.special&&(!LINK_LESSONS[LINK_GAME.lesson]||x.tags.some(LINK_LESSONS[LINK_GAME.lesson].test))).map(x=>x.id);
+  for(let attempt=0;attempt<500;attempt++){
+    const board=Array(36).fill(null);let failed=false;
+    for(let r=3;r<6&&!failed;r++)for(let c=0;c<6;c++){const choices=[...ids].sort(()=>Math.random()-.5);const pick=choices.find(id=>canPlaceLink(board,r,c,id));if(!pick){failed=true;break;}board[r*6+c]=pick;}
+    if(!failed&&findLinkMatches(board).groups===0&&hasLinkMove(board))return board;
+  }
+  return Array(18).fill(null).concat(Array.from({length:18},()=>ids[Math.floor(Math.random()*ids.length)]));
+}
+function makeTutorialBoard(){
+  const board=Array(36).fill(null),ids=LINK_ITEMS.filter(x=>!x.special).map(x=>x.id);
+  const fixed={30:'orange',31:'carrot',32:'tomato',33:'pumpkin',34:'lemon',35:'yellowpepper'};
+  for(let attempt=0;attempt<800;attempt++){
+    board.fill(null);let failed=false;
+    for(let r=3;r<6&&!failed;r++)for(let c=0;c<6;c++){
+      const pos=r*6+c;if(fixed[pos]){board[pos]=fixed[pos];if(!canPlaceLink(board,r,c,fixed[pos])){failed=true;break;}continue;}
+      const options=[...ids].sort(()=>Math.random()-.5),pick=options.find(id=>canPlaceLink(board,r,c,id));
+      if(!pick){failed=true;break;}board[pos]=pick;
+    }
+    if(!failed&&findLinkMatches(board).groups===0){const copy=[...board];[copy[32],copy[33]]=[copy[33],copy[32]];if(findLinkMatches(copy).groups>0)return board;}
+  }
+  const fallback=Array(36).fill(null);Object.assign(fallback,{30:'orange',31:'carrot',32:'tomato',33:'pumpkin',34:'lemon',35:'yellowpepper'});return fallback;
+}
+function drawLinkProduct(){
+  if(!LINK_GAME.board.includes('pan')&&Math.random()<.035)return 'pan';
+  const pool=LINK_ITEMS.filter(x=>!x.special).map(x=>x.id);return pool[Math.floor(Math.random()*pool.length)];
+}
+function linkText(nl,en){return S.lang==='nl'?nl:en}
+function stopLinkClocks(){clearTimeout(LINK_GAME.dropTimer);clearInterval(LINK_GAME.clockTimer);clearTimeout(LINK_GAME.actionTimer);}
+function startLinkClocks(){
+  stopLinkClocks();LINK_GAME.nextDropAt=Date.now()+LINK_GAME.dropMs;LINK_GAME.dropTimer=setTimeout(dropLinkWave,LINK_GAME.dropMs);
+  LINK_GAME.clockTimer=setInterval(()=>{if(LINK_GAME.mode==='playing'){const el=document.getElementById('linkClock');if(el)el.textContent=Math.max(0,Math.ceil((LINK_GAME.nextDropAt-Date.now())/1000))+'s';}},250);
+}
+function initLinkGame(){
+ stopLinkClocks();Object.assign(LINK_GAME,{mode:'playing',tutorial:false,lesson:0,lessonWins:0,mistakes:0,guide:[],selected:[],clearing:[],dropping:[],invalid:[],busy:false,score:0,waves:0,rainbowProgress:0,rainbowReady:false,rainbowSelecting:false,dropMs:45000});
+ LINK_GAME.board=makeLinkBoard();LINK_GAME.guide=guideLinkMove()?.cells||[];LINK_GAME.feedback='Begin met drie ronde producten. De groene randen laten zien welke producten bij elkaar horen.';render();startLinkClocks();
+}
+function startFoodRushLink(){initLinkGame()}
+function startEndlessLink(){initLinkGame()}
+function linkGameOver(){stopLinkClocks();LINK_GAME.mode='over';LINK_GAME.busy=false;render();}
+function renderFoodRushLink(){
+  const head=`<div style="display:flex;justify-content:flex-end;margin-bottom:8px">${langSwitcherDark()}</div><div class="hero"><small>ARCADE · ${linkText('LOS VAN DE SAUZENLESSEN','SEPARATE MINI-GAME')}</small><h1>🧩 FoodRush Link!</h1><p>${linkText('Wissel producten en maak verbindingen. Nieuwe rijen vallen op de stapel. Hoe lang houd jij het speelveld vrij?','Swap products and make connections. New rows land on the stack. How long can you keep the board clear?')}</p></div>`;
+  if(LINK_GAME.mode==='ready')return `<main><section class="card linkGame">${head}<p class="muted">${linkText('Je begint met één korte oefenronde. Daarna krijg je voorbeelden van de andere verbindingen en speel je eindeloos verder.','Start with one short practice round. Then see examples of other connections and keep playing endlessly.')}</p><button class="btn primary" id="btnLinkStart">▶ ${linkText('Eerst even oefenen','Practice first')}</button><button class="btn ghost" id="btnLinkExit">${linkText('Terug naar CuliLab','Back to CuliLab')}</button></section></main>`;
+  if(LINK_GAME.mode==='teach')return `<main><section class="card linkGame">${head}<div class="discover"><div class="bowl">🎉</div><h2>${linkText('Goed gedaan!','Well done!')}</h2><p>${linkText('Sinaasappel, wortel en pompoen zijn alle drie oranje. Je kunt ook andere verbanden zoeken:','Orange, carrot, and pumpkin are all orange. You can also look for other connections:')}</p></div><div class="linkExamples">
+    <div class="linkExample">${linkText('Dezelfde vorm: rond','Same shape: round')}<div class="exampleItems"><span class="exampleItem">🍅<small>${linkText('tomaat','tomato')}</small></span><span class="exampleItem">🥔<small>${linkText('aardappel','potato')}</small></span><span class="exampleItem">🍊<small>${linkText('sinaasappel','orange')}</small></span></div></div>
+    <div class="linkExample">${linkText('Voedingsstof: vitamine C','Nutrient: vitamin C')}<div class="exampleItems"><span class="exampleItem">🥝<small>${linkText('kiwi','kiwi')}</small></span><span class="exampleItem">🫑<small>${linkText('paprika','pepper')}</small></span><span class="exampleItem">🍓<small>${linkText('aardbei','strawberry')}</small></span></div></div>
+    <div class="linkExample">${linkText('Keukencombinatie','Kitchen combination')}<div class="exampleItems"><span class="exampleItem">🫒<small>${linkText('olijven','olives')}</small></span><span class="exampleItem">🫗<small>${linkText('olijfolie','olive oil')}</small></span><span class="exampleItem">🌿<small>${linkText('oregano','oregano')}</small></span></div></div>
+    <div class="linkExample">${linkText('Van dezelfde grondstof','From the same ingredient')}<div class="exampleItems"><span class="exampleItem">🥜<small>${linkText('pinda’s','peanuts')}</small></span><span class="exampleItem">🥜<small>${linkText('pindakaas','peanut butter')}</small></span><span class="exampleItem">🫗<small>${linkText('pindaolie','peanut oil')}</small></span></div></div>
+  </div><p class="muted">${linkText('De Jokerpan past bij elke verbinding. Als een rij geen geldige zet meer heeft, worden de producten geschud.','The Wild Pan works with any connection. If there are no valid moves, the products are shuffled.')}</p><button class="btn primary" id="btnLinkContinue">${linkText('Start eindeloos spel','Start endless game')} →</button></section></main>`;
+  if(LINK_GAME.mode==='over')return `<main><section class="card linkGame">${head}<div class="discover"><div class="bowl">🍳💥</div><h2>${linkText('De stapel is te hoog!','The stack got too high!')}</h2><p>⭐ ${LINK_GAME.score} · ${linkText('golven overleefd: ','waves survived: ')}${LINK_GAME.waves}</p></div><button class="btn primary" id="btnLinkAgain">${linkText('Nog een poging ↻','Try again ↻')}</button><button class="btn ghost" id="btnLinkExit" style="margin-top:10px">${linkText('Terug naar CuliLab','Back to CuliLab')}</button></section></main>`;
+  const introCard=LINK_GAME.tutorial?`<div class="linkRule"><b>${linkText('Oefenronde · dezelfde kleur','Practice · same color')}</b><div class="linkPracticeGroup"><span>🍊<small>${linkText('sinaasappel','orange')}</small></span>＋<span>🥕<small>${linkText('wortel','carrot')}</small></span>＋<span>🎃<small>${linkText('pompoen','pumpkin')}</small></span></div><div>${linkText('Deze drie zijn oranje. Wissel de tomaat en pompoen op het bord om ze op één rij te krijgen.','These three are orange. Swap the tomato and pumpkin on the board to put them in one row.')}</div></div>`:'';
+  return `<main><section class="card linkGame">${head}${LINK_LESSONS[LINK_GAME.lesson]?`<div class="linkRule"><b>${LINK_LESSONS[LINK_GAME.lesson].name} · ${LINK_GAME.lessonWins}/3</b><p>${LINK_LESSONS[LINK_GAME.lesson].text}</p></div>`:''}<div class="linkStats">${LINK_GAME.tutorial?`<span class="linkStat">🧑‍🍳 ${linkText('Oefenronde','Practice round')}</span>`:`<span class="linkStat">🌊 ${linkText('Golf','Wave')} ${LINK_GAME.waves+1}</span><span class="linkStat">⬇️ ${linkText('Nieuwe rij over','Next row in')} <b id="linkClock">${Math.max(0,Math.ceil((LINK_GAME.nextDropAt-Date.now())/1000))}s</b></span>`}<span class="linkStat">🔗 ${linkText('Mogelijke verbindingen','Possible moves')}: <b>${countLinkMoves(LINK_GAME.board)}</b></span><span class="linkStat">🌈 ${LINK_GAME.rainbowReady?linkText('Klaar!','Ready!'):`${LINK_GAME.rainbowProgress}/3`}</span><span class="linkStat">⭐ ${LINK_GAME.score}</span></div>${LINK_GAME.rainbowReady?`<button class="linkRainbowAction" id="btnRainbowActivate">${LINK_GAME.rainbowSelecting?linkText('Tik een rij · tik hier om te annuleren','Tap a row · tap here to cancel'):linkText('🌈 Gebruik superfruit','🌈 Use super fruit')}</button>`:''}${LINK_GAME.rainbowSelecting?`<div class="linkRule">${linkText('Tik op een tegel in de rij die je wilt verwijderen.','Tap any tile in the row you want to clear.')}</div>`:''}<div class="linkBoard ${LINK_GAME.rainbowSelecting?'rainbowArmed':''}" id="linkBoard" aria-label="${linkText('Speelbord: wissel twee buurproducten','Game board: swap two neighboring products')}">${LINK_GAME.board.map((id,i)=>{const item=id?LINK_ITEM_BY_ID[id]:null;return `<button class="linkTile ${LINK_GAME.guide.includes(i)?'guided':''} ${LINK_GAME.selected.includes(i)?'selected':''} ${LINK_GAME.clearing.includes(i)?'clearing':''} ${LINK_GAME.dropping.includes(i)?'dropping':''} ${LINK_GAME.invalid.includes(i)?'invalid':''} ${item?.special?'special':''}" data-link-tile="${i}" aria-label="${item?tr(item.name):linkText('leeg vak','empty slot')}" ${!item&&!LINK_GAME.rainbowSelecting?'disabled':''}>${item?`<span class="produce">${item.icon}</span><span class="produceName">${tr(item.name)}</span>`:''}</button>`}).join('')}</div><div class="feedback ${LINK_GAME.invalid.length?'bad':'good'}" id="linkFeedback">${LINK_GAME.feedback}</div><p class="muted">${linkText('Tik een product aan en wissel met een buurvakje. Maak een rij van drie verschillende producten die bij elkaar horen.','Tap a product and swap it with a neighbor. Make a row of three different products that belong together.')}</p><button class="btn ghost" id="btnLinkExit">${linkText('Stoppen en terug','Stop and go back')}</button></section></main>`;
+}
+function swapLinkTiles(a,b){
+  if(LINK_GAME.busy)return;LINK_GAME.busy=true;LINK_GAME.selected=[];[LINK_GAME.board[a],LINK_GAME.board[b]]=[LINK_GAME.board[b],LINK_GAME.board[a]];const result=findLinkMatches(LINK_GAME.board);
+  if(!result.groups){LINK_GAME.mistakes++;LINK_GAME.invalid=[a,b];LINK_GAME.feedback=linkText('Die wissel maakt nog geen verbinding. Probeer een andere buur.','That swap does not make a connection yet. Try another neighbor.');render();LINK_GAME.actionTimer=setTimeout(()=>{[LINK_GAME.board[a],LINK_GAME.board[b]]=[LINK_GAME.board[b],LINK_GAME.board[a]];LINK_GAME.invalid=[];LINK_GAME.busy=false;if(LINK_GAME.mistakes>=3){LINK_GAME.guide=(guideLinkMove()?.pair||[]).slice(0,1);LINK_GAME.mistakes=0;}LINK_GAME.feedback=linkText('Zoek drie verschillende producten die bij elkaar passen.','Find three different products that fit together.');render();},280);return;}
+  clearTimeout(LINK_GAME.dropTimer);LINK_GAME.dropTimer=0;applyLinkMatches(result,true);
+}
+function settleLinkColumns(){for(let c=0;c<6;c++){const keep=[];for(let r=5;r>=0;r--){const id=LINK_GAME.board[r*6+c];if(id)keep.push(id);}for(let r=5;r>=0;r--)LINK_GAME.board[r*6+c]=keep[5-r]||null;}}
+function applyLinkMatches(result,playerMade=false){
+  if(playerMade){LINK_GAME.guide=[];LINK_GAME.mistakes=0;if(LINK_LESSONS[LINK_GAME.lesson]){LINK_GAME.lessonWins++;if(LINK_GAME.lessonWins>=3){LINK_GAME.lesson++;LINK_GAME.lessonWins=0;LINK_GAME.advanceLesson=true;}}}
+  LINK_GAME.score+=result.cells.size*10+Math.max(0,result.tags.length-1)*15;
+  if(playerMade&&!LINK_GAME.tutorial&&!LINK_GAME.rainbowReady){LINK_GAME.rainbowProgress++;if(LINK_GAME.rainbowProgress>=3){LINK_GAME.rainbowProgress=0;LINK_GAME.rainbowReady=true;}}
+  LINK_GAME.clearing=[...result.cells.keys()];LINK_GAME.feedback=linkText('Goede verbinding: ','Good connection: ')+result.tags.map(x=>tr(LINK_LABELS[x])).join(' · ')+(LINK_GAME.rainbowReady?' · 🌈 '+linkText('Superfruit verdiend!','Super fruit earned!'):'');render();
+  LINK_GAME.actionTimer=setTimeout(()=>{LINK_GAME.clearing.forEach(i=>LINK_GAME.board[i]=null);LINK_GAME.clearing=[];settleLinkColumns();LINK_GAME.selected=[];LINK_GAME.invalid=[];LINK_GAME.feedback=linkText('Mooi! De producten zakken naar beneden.','Nice! The products fall down.');render();LINK_GAME.actionTimer=setTimeout(resolveLinkCascades,180);},250);
+}
+function reshuffleLinkBoard(){
+  for(let attempt=0;attempt<150;attempt++){
+    const candidate=Array(36).fill(null);let items=LINK_GAME.board.filter(Boolean).sort(()=>Math.random()-.5),k=0;
+    for(let c=0;c<6;c++)for(let r=5;r>=0;r--)if(LINK_GAME.board[r*6+c])candidate[r*6+c]=items[k++];
+    if(findLinkMatches(candidate).groups===0&&hasLinkMove(candidate)){LINK_GAME.board=candidate;LINK_GAME.feedback=linkText('Geen zet mogelijk — de producten zijn geschud!','No moves available — the products were shuffled!');return;}
+  }
+  LINK_GAME.board=makeLinkBoard();LINK_GAME.feedback=linkText('Geen zet mogelijk — een nieuw speelbord!','No moves available — a fresh board!');
+}
+function resolveLinkCascades(){
+  if(LINK_GAME.mode!=='playing')return;const result=findLinkMatches(LINK_GAME.board);if(result.groups){applyLinkMatches(result);return;}LINK_GAME.busy=false;LINK_GAME.selected=[];
+  if(LINK_GAME.advanceLesson){LINK_GAME.advanceLesson=false;LINK_GAME.board=makeLinkBoard();LINK_GAME.guide=LINK_LESSONS[LINK_GAME.lesson]?guideLinkMove()?.cells||[]:[];}
+  if(!hasLinkMove(LINK_GAME.board))reshuffleLinkBoard();
+  if(LINK_GAME.tutorial){stopLinkClocks();LINK_GAME.tutorial=false;LINK_GAME.mode='teach';LINK_GAME.busy=false;render();return;}
+  render();startLinkClocks();
+}
+function dropLinkWave(){
+  if(LINK_GAME.mode!=='playing')return;LINK_GAME.dropTimer=0;LINK_GAME.busy=true;LINK_GAME.waves++;LINK_GAME.dropMs=LINK_LESSONS[LINK_GAME.lesson]?45000:Math.max(9000,15000-Math.floor(LINK_GAME.waves/4)*1000);const incoming=Array.from({length:6},()=>drawLinkProduct()),landed=[];
+  for(let c=0;c<6;c++){let landing=-1;for(let r=0;r<6;r++)if(LINK_GAME.board[r*6+c]){landing=r-1;break;}if(landing===-1)landing=5;if(landing<0){linkGameOver();return;}LINK_GAME.board[landing*6+c]=incoming[c];landed.push(landing*6+c);}
+  LINK_GAME.dropping=landed;LINK_GAME.feedback=linkText('Nieuwe rij valt binnen! Maak ruimte in de stapel.','New row dropping! Make room in the stack.');render();
+  LINK_GAME.actionTimer=setTimeout(()=>{LINK_GAME.dropping=[];const matches=findLinkMatches(LINK_GAME.board);if(matches.groups)applyLinkMatches(matches);else{LINK_GAME.busy=false;if(!hasLinkMove(LINK_GAME.board))reshuffleLinkBoard();render();startLinkClocks();}},450);
+}
+function toggleRainbow(){if(LINK_GAME.busy||!LINK_GAME.rainbowReady)return;LINK_GAME.rainbowSelecting=!LINK_GAME.rainbowSelecting;LINK_GAME.selected=[];LINK_GAME.feedback=LINK_GAME.rainbowSelecting?linkText('Kies de rij die je wilt leegmaken.','Choose the row you want to clear.'):linkText('Superfruit bewaard.','Super fruit saved.');render();}
+function clearRainbowRow(row){
+  if(LINK_GAME.busy||!LINK_GAME.rainbowReady||!LINK_GAME.rainbowSelecting)return;
+  const rowCells=Array.from({length:6},(_,c)=>row*6+c).filter(i=>LINK_GAME.board[i]);if(!rowCells.length){LINK_GAME.feedback=linkText('Die rij is leeg. Kies een rij met producten.','That row is empty. Choose a row with products.');render();return;}
+  stopLinkClocks();LINK_GAME.busy=true;LINK_GAME.rainbowReady=false;LINK_GAME.rainbowSelecting=false;LINK_GAME.selected=[];LINK_GAME.clearing=rowCells;LINK_GAME.score+=LINK_GAME.clearing.length*10+60;LINK_GAME.feedback=linkText('Regenboog-superfruit! Hele rij verwijderd.','Rainbow super fruit! Whole row cleared.');render();
+  LINK_GAME.actionTimer=setTimeout(()=>{for(let c=0;c<6;c++)LINK_GAME.board[row*6+c]=null;LINK_GAME.clearing=[];settleLinkColumns();render();LINK_GAME.actionTimer=setTimeout(resolveLinkCascades,180);},420);
+}
+function chooseLinkTile(index){
+  if(LINK_GAME.busy||LINK_GAME.mode!=='playing')return;
+  if(LINK_GAME.rainbowSelecting){clearRainbowRow(Math.floor(index/6));return;}
+  if(!LINK_GAME.board[index])return;
+  if(!LINK_GAME.selected.length){LINK_GAME.selected=[index];LINK_GAME.feedback=linkText('Kies nu een vakje ernaast om te wisselen.','Now choose a neighboring tile to swap.');render();return;}
+  const first=LINK_GAME.selected[0];if(first===index){LINK_GAME.selected=[];LINK_GAME.feedback=linkText('Selectie gewist. Kies een product.','Selection cleared. Choose a product.');render();return;}
+  const adjacent=Math.abs(Math.floor(first/6)-Math.floor(index/6))+Math.abs(first%6-index%6)===1;if(!adjacent){LINK_GAME.selected=[index];LINK_GAME.feedback=linkText('Kies een vakje dat direct naast dit product ligt.','Choose a tile directly next to this product.');render();return;}swapLinkTiles(first,index);
+}
+function exitFoodRushLink(){stopLinkClocks();LINK_GAME.mode='ready';LINK_GAME.busy=false;S.phase='home';render();}
+function bindFoodRushLink(){document.querySelectorAll('[data-link-tile]').forEach(b=>b.onclick=()=>chooseLinkTile(Number(b.dataset.linkTile)));const btn=document.getElementById('btnRainbowActivate');if(btn)btn.onclick=toggleRainbow;}
+function langSwitcherDark(){
+  return `<div style="display:flex;gap:4px">
+    <button data-lang="nl" style="border:2px solid ${S.lang==='nl'?'#60411d':'#e0d3c1'};border-radius:10px;padding:5px 9px;font-size:11px;font-weight:900;background:${S.lang==='nl'?'#ffe49a':'#fff'};color:#60411d" type="button">NL</button>
+    <button data-lang="en" style="border:2px solid ${S.lang==='en'?'#60411d':'#e0d3c1'};border-radius:10px;padding:5px 9px;font-size:11px;font-weight:900;background:${S.lang==='en'?'#ffe49a':'#fff'};color:#60411d" type="button">EN</button>
+  </div>`;
+}
+
+function screenIngredients(){
+  const shelf = availableIngredients().filter(e=>!S.pick.some(p=>p.id===e.id));
+  const nextTier = TIERS[S.tierIndex+1];
+  const foundThisRound=TIERS[S.tierIndex].recipes.filter(r=>S.products.has(r.id)).length;
+  const roundTotal=TIERS[S.tierIndex].recipes.length;
+  return `
+  <main>
+    <div class="roundline"><span>${t('roundLabel',{n:S.tierIndex+1, total:TIERS.length})} · ${S.lang==='nl'?`${foundThisRound}/${roundTotal} recepten ontdekt`:`${foundThisRound}/${roundTotal} recipes discovered`}</span><span>💡 <button class="tipbtn" id="btnTip" style="border:0;background:none;font-weight:900;color:#8b5a17" ${S.tipCount>=3?'disabled':''}>${t('tipButton',{left:3-S.tipCount})}</button></span></div>
+    <div class="labWorkspace">
+      <section class="labBench">
+        <div class="combine ${S.pick.length?'haspick':''}" id="combineZone">
+          ${S.pick.length ? S.pick.map((p,i)=>`<div class="pick" data-remove="${i}"><span class="emoji">${p.icon}</span>${tr(p.name)}<span class="x">✕</span></div>`).join('')
+            : `<div class="combineEmpty"><span>＋</span>${t('combineEmpty')}</div>`}
+        </div>
+        ${S.pick.length?`<div class="pickhint">${t('pickHint')}</div>`:''}
+        <button class="btn primary" id="btnPrepare" style="margin-top:12px" ${S.pick.length<2?'disabled':''}>${t('btnPrepare')}</button>
+        <div class="feedback ${S.msgType}">${S.msg}</div>
+      </section>
+      <section class="labPantry">
+        <div class="shelfLabel">${t('shelfLabel')}</div>
+        <div class="shelf">
+          ${shelf.map(e=>`<button class="ing" data-pick="${e.id}"><span class="emoji">${e.icon}</span><span class="ingName">${tr(e.name)}</span></button>`).join('')}
+          ${nextTier ? `<div class="ing locked"><span class="emoji">🔒</span>?</div>` : ''}
+        </div>
+      </section>
+    </div>
+  </main>`;
+}
+function screenSpices(){
+  const opts=shuffleStable(`spices:${S.current.id}`,spiceChoices(S.current)), count=opts.filter(x=>x.correct).length;
+  return `<main><div class="card center"><h2>🌿 ${S.lang==='nl'?'Welke specerijen passen?':'Which spices fit?'}</h2><p>${S.lang==='nl'?`Kies ${count}; er zijn altijd twee afleiders.`:`Choose ${count}; there are always two distractors.`}</p><div class="actiongrid">${opts.map(x=>`<button class="choice ${S.spicePick?.includes(x.id)?'active':''}" data-spice="${x.id}"><span class="big">${x.icon}</span>${tr(x.name)}</button>`).join('')}</div><button class="btn primary" id="btnCheckSpices" style="margin-top:12px">${S.lang==='nl'?'Controleer keuze':'Check choice'}</button><div class="feedback ${S.msgType}">${S.msg}</div></div></main>`;
+}
+function screenAction(){
+  const options=[
+    {a:'whisk',big:'🌀',label:t('actWhisk')}, {a:'stir',big:'🥄',label:t('actStir')},
+    {a:'heat',big:'🔥',label:t('actHeat')}, {a:'mix',big:'⚡',label:t('actMix')},
+  ];
+  return `
+  <main>
+    <div class="card center">
+      <b>${t('actionQuestion')}</b>
+      <div class="actiongrid">
+        ${shuffleStable(`action:${S.current.id}`,options,o=>o.a).map(o=>`<button class="choice" data-action="${o.a}"><span class="big">${o.big}</span>${o.label}</button>`).join('')}
+      </div>
+      <div class="feedback ${S.msgType}">${S.msg}</div>
+    </div>
+  </main>`;
+}
+function screenDo(){
+  const act=S.current.act;
+  let inner='';
+  if(act==='whisk'||act==='stir'){
+    inner=`<div class="doIcon" id="doIcon">${act==='whisk'?'🌀':'🥄'}</div>
+      <div class="doLabel">${t('gestureLabel')}</div>
+      <div class="doBarWrap"><div class="doBar" id="doBar"></div></div>`;
+  } else if(act==='heat'){
+    inner=`<div class="doIcon" id="doIcon">🔥</div>
+      <div class="doLabel">${t('heatLabel')}</div>
+      <div class="doBarWrap"><div class="doGoodBand"><i style="left:61%;width:39%"></i></div><div class="doBar burnzone" id="doBar"></div></div><small>${S.lang==='nl'?'Groen = veilig loslaten':'Green = safe release'}</small>`;
+  } else if(act==='mix'){
+    inner=`<div class="doIcon" id="doIcon">⚡</div>
+      <div class="doLabel">${t('mixLabel')}</div>
+      <div class="doBarWrap"><div class="doBar" id="doBar"></div></div>
+      <div class="tapcount" id="tapCount">0 / 12</div>
+      <button class="btn primary" id="tapBtn" style="margin-top:10px">${t('btnMix')}</button>`;
+  }
+  return `
+  <main>
+    <div class="card center">
+      <b>${t('doYourself')}</b>
+      <div class="doZone" id="doZone">${inner}</div>
+      <div class="feedback ${S.msgType}">${S.msg}</div>
+    </div>
+  </main>`;
+}
+function screenDiscover(){
+  const r=S.current;
+  const L=r.lesson ? (r.lesson[S.lang]||r.lesson.nl) : null;
+  return `
+  <main>
+    <div class="discover" style="${r.signature?'background:linear-gradient(135deg,#fff0b8,#ffd98a);border:2px solid #d89a48':''}">
+      <div class="bowl">${r.signature?'👑✨':'🥣✨'}</div>
+      ${r.signature?`<div class="fresh" style="background:#7a4a10;margin-bottom:6px">${t('signatureBadgeLabel')}</div>`:''}
+      <h2>${r.emoji} ${tr(r.product)}</h2>
+      ${r.category?`<span class="fresh">${tr(r.category)}</span>`:''}
+      <p>${tr(r.story)}</p>
+      ${S.freshDiscovery?`<span class="fresh">${t('freshBadge')}</span>`:''}
+    </div>
+    ${L?`<button class="btn ghost" id="btnLesson" style="margin-top:10px">${S.lessonOpen?t('lessonClose'):t('btnLearn')}</button>${S.lessonOpen?`<section class="card" style="text-align:left"><b>${S.lang==='nl'?'Zo maak je dit echt':'How to make it'}</b><p><b>${S.lang==='nl'?'Hoeveelheden':'Quantities'}</b><br>${L.amount}</p><p><b>${S.lang==='nl'?'Benodigdheden':'Equipment'}</b><br>${L.tools}</p><b>${S.lang==='nl'?'Stappen':'Steps'}</b><ol>${L.steps.map(x=>`<li style="margin:6px 0">${x}</li>`).join('')}</ol><p><b>${S.lang==='nl'?'Waar let je op?':'What to look for'}</b><br>${L.sign}</p><p><b>${S.lang==='nl'?'Probleem oplossen':'Troubleshooting'}</b><br>${L.fix}</p><small>${S.lang==='nl'?'Bron':'Source'}: <a href="${L.source}" target="_blank" rel="noopener">${L.sourceName}</a></small></section>`:''}`:''}
+    <button class="btn primary" id="btnContinue" style="margin-top:14px">${t('btnContinueDiscover')}</button>
+  </main>`;
+}
+function screenCelebrate(){
+  const u=S.pendingUnlock;
+  const generic=['🍋','🍅','🥕','🌿','🍎','🥦','🫒','⭐','✨','🎉'];
+  const fruit=[u.icon, u.icon, ...generic];
+  let rain='';
+  for(let i=0;i<32;i++){
+    rain+=`<span class="fall" style="left:${(i*31)%100}%;animation-duration:${2.2+(i%5)*.35}s;animation-delay:-${(i%7)*.28}s;font-size:${18+(i%4)*6}px">${fruit[i%fruit.length]}</span>`;
+  }
+  return `
+  <main>
+    <div class="celebrate">
+      ${rain}
+      <div class="celebrateCard">
+        <div class="trophy">🏆</div>
+        <div style="font-weight:950;color:#bd6d16">${t('roundComplete')}</div>
+        <h2>${t('discoveriesCount',{n:S.products.size})}</h2>
+        <p class="muted">${t('youAreNow',{rank:'<b>'+rank()+'</b>'})}</p>
+        <div class="unlock">${t('newIngredientUnlocked')}<br><span>${u.icon}</span>${t('addedToKitchen',{name:tr(u.name)})}</div>
+        <button class="btn primary" id="btnCelebrateContinue">${t('btnContinueDiscover')}</button>
+      </div>
+    </div>
+  </main>`;
+}
+function screenWin(){
+  return `
+  <main>
+    <div class="celebrate" style="min-height:50vh">
+      <div class="celebrateCard">
+        <div class="trophy">👑</div>
+        <div style="font-weight:950;color:#bd6d16">${t('allDiscovered')}</div>
+        <h2>${t('recipesOfTotal',{total:TOTAL_RECIPES()})}</h2>
+        <p class="muted">${t('winText',{rank:'<b>'+rank()+'</b>'})}</p>
+        <button class="btn primary" id="btnToBook" style="margin-top:6px">${t('btnViewBook')}</button>
+        <button class="btn ghost" id="btnReset2" style="margin-top:8px">${t('btnResetHome')}</button>
+      </div>
+    </div>
+  </main>`;
+}
+function screenBook(){
+  return `
+  <main>
+    ${TIERS.map((tier,i)=>{
+      if(i>S.tierIndex) return `<div class="tierBlock"><div class="tierHead"><span class="em">🔒</span> ${t('lockedRound',{n:i+1})}</div></div>`;
+      const label = tier.unlock ? `${tier.unlock.icon} ${tr(tier.unlock.name)}` : t('basisRound');
+      return `<div class="tierBlock">
+        <div class="tierHead"><span class="em">${tier.unlock?tier.unlock.icon:'🥗'}</span> ${t('roundHeading',{n:i+1, label})}</div>
+        ${tier.recipes.map(r=>{
+          const found=S.products.has(r.id);
+          const sig = r.signature ? ' style="border:2px solid #d89a48;background:#fff8e8"' : '';
+          return found
+            ? `<div class="recipeRow"${sig}><span class="em">${r.emoji}</span><div><b>${r.signature?'⭐ ':''}${tr(r.product)}</b><small>${tr(TOOL_OF[r.act])}</small></div></div>`
+            : `<div class="recipeRow locked"${sig}><span class="em">❔</span><div><b>${r.signature?t('signatureDish'):t('toDiscover')}</b><small>${t('ingredientsCount',{n:r.ids.length})}</small></div></div>`;
+        }).join('')}
+      </div>`;
+    }).join('')}
+  </main>`;
+}
+function screenBadges(){
+  return `
+  <main>
+    <div class="badgeGrid">
+      ${BADGES.map(b=>{
+        const got=b.need(S);
+        return `<div class="badge ${got?'':'locked'}"><span class="em">${b.em}</span><b>${tr(b.name)}</b><small>${got?t('achieved'):t('notYetAchieved')}</small></div>`;
+      }).join('')}
+    </div>
+  </main>`;
+}
+
+function openCuliInfo(){
+ const remaining=Math.max(1000,LINK_GAME.nextDropAt-Date.now());const running=S.phase==='foodrushLink'&&LINK_GAME.mode==='playing';if(running)clearTimeout(LINK_GAME.dropTimer);
+ const d=document.createElement('dialog');d.style.cssText='max-width:660px;width:85%;max-height:80vh;overflow:auto;border:0;border-radius:20px;padding:22px;background:#fff9ec;color:#503c28';
+ d.innerHTML='<h2>ⓘ Verbindingenboek</h2><p>Drie verschillende producten delen één eigenschap: vorm, kleur, voedingsstof of een culinair verband. Tijdens het leren telt alleen het aangekondigde verband.</p><h3>Voedingsstoffen</h3><p>Vitamine C draagt bij aan de normale werking van je afweer. Provitamine A kan je lichaam omzetten in vitamine A. De hoeveelheden verschillen per product. Dit boek toont de voedingsstofgroepen die in het spel voorkomen, geen volledig voedingswaardeoverzicht.</p><p><a href="https://www.voedingscentrum.nl/encyclopedie/vitamine-c.aspx" target="_blank" rel="noopener">Voedingscentrum: vitamine C</a> · <a href="https://www.voedingscentrum.nl/encyclopedie/vitamine-a.aspx" target="_blank" rel="noopener">Vitamine A</a></p>'+LINK_ITEMS.map(x=>'<details><summary>'+tr(x.name)+'</summary><p>'+x.tags.map(t=>tr(LINK_LABELS[t])).join(' · ')+'</p></details>').join('')+'<p>Een jokerpan mag bij elke verbinding. Drie zelfgemaakte verbindingen verdienen een regenboog-superfruit waarmee je een rij kiest om te verwijderen.</p><button id="closeCuliInfo">Terug naar spel</button>';
+ document.body.append(d);d.showModal();const close=()=>{d.close();d.remove();if(running&&LINK_GAME.mode==='playing'){LINK_GAME.nextDropAt=Date.now()+remaining;LINK_GAME.dropTimer=setTimeout(dropLinkWave,remaining);}};d.querySelector('button').onclick=close;d.oncancel=e=>{e.preventDefault();close();};
+}
+function culiHome(){
+ const running=S.phase==='foodrushLink'&&LINK_GAME.mode==='playing';const left=LINK_GAME.nextDropAt-Date.now();if(running)clearTimeout(LINK_GAME.dropTimer);
+ if(S.phase!=='home'&&!confirm('Terug naar het hoofdmenu? Je huidige ronde stopt. Je opgeslagen voortgang blijft bewaard.')){if(running){LINK_GAME.nextDropAt=Date.now()+Math.max(1000,left);LINK_GAME.dropTimer=setTimeout(dropLinkWave,Math.max(1000,left));}return;}
+ stopLinkClocks();if(typeof PANIC!=='undefined'){cancelAnimationFrame(PANIC.raf);removePanicKeys();}LINK_GAME.mode='ready';S.pick=[];S.phase='home';save();render();
+}
+function render(){
+  const app=document.getElementById('app');
+  let html='';
+  if(S.phase==='home'){
+    html = screenHome();
+  } else if(S.phase==='panic'){
+    html = screenKitchenPanic();
+  } else if(S.phase==='foodrushLink'){
+    html = renderFoodRushLink();
+  } else if(S.phase==='celebrate'){
+    html = screenCelebrate();
+  } else if(S.phase==='win'){
+    html = header(false) + screenWin();
+  } else if(S.phase==='pairing'){
+    html = header(true) + screenPairing();
+  } else {
+    html = header(true);
+    if(S.phase==='ingredients') html+=screenIngredients();
+    else if(S.phase==='pairing') html+=screenPairing();
+    else if(S.phase==='knowledge') html+=screenKnowledge();
+    else if(S.phase==='taste') html+=screenTaste();
+    else if(S.phase==='spices') html+=screenSpices();
+    else if(S.phase==='action') html+=screenAction();
+    else if(S.phase==='do') html+=screenDo();
+    else if(S.phase==='discover') html+=screenDiscover();
+    else if(S.phase==='book') html+=screenBook();
+    else if(S.phase==='badges') html+=screenBadges();
+  }
+  app.innerHTML='<nav style="position:sticky;top:0;z-index:100;background:#fff8ec;padding:8px;display:flex;gap:8px"><button id="globalHome" aria-label="Hoofdmenu">🏠 Hoofdmenu</button><button id="globalInfo" aria-label="Informatie">ⓘ Verbindingenboek</button></nav>'+html;
+  wire();
+  if(S.phase==='do') bindDoMechanic();
+  if(S.phase==='panic'&&PANIC.mode==='run') bindKitchenPanic();
+  if(S.phase==='foodrushLink'&&LINK_GAME.mode==='playing') bindFoodRushLink();
+}
+
+function wire(){
+  const q=(s)=>document.querySelectorAll(s);
+  const on=(s,fn)=>{ const n=document.getElementById(s); if(n) n.onclick=fn; };
+
+  on('globalHome',culiHome);on('globalInfo',()=>{if(S.phase==='foodrushLink'&&LINK_GAME.busy)return;openCuliInfo();});
+  on('btnStart', ()=>{ S.lessonOpen=false; S.phase='ingredients'; if(!S.pick) S.pick=[]; S.msg=t('chooseIngredients'); render(); });
+  on('btnKitchenPanic', ()=>{PANIC.mode='ready';PANIC.best=panicBest();S.phase='panic';render();});
+  on('btnFoodRushLink', ()=>{S.phase='foodrushLink';initLinkGame();});
+  on('btnLinkExit', exitFoodRushLink);
+  on('btnLinkStart', startFoodRushLink);
+  on('btnLinkContinue', startEndlessLink);
+  on('btnLinkAgain', startEndlessLink);
+  on('btnPanicStart', startKitchenPanic);
+  on('btnPanicAgain', startKitchenPanic);
+  on('btnPanicExit', exitKitchenPanic);
+  on('btnPairStart', ()=>{ S.phase='pairing'; S.pairingIndex=0; S.pairingAnswered=false; S.pairingFeedback=''; S.msg=''; S.msgType=''; render(); });
+  on('btnPairLearn', revealPairing);
+  on('btnNextPair', nextPairing);
+  on('btnPairHome', ()=>{ S.phase='home'; save(); render(); });
+  q('[data-pair]').forEach(b=>b.onclick=()=>answerPairing(b.dataset.pair));
+  q('[data-ktopic]').forEach(b=>b.onclick=()=>chooseKnowledgeTopic(b.dataset.ktopic));
+  q('[data-mise]').forEach(b=>b.onchange=()=>toggleMiseStep(Number(b.dataset.mise)));
+  q('[data-kanswer]').forEach(b=>b.onclick=()=>chooseKnowledgeAnswer(b.dataset.kanswer));
+  q('[data-taste-mode]').forEach(b=>b.onclick=()=>setTasteMode(b.dataset.tasteMode));
+  q('[data-taste-answer]').forEach(b=>b.onclick=()=>S.tasteMode==='balance'?answerTasteBalance(b.dataset.tasteAnswer):toggleTasteAnswer(b.dataset.tasteAnswer));
+  on('btnCheckTaste',checkTasteProfile);
+  on('btnNextTaste',nextTasteQuestion);
+  const sample=document.getElementById('tasteSample');if(sample)sample.onchange=()=>setTasteSample(sample.value);
+  q('[data-rating]').forEach(i=>i.oninput=()=>updateTasteRating(i));
+  on('btnNextKnowledge', nextKnowledgeQuiz);
+  on('btnLearn', ()=>{ if(S.learning){S.learning=false;S.lessonOpen=false;S.phase='home';} else {S.learning=true;S.lessonOpen=true;S.phase='ingredients';S.pick=[];S.msg=t('chooseIngredients');} save(); render(); });
+  on('btnLesson', ()=>{ S.lessonOpen=!S.lessonOpen; render(); });
+  on('btnReset', resetGame);
+  on('btnResetHeader', resetGame);
+  on('btnReset2', resetGame);
+  on('btnToBook', ()=>{ S.phase='book'; render(); });
+  on('btnMute', toggleMute);
+
+  q('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+
+  q('[data-nav]').forEach(b=>b.onclick=()=>{
+    const destination=b.dataset.nav;
+    S.phase=destination;
+    if(destination==='ingredients'){
+      S.pick=[]; S.current=null; S.msg=t('chooseIngredients'); S.msgType='';
+    } else if(destination==='pairing') {
+      S.pick=[]; S.current=null; S.msg=''; S.msgType='';
+      S.pairingAnswered=!!S.pairingAnswered;
+    }
+    save(); render();
+  });
+
+  q('[data-pick]').forEach(b=>b.onclick=()=>selectIngredient(b.dataset.pick));
+  q('[data-remove]').forEach(b=>b.onclick=()=>removePick(Number(b.dataset.remove)));
+  on('btnPrepare', prepare);
+  on('btnTip', useTip);
+
+  q('[data-action]').forEach(b=>b.onclick=()=>chooseAction(b.dataset.action));
+  q('[data-spice]').forEach(b=>b.onclick=()=>toggleSpice(b.dataset.spice));
+  on('btnCheckSpices',submitSpices);
+  
+
+  on('btnContinue', afterDiscover);
+  on('btnCelebrateContinue', ()=>{ S.pendingUnlock=null; S.phase='ingredients'; S.pick=[]; S.current=null; S.msg=t('newIngredientAvailable'); S.msgType=''; save(); render(); });
+}
+
+/* ==========================================================
+   6) INIT
+   ========================================================== */
+if(hasSave()) load();
+document.documentElement.lang=S.lang||'nl';
+render();
+
+</script>
+</body>
+</html>
