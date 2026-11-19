@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>body{margin:0}</style>
+</head>
+<body>
+<title>CuliLab Bonnetje</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;600;800&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: één smalle kolom zoals de CuliLab-app; het bonnetje is een papieren keukenbon bovenaan, lab en uitgifte eronder. */
+:root{
+  --bg:#f7f0e3; --surface:#ffffff; --ink:#29231e; --muted:#6a5b4c; --line:#d9c9b0;
+  --brand:#20150e; --brand-2:#54351f; --gold:#f5a019; --cta:#a84908; --cta-ink:#ffffff;
+  --paper:#fffdf6; --paper-ink:#2a2622; --tray:#2f2016; --tray-ink:#f3dfc2;
+  --good:#2f7d32; --good-bg:#e4f3e3; --bad:#b3261e; --bad-bg:#fbe4df; --hint-bg:#fff2cf;
+  --f-display:'Bricolage Grotesque', 'Arial Black', Arial, sans-serif;
+  --f-body:'Inter', -apple-system, 'Segoe UI', Arial, sans-serif;
+  --f-mono:'IBM Plex Mono', 'Courier New', monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17110c; --surface:#231a13; --ink:#f1e6d6; --muted:#bba98f; --line:#4a3a2b;
+  --brand:#0e0905; --brand-2:#3a2617; --gold:#f5b142; --cta:#d0661c; --cta-ink:#1a0f07;
+  --paper:#2b231b; --paper-ink:#f3e9d9; --tray:#0f0a06; --tray-ink:#f3dfc2;
+  --good:#8fd18f; --good-bg:#1f3320; --bad:#ff9b8f; --bad-bg:#3b1d19; --hint-bg:#3a2f15; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17110c; --surface:#231a13; --ink:#f1e6d6; --muted:#bba98f; --line:#4a3a2b;
+  --brand:#0e0905; --brand-2:#3a2617; --gold:#f5b142; --cta:#d0661c; --cta-ink:#1a0f07;
+  --paper:#2b231b; --paper-ink:#f3e9d9; --tray:#0f0a06; --tray-ink:#f3dfc2;
+  --good:#8fd18f; --good-bg:#1f3320; --bad:#ff9b8f; --bad-bg:#3b1d19; --hint-bg:#3a2f15; color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 40px}
+header.top{background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;padding-block:18px 16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top .brandrow{max-width:488px;margin:0 auto}
+.brandrow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-family:var(--f-display);font-weight:800;font-size:28px;letter-spacing:-.5px;line-height:1}
+.brand small{display:block;font-family:var(--f-body);font-size:11px;font-weight:600;letter-spacing:1.3px;text-transform:uppercase;opacity:.75;margin-top:6px}
+.score{text-align:right;font-variant-numeric:tabular-nums}
+.score b{display:block;font-family:var(--f-display);font-size:30px;line-height:1;color:var(--gold)}
+.score span{font-size:11px;letter-spacing:1px;text-transform:uppercase;opacity:.8}
+h2{font-family:var(--f-display);font-weight:800;font-size:19px;margin:26px 0 4px;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+/* bonnetje */
+.bon{position:relative;margin-top:18px;background:var(--paper);color:var(--paper-ink);font-family:var(--f-mono);padding:16px 18px 22px;border-radius:4px 4px 0 0;box-shadow:0 1px 0 var(--line)}
+.bon::after{content:"";position:absolute;left:0;right:0;bottom:-10px;height:10px;background:linear-gradient(-45deg,transparent 7px,var(--paper) 0) 0 0/14px 10px,linear-gradient(45deg,transparent 7px,var(--paper) 0) 0 0/14px 10px}
+.bon .row{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.6px;text-transform:uppercase;opacity:.8}
+.bon .rule{border-top:1.5px dashed currentColor;opacity:.35;margin:10px 0}
+.bon .order{font-size:17px;font-weight:600;line-height:1.35;margin:4px 0 0}
+.bon .lines{font-size:13.5px;margin-top:8px;display:grid;gap:2px}
+.bon .lines div{display:flex;gap:10px}
+.bon .lines i{font-style:normal;opacity:.6;min-width:4.5em}
+.testbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:22px;font-size:12px;color:var(--muted)}
+.testbar select{font:inherit;padding:4px 6px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+/* lab */
+.tray{background:var(--tray);color:var(--tray-ink);border-radius:18px;min-height:116px;padding:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center}
+.tray .empty{opacity:.75;font-size:13px;text-align:center}
+.chip{display:inline-flex;flex-direction:column;align-items:center;gap:2px;background:#fff2d2;color:#4c3216;border:2px solid #ffd98a;border-radius:14px;padding:7px 9px;font-weight:800;font-size:12px;min-width:62px;cursor:pointer}
+.chip .e{font-size:24px;line-height:1.1}
+.labbtns{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.btn{font:inherit;font-weight:800;border-radius:13px;padding:13px 12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--cta);border-color:var(--cta);color:var(--cta-ink);font-size:16px}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:focus-visible,.ing:focus-visible,.chip:focus-visible,.dish:focus-visible,.slot:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.feedback{margin-top:10px;border-radius:13px;padding:11px 13px;font-size:14px;background:var(--surface);border:1px solid var(--line)}
+.feedback.good{background:var(--good-bg);border-color:transparent}
+.feedback.bad{background:var(--bad-bg);border-color:transparent}
+.feedback.hint{background:var(--hint-bg);border-color:transparent}
+.shelflabel{font-size:11px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px}
+.shelf{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#gemaakt{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:380px){.shelf{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.ing{font:inherit;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:13px;padding:9px 3px 8px;text-align:center;font-weight:700;font-size:12px;line-height:1.15;cursor:pointer;min-width:0;overflow-wrap:break-word;hyphens:auto}
+.ing .e{display:block;font-size:24px;margin-bottom:3px}
+.ing.on{border-color:var(--gold);background:var(--hint-bg)}
+.ing.made{border-style:dashed}
+/* uitgifte */
+.pass{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slot{font:inherit;text-align:left;border:2px dashed var(--line);background:transparent;color:var(--ink);border-radius:14px;padding:10px 12px;min-height:84px;cursor:pointer}
+.slot b{display:block;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.slot.full{border-style:solid;background:var(--surface)}
+.slot.ok{border-color:var(--good)} .slot.no{border-color:var(--bad)}
+.slot .mark{font-size:12px;font-weight:800;margin-top:4px}
+.slot.ok .mark{color:var(--good)} .slot.no .mark{color:var(--bad)}
+.dishes{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.dish{font:inherit;text-align:left;display:flex;align-items:center;gap:8px;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px;font-weight:700;font-size:13px;cursor:pointer}
+.dish .e{font-size:20px}
+.dish small{font-weight:600;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+.none{color:var(--muted);font-size:13px}
+/* klaar */
+.done{margin-top:20px;background:var(--surface);border:2px solid var(--good);border-radius:18px;padding:18px}
+.done h3{font-family:var(--f-display);font-size:22px;margin:0 0 4px}
+.trail{font-size:22px;letter-spacing:2px;margin:10px 0;overflow-wrap:anywhere}
+.sharebox{width:100%;font-family:var(--f-mono);font-size:13px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg);color:var(--ink);resize:none}
+details{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+summary{cursor:pointer;font-weight:800}
+.book{display:grid;gap:8px;margin-top:10px}
+.book div{font-size:13.5px}
+.book b{display:block}
+.book span{color:var(--muted)}
+.howto{font-size:14px;color:var(--ink)}
+.howto li{margin:4px 0}
+@media (prefers-reduced-motion:no-preference){.pop{animation:pop .35s ease-out}@keyframes pop{0%{transform:scale(.9);opacity:.4}100%{transform:scale(1);opacity:1}}}
+</style>
+
+<header class="top" lang="nl">
+    <div class="brandrow">
+      <div class="brand">CuliLab<small>Proef · bonnetje van de dag</small></div>
+      <div class="score" aria-live="polite"><b id="pogingen">0</b><span>pogingen</span></div>
+    </div>
+  </header>
+<div class="wrap" lang="nl">
+
+  <section class="bon" aria-label="Bonnetje">
+    <div class="row"><span id="bonNr">Bon 01</span><span id="bonDatum"></span></div>
+    <div class="rule"></div>
+    <div class="row"><span>Tafel <span id="tafel">4</span></span><span>2 gangen</span></div>
+    <p class="order" id="bonOpdracht"></p>
+    <div class="lines">
+      <div><i>Voor</i><span id="bonVoor"></span></div>
+      <div><i>Hoofd</i><span id="bonHoofd"></span></div>
+    </div>
+  </section>
+
+  <div class="testbar">
+    <label for="kiesBon">Proefversie: kies een bonnetje</label>
+    <select id="kiesBon"></select>
+    <button class="btn" id="opnieuw" style="padding:5px 10px;font-size:12px">Opnieuw</button>
+  </div>
+
+  <h2>Lab</h2>
+  <p class="sub">Kies ingrediënten en druk op Bereid. Elke bereiding telt als poging.</p>
+  <div class="tray" id="tray"></div>
+  <div class="labbtns">
+    <button class="btn primary" id="bereid">Bereid</button>
+    <button class="btn" id="tip">Tip <span style="font-weight:600">(+1)</span></button>
+  </div>
+  <div class="feedback" id="feedback" hidden></div>
+
+  <div class="shelflabel">Gemaakt in het lab</div>
+  <div class="shelf" id="gemaakt"></div>
+  <div class="shelflabel">Ingrediënten</div>
+  <div class="shelf" id="voorraad"></div>
+
+  <h2>Uitgifte</h2>
+  <p class="sub">Klaargemaakte gerechten komen hier. Zet een menu samen en serveer. Alleen een fout geserveerd menu telt als poging.</p>
+  <div class="dishes" id="dishes"></div>
+  <div class="pass">
+    <button class="slot" id="slotVoor"><b>Voorgerecht</b><span class="none">Tik op een voorgerecht</span></button>
+    <button class="slot" id="slotHoofd"><b>Hoofdgerecht</b><span class="none">Tik op een hoofdgerecht</span></button>
+  </div>
+  <div class="labbtns" style="grid-template-columns:1fr">
+    <button class="btn primary" id="serveer" disabled>Serveer</button>
+  </div>
+  <div class="feedback" id="serveFeedback" hidden></div>
+
+  <section class="done" id="klaar" hidden>
+    <h3>Service! Bonnetje gehaald</h3>
+    <p class="sub" id="klaarTekst"></p>
+    <div class="trail" id="trail"></div>
+    <textarea class="sharebox" id="shareText" rows="4" readonly aria-label="Uitslag om te delen"></textarea>
+    <div class="labbtns" style="grid-template-columns:1fr">
+      <button class="btn primary" id="kopieer">Kopieer uitslag</button>
+    </div>
+  </section>
+
+  <details id="boekDetails">
+    <summary>Receptenboek (<span id="boekAantal">0</span>)</summary>
+    <p class="sub" style="margin-top:8px">Wat je ooit ontdekt hebt, blijft hier staan, ook voor de volgende bonnetjes.</p>
+    <div class="book" id="boek"></div>
+  </details>
+
+  <details>
+    <summary>Hoe werkt het?</summary>
+    <ol class="howto">
+      <li>Lees het bonnetje: welk voorgerecht en hoofdgerecht wil de gast?</li>
+      <li>Combineer ingrediënten in het lab. Wat je maakt, wordt soms weer een ingrediënt, zoals mayonaise voor tartaarsaus.</li>
+      <li>Klaargemaakte gerechten gaan naar de uitgifte. Kies daar een voorgerecht en een hoofdgerecht en druk op Serveer.</li>
+      <li>Hoe minder pogingen, hoe beter. Een tip kost 1 poging. Deel je uitslag met familie en vrienden.</li>
+    </ol>
+    <p class="sub">Proefversie. De nieuwe recepten (salades, soep, spaghetti, friet, vis, biefstuk) moeten nog door een kok worden nagekeken.</p>
+  </details>
+</div>
+
+<script>
+(function(){
+'use strict';
+// ---------- data ----------
+const ING = [
+  ['oil','Olie','🫒'],['vinegar','Azijn','🍶'],['egg','Ei','🥚'],['lemon','Citroen','🍋'],
+  ['pickle','Augurk','🥒'],['capers','Kappertjes','🫛'],['tomato','Tomaat','🍅'],['onion','Ui','🧅'],
+  ['garlic','Knoflook','🧄'],['butter','Boter','🧈'],['shallot','Sjalot','🟣'],['tarragon','Dragon','🌿'],
+  ['stock','Bouillon','🍲'],['lettuce','Sla','🥬'],['spaghetti','Spaghetti','🍝'],['water','Water','💧'],
+  ['potato','Aardappel','🥔'],['fish','Vis','🐟'],['flour','Bloem','🌾'],['steak','Biefstuk','🥩']
+];
+// soort: 'deel' = tussenproduct (wordt ingrediënt), 'gerecht' = naar de uitgifte
+const REC = [
+  {id:'vinaigrette', naam:'Vinaigrette', e:'🥗', soort:'deel', ids:['oil','vinegar']},
+  {id:'mayo', naam:'Mayonaise', e:'🫙', soort:'deel', ids:['egg','oil','vinegar']},
+  {id:'tartaar', naam:'Tartaarsaus', e:'🥣', soort:'deel', ids:['mayo','pickle','capers','lemon']},
+  {id:'tomatensaus', naam:'Tomatensaus', e:'🥫', soort:'deel', ids:['tomato','oil','garlic']},
+  {id:'bearnaise', naam:'Béarnaisesaus', e:'🧉', soort:'deel', ids:['egg','butter','vinegar','shallot','tarragon']},
+  {id:'pasta', naam:'Gekookte spaghetti', e:'🍜', soort:'deel', ids:['spaghetti','water']},
+  {id:'friet', naam:'Friet', e:'🍟', soort:'deel', ids:['potato','oil']},
+  {id:'gebvis', naam:'Gebakken vis', e:'🐠', soort:'deel', ids:['fish','flour','butter']},
+  {id:'gebbief', naam:'Gebakken biefstuk', e:'🍖', soort:'deel', ids:['steak','butter']},
+  {id:'groen', naam:'Groene salade met vinaigrette', e:'🥗', soort:'gerecht', gang:'voor', tags:['fris','vega'], ids:['lettuce','vinaigrette']},
+  {id:'tomsal', naam:'Tomatensalade', e:'🍅', soort:'gerecht', gang:'voor', tags:['fris','vega'], ids:['tomato','onion','oil']},
+  {id:'soep', naam:'Tomatensoep', e:'🍲', soort:'gerecht', gang:'voor', tags:['warm','vega'], ids:['tomato','onion','stock']},
+  {id:'spag', naam:'Spaghetti met tomatensaus', e:'🍝', soort:'gerecht', gang:'hoofd', tags:['vega'], ids:['pasta','tomatensaus']},
+  {id:'visfriet', naam:'Vis met friet en tartaarsaus', e:'🐟', soort:'gerecht', gang:'hoofd', tags:['vis'], ids:['gebvis','friet','tartaar']},
+  {id:'biefriet', naam:'Biefstuk met friet en béarnaise', e:'🥩', soort:'gerecht', gang:'hoofd', tags:['vlees'], ids:['gebbief','friet','bearnaise']}
+];
+const R = Object.fromEntries(REC.map(r=>[r.id,r]));
+const IN = Object.fromEntries(ING.map(i=>[i[0],{id:i[0],naam:i[1],e:i[2]}]));
+// alle basis-ingrediënten in een gerecht (voor "met tomaat", "met friet")
+function bevat(id){ const r=R[id]; if(!r) return [id]; return [id].concat(...r.ids.map(bevat)); }
+// bonnetjes: per gang een eis {tags:[...]} of {met:'x'} of {zonder:'x'}
+const BONNEN = [
+  {tekst:'Een frisse starter en een vegetarisch hoofdgerecht.', voor:{tags:['fris']}, hoofd:{tags:['vega']}, vt:'fris', ht:'vegetarisch'},
+  {tekst:'Een warme starter en een visgerecht.', voor:{tags:['warm']}, hoofd:{tags:['vis']}, vt:'warm', ht:'vis'},
+  {tekst:'Een frisse starter en een vleesgerecht.', voor:{tags:['fris']}, hoofd:{tags:['vlees']}, vt:'fris', ht:'vlees'},
+  {tekst:'Een helemaal vegetarisch menu, en de starter is warm.', voor:{tags:['warm','vega']}, hoofd:{tags:['vega']}, vt:'warm en vegetarisch', ht:'vegetarisch'},
+  {tekst:'Een starter met sla en daarna vis.', voor:{met:'lettuce'}, hoofd:{tags:['vis']}, vt:'met sla', ht:'vis'},
+  {tekst:'Een warme starter en een vleesgerecht.', voor:{tags:['warm']}, hoofd:{tags:['vlees']}, vt:'warm', ht:'vlees'},
+  {tekst:'Een starter met tomaat en een hoofdgerecht met friet.', voor:{met:'tomato'}, hoofd:{met:'friet'}, vt:'met tomaat', ht:'met friet'},
+  {tekst:'Een frisse starter en een hoofdgerecht met friet.', voor:{tags:['fris']}, hoofd:{met:'friet'}, vt:'fris', ht:'met friet'},
+  {tekst:'Deze gast eet geen tomaat. Nergens in het menu.', voor:{zonder:'tomato'}, hoofd:{zonder:'tomato'}, vt:'zonder tomaat', ht:'zonder tomaat'},
+  {tekst:'Deze gast is gek op tomaat: in de starter én in het hoofdgerecht.', voor:{met:'tomato'}, hoofd:{met:'tomato'}, vt:'met tomaat', ht:'met tomaat'}
+];
+function past(dishId, eis){
+  const r=R[dishId];
+  if(eis.tags) return eis.tags.every(t=>r.tags.includes(t));
+  if(eis.met) return bevat(dishId).includes(eis.met);
+  if(eis.zonder) return !bevat(dishId).includes(eis.zonder);
+  return true;
+}
+// minimaal aantal bereidingen voor een gerecht (alle tussenstappen, elk 1x)
+function stappen(id, set){ set=set||new Set(); const r=R[id]; if(!r||set.has(id)) return set; set.add(id); r.ids.forEach(x=>stappen(x,set)); return set; }
+function minimum(bon){
+  let best=99;
+  REC.filter(r=>r.gang==='voor'&&past(r.id,bon.voor)).forEach(v=>{
+    REC.filter(r=>r.gang==='hoofd'&&past(r.id,bon.hoofd)).forEach(h=>{
+      const s=stappen(v.id); stappen(h.id,s); best=Math.min(best,s.size);
+    });
+  });
+  return best;
+}
+
+// ---------- opslag (alleen gemak voor deze speler) ----------
+const KEY='culilab_proef_v1';
+function laad(){ try{ return JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ return {}; } }
+function bewaar(){ try{ localStorage.setItem(KEY, JSON.stringify(opslag)); }catch(e){} }
+const opslag = laad(); opslag.boek = opslag.boek||[]; opslag.rondes = opslag.rondes||{};
+
+// ---------- bonnetje van vandaag ----------
+const START = Date.UTC(2026,10,19);
+function vandaagIndex(){ const d=new Date(); const n=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-START)/864e5); return ((n%10)+10)%10; }
+let bonIdx = vandaagIndex();
+let S; // rondestaat
+function nieuweRonde(){ return {gemaakt:[], gerechten:[], poging:0, spoor:[], voor:null, hoofd:null, klaar:false}; }
+function laadRonde(){ S = opslag.rondes[bonIdx] ? Object.assign(nieuweRonde(), opslag.rondes[bonIdx]) : nieuweRonde(); keuze=[]; }
+function bewaarRonde(){ opslag.rondes[bonIdx]=S; bewaar(); }
+let keuze=[];
+
+// ---------- helpers ----------
+const $=id=>document.getElementById(id);
+function info(id){ return IN[id] || R[id]; }
+function el(tag, attrs, html){ const e=document.createElement(tag); Object.assign(e, attrs||{}); if(html!=null) e.innerHTML=html; return e; }
+function toon(box, soort, tekst){ box.hidden=false; box.className='feedback '+soort+' pop'; box.textContent=tekst; }
+
+// ---------- lab ----------
+function bereid(){
+  if(!keuze.length||S.klaar) return;
+  const sel=[...keuze].sort().join('|');
+  const r=REC.find(x=>[...x.ids].sort().join('|')===sel);
+  if(r && (S.gemaakt.includes(r.id)||S.gerechten.includes(r.id))){
+    toon($('feedback'),'hint', r.naam+' staat al klaar. Dit telt niet als poging.'); keuze=[]; render(); return;
+  }
+  S.poging++;
+  if(r){
+    S.spoor.push('🟩');
+    if(r.soort==='gerecht') S.gerechten.push(r.id); else S.gemaakt.push(r.id);
+    if(!opslag.boek.includes(r.id)) opslag.boek.push(r.id);
+    toon($('feedback'),'good', r.e+' '+r.naam+'! '+(r.soort==='gerecht' ? 'Staat klaar in de uitgifte.' : 'Je kunt het nu als ingrediënt gebruiken.'));
+  } else {
+    S.spoor.push('🟥');
+    const deel = REC.find(x=>x.ids.length>keuze.length && keuze.every(k=>x.ids.includes(k)));
+    const teveel = REC.find(x=>x.ids.length<keuze.length && x.ids.every(k=>keuze.includes(k)));
+    if(deel){ const n=deel.ids.length-keuze.length; toon($('feedback'),'hint','Goed begin! Hier hoort nog '+n+' ingrediënt'+(n>1?'en':'')+' bij om iets te worden.'); }
+    else if(teveel){ const n=keuze.length-teveel.ids.length; toon($('feedback'),'hint','Bijna. Er zit '+n+' ingrediënt te veel in.'); }
+    else toon($('feedback'),'bad','Hier wordt niets van. Probeer een andere combinatie.');
+  }
+  keuze=[]; bewaarRonde(); render();
+}
+function tip(){
+  if(S.klaar) return;
+  const bon=BONNEN[bonIdx];
+  // kies het eerstvolgende recept dat nodig is voor het kortste geldige menu en nu gemaakt kan worden
+  let doel=null, best=99;
+  REC.filter(r=>r.gang==='voor'&&past(r.id,bon.voor)).forEach(v=>REC.filter(r=>r.gang==='hoofd'&&past(r.id,bon.hoofd)).forEach(h=>{
+    const s=stappen(v.id); stappen(h.id,s); const open=[...s].filter(x=>!S.gemaakt.includes(x)&&!S.gerechten.includes(x));
+    if(open.length<best){ best=open.length; doel=open; }
+  }));
+  if(!doel||!doel.length){ toon($('feedback'),'hint','Alles wat je nodig hebt staat klaar. Zet het menu samen in de uitgifte.'); return; }
+  const kan = doel.map(x=>R[x]).find(r=>r.ids.every(i=>IN[i]||S.gemaakt.includes(i)));
+  S.poging++; S.spoor.push('💡');
+  const ing = kan.ids.map(info)[kan.ids.length>2?1:0];
+  toon($('feedback'),'hint','Tip: maak '+kan.naam+'. Daar hoort '+ing.e+' '+ing.naam.toLowerCase()+' in.');
+  bewaarRonde(); render();
+}
+
+// ---------- uitgifte ----------
+function zetInSlot(id){ if(S.klaar) return; const r=R[id]; S[r.gang]=id; $('serveFeedback').hidden=true; bewaarRonde(); render(); }
+function serveer(){
+  if(!S.voor||!S.hoofd||S.klaar) return;
+  const bon=BONNEN[bonIdx];
+  const okV=past(S.voor,bon.voor), okH=past(S.hoofd,bon.hoofd);
+  render({voor:okV, hoofd:okH});
+  if(okV&&okH){
+    S.klaar=true; S.spoor.push('✅'); bewaarRonde(); render({voor:true,hoofd:true}); toonKlaar();
+  } else {
+    S.poging++; S.spoor.push('❌'); bewaarRonde();
+    const fout=[!okV&&'het voorgerecht', !okH&&'het hoofdgerecht'].filter(Boolean).join(' en ');
+    toon($('serveFeedback'),'bad','Terug naar de keuken: '+fout+(!okV&&!okH?' passen':' past')+' niet bij het bonnetje. Dit telt als poging.');
+    render({voor:okV, hoofd:okH});
+  }
+}
+function toonKlaar(){
+  const bon=BONNEN[bonIdx], min=minimum(bon);
+  $('klaar').hidden=false;
+  $('klaarTekst').textContent = 'Je had '+S.poging+' pogingen nodig. Het kan in '+min+'.';
+  $('trail').textContent = S.spoor.join('');
+  const d=new Date();
+  $('shareText').value = 'CuliLab bonnetje '+(bonIdx+1)+' ('+d.getDate()+'-'+(d.getMonth()+1)+')\n'+S.poging+' pogingen (kan in '+min+')\n'+S.spoor.join('');
+}
+
+// ---------- tekenen ----------
+function render(serveUitslag){
+  const bon=BONNEN[bonIdx];
+  $('bonNr').textContent='Bon '+String(bonIdx+1).padStart(2,'0');
+  const d=new Date(); $('bonDatum').textContent=d.toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
+  $('tafel').textContent=String((bonIdx*3)%9+2);
+  $('bonOpdracht').textContent=bon.tekst; $('bonVoor').textContent=bon.vt; $('bonHoofd').textContent=bon.ht;
+  $('pogingen').textContent=S.poging;
+  $('kiesBon').value=String(bonIdx);
+  // tray
+  const tray=$('tray'); tray.innerHTML='';
+  if(!keuze.length) tray.appendChild(el('div',{className:'empty'},'Tik op ingrediënten om ze hier te zetten'));
+  keuze.forEach(id=>{ const i=info(id); const c=el('button',{className:'chip',type:'button',title:'Haal weg'},'<span class="e">'+i.e+'</span>'+i.naam); c.dataset.id=id; c.onclick=()=>{ keuze=keuze.filter(k=>k!==id); render(); }; tray.appendChild(c); });
+  $('bereid').disabled=!keuze.length||S.klaar; $('tip').disabled=S.klaar;
+  // planken
+  const gm=$('gemaakt'); gm.innerHTML='';
+  if(!S.gemaakt.length) gm.appendChild(el('div',{className:'none',style:'grid-column:1/-1'},'Nog niets. Sauzen en onderdelen die je maakt, komen hier.'));
+  S.gemaakt.forEach(id=>gm.appendChild(knop(id,true)));
+  const vr=$('voorraad'); vr.innerHTML=''; ING.forEach(i=>vr.appendChild(knop(i[0],false)));
+  // uitgifte
+  const ds=$('dishes'); ds.innerHTML='';
+  if(!S.gerechten.length) ds.appendChild(el('div',{className:'none'},'Nog geen gerechten klaar.'));
+  S.gerechten.forEach(id=>{ const r=R[id]; const b=el('button',{className:'dish',type:'button'},'<span class="e">'+r.e+'</span><span>'+r.naam+'<br><small>'+(r.gang==='voor'?'voorgerecht':'hoofdgerecht')+'</small></span>'); b.dataset.id=id; b.onclick=()=>zetInSlot(id); ds.appendChild(b); });
+  slot('slotVoor','voor','Voorgerecht', serveUitslag);
+  slot('slotHoofd','hoofd','Hoofdgerecht', serveUitslag);
+  $('serveer').disabled=!(S.voor&&S.hoofd)||S.klaar;
+  $('klaar').hidden=!S.klaar; if(S.klaar) toonKlaar();
+  // boek
+  $('boekAantal').textContent=opslag.boek.length;
+  const bk=$('boek'); bk.innerHTML='';
+  if(!opslag.boek.length) bk.appendChild(el('div',{className:'none'},'Nog leeg.'));
+  REC.filter(r=>opslag.boek.includes(r.id)).forEach(r=>bk.appendChild(el('div',{},'<b>'+r.e+' '+r.naam+'</b><span>'+r.ids.map(x=>info(x).naam).join(' + ')+'</span>')));
+}
+function knop(id, gemaakt){
+  const i=info(id); const b=el('button',{className:'ing'+(gemaakt?' made':'')+(keuze.includes(id)?' on':''),type:'button'},'<span class="e">'+i.e+'</span>'+i.naam);
+  b.dataset.id=id; b.setAttribute('aria-pressed', keuze.includes(id)?'true':'false');
+  b.onclick=()=>{ if(S.klaar) return; if(keuze.includes(id)) keuze=keuze.filter(k=>k!==id); else if(keuze.length<6) keuze.push(id); render(); };
+  return b;
+}
+function slot(elId, gang, label, uitslag){
+  const s=$(elId), id=S[gang];
+  let cls='slot'+(id?' full':''); let mark='';
+  if(uitslag && id){ cls+= uitslag[gang]?' ok':' no'; mark='<div class="mark">'+(uitslag[gang]?'Past':'Past niet')+'</div>'; }
+  s.className=cls;
+  s.innerHTML='<b>'+label+'</b>'+(id? R[id].e+' '+R[id].naam : '<span class="none">Tik op een '+label.toLowerCase()+'</span>')+mark;
+  s.onclick=()=>{ if(S.klaar||!id) return; S[gang]=null; $('serveFeedback').hidden=true; bewaarRonde(); render(); };
+}
+
+// ---------- start ----------
+const sel=$('kiesBon');
+BONNEN.forEach((b,i)=>sel.appendChild(el('option',{value:String(i)},'Bon '+(i+1)+(i===vandaagIndex()?' (vandaag)':''))));
+sel.onchange=()=>{ bonIdx=Number(sel.value); laadRonde(); $('feedback').hidden=true; $('serveFeedback').hidden=true; render(); };
+$('opnieuw').onclick=()=>{ opslag.rondes[bonIdx]=null; laadRonde(); bewaarRonde(); $('feedback').hidden=true; $('serveFeedback').hidden=true; render(); };
+$('bereid').onclick=bereid; $('tip').onclick=tip; $('serveer').onclick=serveer;
+$('kopieer').onclick=()=>{
+  const t=$('shareText').value;
+  const klaar=()=>{ $('kopieer').textContent='Gekopieerd'; setTimeout(()=>$('kopieer').textContent='Kopieer uitslag',1800); };
+  try{ navigator.clipboard.writeText(t).then(klaar, ()=>{ $('shareText').select(); }); }catch(e){ $('shareText').select(); }
+};
+laadRonde(); render();
+})();
+</script>
+
+</body>
+</html>
