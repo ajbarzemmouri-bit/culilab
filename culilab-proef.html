@@ -1,11 +1,4 @@
-<!doctype html>
-<html lang="nl">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>body{margin:0}</style>
-</head>
-<body>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0}</style></head><body>
 <title>CuliLab Bonnetje</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,9 +92,13 @@ img.emo{width:1.15em;height:1.15em;vertical-align:-.2em;object-fit:contain;displ
 details{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
 summary{cursor:pointer;font-weight:800}
 .book{display:grid;gap:8px;margin-top:10px}
-.book div{font-size:13.5px}
-.book b{display:block}
-.book span{color:var(--muted)}
+.kbrij{display:grid;gap:3px;padding:9px 0;border-top:1px solid var(--line);font-size:13.5px}
+.kbrij:first-child{border-top:0}
+.kbrij b{font-size:14.5px}
+.kbrij small{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.7px}
+.kbing{color:var(--ink)}
+.kbknop{justify-self:start;padding:6px 10px;font-size:12.5px;border-radius:10px}
+.kbmeta{font-weight:600;color:var(--muted)}
 .howto{font-size:14px;color:var(--ink)}
 .howto li{margin:4px 0}
 @media (prefers-reduced-motion:no-preference){.pop{animation:pop .35s ease-out}@keyframes pop{0%{transform:scale(.9);opacity:.4}100%{transform:scale(1);opacity:1}}}
@@ -131,6 +128,12 @@ summary{cursor:pointer;font-weight:800}
     <select id="kiesBon"></select>
     <button class="btn" id="opnieuw" style="padding:5px 10px;font-size:12px">Opnieuw</button>
   </div>
+
+  <details id="boekDetails">
+    <summary>Kookboek <span class="kbmeta">(<span id="boekAantal">0</span> van 15 geleerd)</span></summary>
+    <p class="sub" style="margin-top:8px">Alle recepten op alfabet. Een recept dat je al eens zelf hebt gemaakt, lees je gratis. Een recept dat je nog niet kent, kost 1 poging om open te slaan.</p>
+    <div class="book" id="boek"></div>
+  </details>
 
   <h2>Lab</h2>
   <p class="sub">Kies ingrediënten en druk op Bereid. Elke bereiding telt als poging.</p>
@@ -168,19 +171,14 @@ summary{cursor:pointer;font-weight:800}
     </div>
   </section>
 
-  <details id="boekDetails">
-    <summary>Receptenboek (<span id="boekAantal">0</span>)</summary>
-    <p class="sub" style="margin-top:8px">Wat je ooit ontdekt hebt, blijft hier staan, ook voor de volgende bonnetjes.</p>
-    <div class="book" id="boek"></div>
-  </details>
-
   <details>
     <summary>Hoe werkt het?</summary>
     <ol class="howto">
       <li>Lees het bonnetje: welk voorgerecht en hoofdgerecht wil de gast?</li>
       <li>Combineer ingrediënten in het lab. Wat je maakt, wordt soms weer een ingrediënt, zoals mayonaise voor tartaarsaus.</li>
       <li>Klaargemaakte gerechten gaan naar de uitgifte. Kies daar een voorgerecht en een hoofdgerecht en druk op Serveer.</li>
-      <li>Hoe minder pogingen, hoe beter. Een tip kost 1 poging. Deel je uitslag met familie en vrienden.</li>
+      <li>Weet je een recept niet? Zoek het op in het kookboek. Een recept dat je nog niet kent, kost 1 poging; wat je al eens gemaakt hebt, is gratis.</li>
+      <li>Hoe minder pogingen, hoe beter. Een tip kost ook 1 poging. Deel je uitslag met familie en vrienden.</li>
     </ol>
     <p class="sub">Proefversie. De nieuwe recepten (salades, soep, spaghetti, friet, vis, biefstuk) moeten nog door een kok worden nagekeken.</p>
   </details>
@@ -275,7 +273,7 @@ const START = Date.UTC(2026,10,19);
 function vandaagIndex(){ const d=new Date(); const n=Math.floor((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-START)/864e5); return ((n%10)+10)%10; }
 let bonIdx = vandaagIndex();
 let S; // rondestaat
-function nieuweRonde(){ return {gemaakt:[], gerechten:[], poging:0, spoor:[], voor:null, hoofd:null, klaar:false}; }
+function nieuweRonde(){ return {gemaakt:[], gerechten:[], poging:0, spoor:[], voor:null, hoofd:null, klaar:false, opgezocht:[]}; }
 function laadRonde(){ S = opslag.rondes[bonIdx] ? Object.assign(nieuweRonde(), opslag.rondes[bonIdx]) : nieuweRonde(); keuze=[]; }
 function bewaarRonde(){ opslag.rondes[bonIdx]=S; bewaar(); }
 let keuze=[];
@@ -309,6 +307,10 @@ function bereid(){
     else toon($('feedback'),'bad','Hier wordt niets van. Probeer een andere combinatie.');
   }
   keuze=[]; bewaarRonde(); render();
+}
+function zoekOp(id){
+  if(S.klaar||S.opgezocht.includes(id)) return;
+  S.opgezocht.push(id); S.poging++; S.spoor.push('📖'); bewaarRonde(); render();
 }
 function tip(){
   if(S.klaar) return;
@@ -379,11 +381,17 @@ function render(serveUitslag){
   slot('slotHoofd','hoofd','Hoofdgerecht', serveUitslag);
   $('serveer').disabled=!(S.voor&&S.hoofd)||S.klaar;
   $('klaar').hidden=!S.klaar; if(S.klaar) toonKlaar();
-  // boek
+  // kookboek: alles op alfabet; onbekend recept openen kost 1 poging
   $('boekAantal').textContent=opslag.boek.length;
   const bk=$('boek'); bk.innerHTML='';
-  if(!opslag.boek.length) bk.appendChild(el('div',{className:'none'},'Nog leeg.'));
-  REC.filter(r=>opslag.boek.includes(r.id)).forEach(r=>bk.appendChild(el('div',{},'<b>'+ico(r.e)+' '+r.naam+'</b><span>'+r.ids.map(x=>info(x).naam).join(' + ')+'</span>')));
+  [...REC].sort((a,b)=>a.naam.localeCompare(b.naam,'nl')).forEach(r=>{
+    const kent=opslag.boek.includes(r.id), open=kent||S.opgezocht.includes(r.id);
+    const soort = r.soort==='gerecht' ? (r.gang==='voor'?'Voorgerecht':'Hoofdgerecht')+' · '+r.tags.map(t=>t==='vega'?'vegetarisch':t).join(' · ') : 'Saus of onderdeel';
+    const rij=el('div',{className:'kbrij'},'<b>'+ico(r.e)+' '+r.naam+'</b><small>'+soort+'</small>');
+    if(open) rij.appendChild(el('span',{className:'kbing'},r.ids.map(x=>ico(info(x).e)+' '+info(x).naam).join(' + ')));
+    else { const k=el('button',{className:'btn kbknop',type:'button'},'Bekijk recept (+1 poging)'); k.dataset.id=r.id; k.disabled=S.klaar; k.onclick=()=>zoekOp(r.id); rij.appendChild(k); }
+    bk.appendChild(rij);
+  });
 }
 function knop(id, gemaakt){
   const i=info(id); const b=el('button',{className:'ing'+(gemaakt?' made':'')+(keuze.includes(id)?' on':''),type:'button'},'<span class="e">'+ico(i.e)+'</span>'+i.naam);
@@ -415,5 +423,4 @@ laadRonde(); render();
 })();
 </script>
 
-</body>
-</html>
+</body></html>
